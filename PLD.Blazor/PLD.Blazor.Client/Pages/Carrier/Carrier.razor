@@ -1,0 +1,84 @@
+﻿@page "/carrier"
+@using Telerik.DataSource.Extensions;
+@inject ICarrierService carrierService
+
+
+@if (@CarrierList != null)
+{
+    <h3>Carrier</h3>
+    <TelerikGrid Data=@CarrierList
+             Sortable=true
+             Pageable=true
+             @bind-PageSize="@PageSize"
+             FilterMode="@GridFilterMode.FilterRow"
+             Height=@Height>
+
+        <GridSettings>
+            <GridPagerSettings PageSizes="@PageSizes" />
+        </GridSettings>
+        <GridColumns>
+            <GridColumn Field="@nameof(CarrierDTO.Id)" Title="Id" Visible=false>
+                <Template><input type="hidden" asp-for="@nameof(CarrierDTO.Id)"> </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(CarrierDTO.CarrierCode)" Title="Code" Width="50px">
+            </GridColumn>
+            <GridColumn Field="@nameof(CarrierDTO.Name)" Title="Name" Width="195px" />
+            <GridCommandColumn Width="35px">
+                @{
+                    CarrierDTO? record = (context as CarrierDTO);
+                <NavLink class="btn btn-primary" href="@($"carrier/carrierUpdate/{record?.Id}")">Edit</NavLink>
+                <NavLink class="btn btn-primary">Delete</NavLink>
+            }
+        </GridCommandColumn>
+    </GridColumns>
+    <GridToolBar>
+        <div class="col d-flex justify-content-end">
+            <div>
+                <NavLink class="btn btn-primary" href="carrier/carrierInsert">New</NavLink>
+            </div>
+        </div>
+    </GridToolBar>
+</TelerikGrid>
+}
+else
+{
+    <div class="loader-container">
+        <span class="loader-size-title">Fetching data</span>
+        <TelerikLoader Class="loader-indicator" Type="@LoaderType.ConvergingSpinner" Size="@(ThemeConstants.Loader.Size.Large)"></TelerikLoader>
+    </div>
+}
+
+
+@code {
+
+    private IEnumerable<CarrierDTO> CarrierList { get; set; }
+    int PageSize = 10;
+    string Height = "400px";
+    public List<int?> PageSizes => new List<int?> { 5, 10, 25, 50, null };
+    protected override async Task OnInitializedAsync()
+    {
+        await GetGridData();
+        //return base.OnInitializedAsync();
+    }
+
+    async Task GetGridData()
+    {
+        CarrierList = await carrierService.GetAll();
+    }
+}
+
+<style>
+    .loader-size-title {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .loader-container {
+        text-align: center;
+        width: 150px;
+        display: inline-table;
+        padding-top: 10px;
+        position: absolute;
+        left: 50%;
+    }
+</style>

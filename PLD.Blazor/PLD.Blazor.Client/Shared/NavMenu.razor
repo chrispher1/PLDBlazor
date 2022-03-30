@@ -1,0 +1,62 @@
+﻿<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container">
+    <a class="navbar-brand" href="#">Prudential Life Distributors</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+            <NavLink class="nav-link" href="cases" Match="NavLinkMatch.All">
+               <i class="bi bi-briefcase-fill"></i> Cases
+            </NavLink>          
+        </li>
+        <li class="nav-item">
+          <NavLink class="nav-link" href="commission">
+                <i class="bi bi-wallet-fill"></i> Commissions
+            </NavLink>
+        </li>
+        <li class="nav-item">
+             <NavLink class="nav-link" href="payment">
+                <i class="bi bi-credit-card-2-front-fill"></i> Payments
+            </NavLink>
+        </li>
+        <li class="nav-item">
+             <NavLink class="nav-link" href="report">
+                <i class="bi bi-file-spreadsheet-fill"></i> Reports
+            </NavLink>
+        </li>
+        <li class="nav-item dropdown">          
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-menu-button-wide-fill"></i> Maintenance
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="dropdown-item" href="#"><i class="bi bi-people-fill"></i> Users</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="carrier"><i class="bi bi-truck"></i> Carriers</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-list-task"></i> Products</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-list-stars"></i> Product Types</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-play-fill"></i> Transaction Types</a></li>
+          </ul>
+        </li>
+      </ul>     
+    </div>
+  </div>
+</nav>
+
+
+
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

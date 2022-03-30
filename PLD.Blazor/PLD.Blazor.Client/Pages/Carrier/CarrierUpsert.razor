@@ -1,0 +1,120 @@
+﻿@page "/carrier/carrierUpdate/{Id:int}"
+@page "/carrier/carrierInsert"
+@using PLD.Blazor.Common
+@inject NavigationManager _INavigationManager
+@inject ICarrierService carrierService
+
+@if (@Id == 0)
+{
+    <h3>New Carrier</h3>
+}
+else
+{
+    <h3>Update Carrier</h3>
+
+}
+
+<div class="container border mt-2 p-4">
+    <EditForm EditContext="editContext" OnValidSubmit="@UpsertCarrier">    
+    <DataAnnotationsValidator />
+    <div class="row mb-3">
+        <label for="@nameof(Carrier.CarrierCode)" class="col-4 text-end">Code</label>
+        <div class="col-8">
+            <input type="text" @bind-value="Carrier.CarrierCode" />
+            <ValidationMessage For=" ()=> Carrier.CarrierCode "></ValidationMessage>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <label for="@nameof(Carrier.Name)" class="col-4 text-end">Name</label>
+        <div class="col-8">
+            <input type="text" @bind-value="Carrier.Name" />
+            <ValidationMessage For=" ()=> Carrier.Name" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="offset-4 col-8">
+            <button class="btn btn-primary">Save</button>
+            <NavLink class="btn btn-secondary" href="carrier">Cancel</NavLink>
+        </div>
+    </div>
+</EditForm>
+
+    </div>
+
+
+
+@code {
+
+    private ValidationMessageStore? messageStore;
+
+    private EditContext? editContext;
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private CarrierDTO Carrier { get; set; } = new CarrierDTO();
+
+    protected override void OnInitialized()
+    {
+        if (@Id ==0)
+        {
+            editContext = new(Carrier);
+        }
+        else
+        {
+            // Populate carrier if already exists            
+        }
+
+        editContext.OnValidationRequested += HandleValidationRequested;
+        messageStore = new(editContext);
+    }
+
+    private async Task UpsertCarrier()
+    {
+        try
+        {
+            messageStore?.Clear();
+
+            if (Carrier.Id == 0)
+            {
+                var record = await carrierService.GetByCode(Carrier.CarrierCode);
+                if (record != null)
+                {
+
+                    messageStore?.Add( () => Carrier.CarrierCode, "Cannot add a record. Code already used." 
+                    );
+                    //editContext.NotifyValidationStateChanged();
+                }
+                else
+                {
+                    // Insert Procedure.
+                    if (Carrier.Id == 0)
+                    {
+                        Carrier.CreatedBy = ConstantClass.SystemUser;
+                        Carrier.CreatedDate = System.DateTime.Now;
+                        Carrier = await carrierService.Create(Carrier);
+                    }
+                    
+                    _INavigationManager.NavigateTo("carrier");
+                }
+            }
+            else
+            {
+                
+            }
+
+
+        }
+        catch (Exception ex)
+        {   
+            messageStore?.Add( () => Carrier.CarrierCode, ex.Message);
+        }
+    }
+    
+    private void HandleValidationRequested(object? sender, 
+        ValidationRequestedEventArgs args)
+    {
+        messageStore?.Clear();
+    }
+}
