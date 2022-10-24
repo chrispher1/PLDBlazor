@@ -165,12 +165,7 @@ else
     }
 
     private async Task UpsertUser()
-    {
-
-        foreach (RoleDTO role in RoleList)
-        {
-            var test = role.IsSelected;
-        }
+    {        
 
         customFormValidator.ClearFormErrors();
         var errors = new Dictionary<string, List<string>>();
@@ -194,9 +189,22 @@ else
                     {
                         User.CreatedBy = ConstantClass.SystemUser;
                         User.CreatedDate = System.DateTime.Now;
-                        //Product.Carrier = await carrierService.GetById(Product.CarrierId);
-                        //Product.ProductType = await productTypeService.GetById(Product.ProductTypeId);
-                        //await userService.Create(User);
+
+                        // Add role of the user
+                        User.UserRoles = new List<UserRoleDTO>();
+                        foreach (RoleDTO role in RoleList)
+                        {
+
+                            if (role.IsSelected)
+                            {
+                                UserRoleDTO objUserRole = new UserRoleDTO();
+                                objUserRole.CreatedDate = System.DateTime.Now;
+                                objUserRole.CreatedBy = ConstantClass.SystemUser;
+                                objUserRole.RoleId = role.Id;
+                                User.UserRoles.Add(objUserRole);
+                            }
+                        }
+                        await userService.Create(User);
                     }
                     SaveOperation = true;
                 }
