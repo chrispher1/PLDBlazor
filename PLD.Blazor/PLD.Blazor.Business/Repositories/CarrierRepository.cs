@@ -22,11 +22,8 @@ namespace PLD.Blazor.Business.Repositories
             var carrierRecord = _applicationDBContext.Carrier.Where( carrier => carrier.Id == entity.Id ).Single();
             carrierRecord.CarrierCode = entity.CarrierCode;
             carrierRecord.Name = entity.Name;
-
-            // This will be change in the future when applying the Authentication
-            carrierRecord.ModifiedBy = ConstantClass.SystemUser;
-            
-            carrierRecord.ModifiedDate = DateTime.Now;
+            carrierRecord.ModifiedBy = entity.ModifiedBy;
+            carrierRecord.ModifiedDate = entity.ModifiedDate;
         }
     }
 }

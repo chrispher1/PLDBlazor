@@ -1,7 +1,7 @@
 ﻿@page "/commissionerror/upsert"
-
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Policy = ConstantClass.CommissionUpsertRolePolicy)]
 <h3>CommissionErrorUpsert the</h3>
-
 @code {
 
 }

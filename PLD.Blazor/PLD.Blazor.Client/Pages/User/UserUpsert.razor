@@ -1,0 +1,239 @@
+﻿@page "/user/userUpdate/{Id:int}"
+@page "/user/userInsert"
+@using PLD.Blazor.Common;
+@using Microsoft.AspNetCore.Authorization;
+@using System;
+@attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+
+@inject IUserService userService
+@inject IRoleService roleService
+
+
+@if (@Id == 0)
+{
+    <h3>New User</h3>
+}
+else
+{
+    <h3>Update User</h3>
+}
+
+@if (SaveOperation == true)
+{
+    <span>User successfully saved</span>
+    <br/>
+}
+
+<div class="container border mt-2 p-4">
+
+    @if (User != null)
+    {
+        <EditForm Model="@User" OnValidSubmit="UpsertUser">
+            <DataAnnotationsValidator />
+            <CustomFormValidator @ref="customFormValidator" />
+
+            <div class="row mb-3">
+                <div class="col">
+                <ValidationSummary />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(User.FirstName)" class="col-2 col-form-label text-end">First Name</label>
+                <div class="col-2">                    
+                    <input type="text" @bind-value="User.FirstName" class="form-control" />
+                </div>
+                
+                <label for="@nameof(User.LastName)" class="col-5 col-form-label text-end">Last Name</label>
+                <div class="col-3">
+                    <input type="text" @bind-value="User.LastName" class="form-control" />
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <label for="@nameof(User.BirthDate)" class="col-2 col-fom-label text-end">Birth Date</label>
+                <div class="col-2">
+                    <InputDate @bind-Value="User.BirthDate" class="form-control"/>              
+                </div>
+                <label for="@nameof(User.UserName)" class="col-5 col-form-label text-end">User Name</label>
+                <div class="col-3">
+                    <input type="text" @bind-value="User.UserName"  class="form-control"/>
+                    
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class=" offset-1 col-11"> <b>Roles</b> </div>
+            </div>
+            
+            @if (RoleList != null) {
+                int i = 1, j=0;
+                @foreach (RoleDTO role in RoleList)
+                {                    
+                    @if (i % 3 == 0)  {
+                        <div class="row mb-3">
+                            @for( j = i - 3; j<i; j++ ) {
+                                RoleDTO selectedRole = RoleList.ToList()[j];
+                                <div class="offset-1 col-3">
+                                    @{
+                                        if ( (UserRoleList != null) && ( UserRoleList.Any(u => u.RoleId == selectedRole.Id) ) ) {
+                                            selectedRole.IsSelected = true;                                            
+                                            <input type="checkbox" @bind-value="@role.IsSelected" class="form-check-input" checked />
+                                        }
+                                        else
+                                        {
+                                            <input type="checkbox" @bind-value="@role.IsSelected" class="form-check-input" />
+                                        }
+                                    }                                    
+                                    <label for="@nameof(selectedRole.Name)" class="ms-1 form-check-label">@selectedRole.Name</label>
+                                </div>                     
+                            }                       
+                        </div>
+                     }
+                     else
+                     {
+                        if (i >= RoleList.Count()) {
+                            <div class="row mb-5">
+                                @{
+                                    int diff = i - j;
+                                }
+                                
+                                @for (int k = i - diff; k < i; k++) {                                
+                                    RoleDTO selectedRole = RoleList.ToList()[k];
+                                    <div class="offset-1 col-3">
+                                        @{
+                                            if ((UserRoleList != null) && (UserRoleList.Any(u => u.RoleId == selectedRole.Id))) {
+                                                selectedRole.IsSelected = true;
+                                                <input type="checkbox" @bind-value="@role.IsSelected"  class="form-check-input" checked />
+                                            }
+                                            else
+                                            {
+                                                <input type="checkbox" @bind-value="@role.IsSelected" class="form-check-input" />
+                                            }
+                                        }
+                                        <label for="@nameof(selectedRole.Name)" class="ms-1 form-check-label">@selectedRole.Name</label>
+                                </div>
+                                    
+                                }
+                            </div>
+                        }
+                     }
+                    i++;
+                }
+            }            
+            <div class="row mb-3">
+                <div class="offset-5 col-7">
+                    <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy" Context="authorizedContext">
+                        <Authorized>
+                            <button class="btn btn-primary">Save</button>
+                        </Authorized>
+                        <NotAuthorized>
+                            <button class="btn btn-primary" disabled>Save</button>
+                        </NotAuthorized>
+                    </AuthorizeView>   
+                    <NavLink class="btn btn-secondary" href="user">Back</NavLink>
+                </div>
+            </div>
+        </EditForm>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private bool SaveOperation = false;
+    private UserDTO User { get; set; } = new UserDTO();
+    protected CustomFormValidator customFormValidator;
+    private IEnumerable<RoleDTO> RoleList { get; set; }
+    private ICollection<UserRoleDTO> UserRoleList { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        //await PopulateForm();
+
+        if (@Id == 0)
+        {
+            User = new UserDTO();
+        }
+        else
+        {
+            // Populate carrier if already exists
+            User = await userService.GetById(Id);
+            UserRoleList = User.UserRoles;
+        }
+        RoleList = await roleService.GetAll();
+    }
+
+    private async Task UpsertUser()
+    {
+
+        foreach (RoleDTO role in RoleList)
+        {
+            var test = role.IsSelected;
+        }
+
+        customFormValidator.ClearFormErrors();
+        var errors = new Dictionary<string, List<string>>();
+        try
+        {
+            SaveOperation = false;
+            if (User.Id == 0)
+            {
+                var record = await userService.GetByUserName(User.UserName);
+                if (record != null)
+                {
+
+                    errors.Add(nameof(User.UserName),
+                    new() { ConstantClass.UserCannotAddRecordUserNameUsed });
+                    customFormValidator.DisplayFormErrors(errors);
+                }
+                else
+                {
+                    // Insert Procedure.
+                    if (User.Id == 0)
+                    {
+                        User.CreatedBy = ConstantClass.SystemUser;
+                        User.CreatedDate = System.DateTime.Now;
+                        //Product.Carrier = await carrierService.GetById(Product.CarrierId);
+                        //Product.ProductType = await productTypeService.GetById(Product.ProductTypeId);
+                        //await userService.Create(User);
+                    }
+                    SaveOperation = true;
+                }
+            }
+            else
+            {
+                var record = await userService.GetByUserNameAndNotID(User.UserName,User.Id);
+                if (record != null && record.Any())
+                {
+                    errors.Add(nameof(User.UserName),
+                    new() { ConstantClass.UserCannotAddRecordUserNameUsed });
+                    customFormValidator.DisplayFormErrors(errors);
+                }
+                else
+                {
+                    // Update the record
+                    User.ModifiedBy = ConstantClass.SystemUser;
+                    User.ModifiedDate = System.DateTime.Now;
+
+
+                    //UserRoleDTO objUserRoleCommmissionUserRead = new UserRoleDTO();
+                    //objUserRoleCommmissionUserRead.CreatedDate = System.DateTime.Now;
+                    //objUserRoleCommmissionUserRead.CreatedBy = ConstantClass.SystemUser;
+                    //objUserRoleCommmissionUserRead.RoleId = (await roleService.GetByName(ConstantClass.Role_Commission_User_Read) as RoleDTO).Id;
+                    //UserForRegister.UserRoles.Add(objUserRoleCommmissionUserRead);
+
+                    //await userService.Update(User);
+                    SaveOperation = true;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errors.Add(nameof(User.UserName),
+                    new() { ex.Message });
+                    customFormValidator.DisplayFormErrors(errors);
+            SaveOperation = false;
+        }
+    }
+}

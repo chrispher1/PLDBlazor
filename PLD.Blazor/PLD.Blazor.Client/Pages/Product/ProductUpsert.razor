@@ -1,0 +1,203 @@
+﻿@page "/product/productUpdate/{Id:int}"
+@page "/product/productInsert"
+@using PLD.Blazor.Common;
+@using Microsoft.AspNetCore.Authorization;
+@attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+
+@inject IProductService productService
+@inject ICarrierService carrierService
+@inject IProductTypeService productTypeService
+
+
+@if (@Id == 0)
+{
+    <h3>New Product</h3>
+}
+else
+{
+    <h3>Update Product</h3>
+}
+
+@if (SaveOperation == true)
+{
+    <span>Product successfully saved</span>
+    <br/>
+}
+
+<div class="container border mt-2 p-4">
+
+    @if (Product != null)
+    {
+        <EditForm Model="@Product" OnValidSubmit="UpsertProduct">
+            <DataAnnotationsValidator />
+            <CustomFormValidator @ref="customFormValidator" />
+
+            <div class="row mb-3">
+                <div class="col">
+                <ValidationSummary />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(Product.Carrier.Name)" class="col-2 col-form-label text-end">Carrier</label>
+                <div class="col-2">
+                    <InputSelect @bind-Value="Product.CarrierId" class="form-select">
+                            <option value="0" disabled="disabled" selected>--Select Carrier--</option> 
+                            @foreach( var carrier in CarrierList)
+                            {
+                                <option value="@carrier.Id" >@carrier.Name</option>                         
+                            }
+                        </InputSelect>                   
+                </div>
+                
+                <label for="@nameof(Product.ProductType.Name)" class="col-5 col-form-label text-end">Product Type</label>
+                <div class="col-3">
+                    <InputSelect @bind-Value="Product.ProductTypeId" class="form-select">
+                        <option value="0" disabled="disabled" selected>--Select Product Type--</option> 
+                        @foreach( var productType in ProductTypeList)
+                        {
+                            <option value="@productType.Id">@productType.Name</option>                         
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <label for="@nameof(Product.Code)" class="col-2 col-fom-label text-end">Code</label>
+                <div class="col-2">
+                    <input type="text" @bind-value="Product.Code" class="form-control" />                    
+                </div>
+                <label for="@nameof(Product.Name)" class="col-5 col-form-label text-end">Name</label>
+                <div class="col-3">
+                    <input type="text" @bind-value="Product.Name"  class="form-control"/>
+                </div>
+            </div>          
+
+            <div class="row mb-3">
+                <label for="@nameof(Product.SalesLinkCarrierId)" class="col-2 col-fom-label text-end">SalesLink Carrier ID</label>
+                <div class="col-2">
+                    <input type="text" @bind-value="Product.SalesLinkCarrierId" class="form-control" />                    
+                </div>
+            </div>
+
+            
+            <div class="row mb-3">
+                <label for="@nameof(Product.Code)" class="col-2 form-check-label text-end">Rate Indicator</label>
+                <div class="col-2">
+                    <input type="checkbox" @bind-value="Product.ProductRateIndicator" checked="@(Product.ProductRateIndicator?"checked":null)"  class="form-check-input" />                    
+                </div>
+                <label for="@nameof(Product.Name)" class="col-5 form-check-label text-end">Type Rate Indicator</label>
+                <div class="col-3">
+                    <input type="checkbox" @bind-value="Product.ProductTypeRateIndicator"  
+                    checked="@(Product.ProductTypeRateIndicator?"checked":null)"
+                    class="form-check-input"/>
+                </div>
+            </div> 
+
+            <div class="row mb-3">
+                <div class="offset-4 col-8">
+                    <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy" Context="authorizedContext">
+                        <Authorized>
+                            <button class="btn btn-primary">Save</button>
+                        </Authorized>
+                        <NotAuthorized>
+                            <button class="btn btn-primary" disabled>Save</button>
+                        </NotAuthorized>
+                    </AuthorizeView>   
+                    <NavLink class="btn btn-secondary" href="product">Back</NavLink>
+                </div>
+            </div>
+        </EditForm>
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+    private ProductDTO Product { get; set; } = new ProductDTO();
+    private IEnumerable<CarrierDTO> CarrierList { get; set; } = new List<CarrierDTO>();
+    private IEnumerable<ProductTypeDTO> ProductTypeList { get; set; } = new List<ProductTypeDTO>();
+    private bool SaveOperation = false;
+    protected CustomFormValidator customFormValidator;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await PopulateForm();
+
+        if (@Id == 0)
+        {
+            Product = new ProductDTO();
+        }
+        else
+        {
+            // Populate carrier if already exists
+            Product = await productService.GetById(Id);            
+        }
+    }
+
+    private async Task PopulateForm()
+    {
+        CarrierList = await carrierService.GetAll();
+        ProductTypeList = await productTypeService.GetAll();
+    }
+
+    private async Task UpsertProduct()
+    {
+        customFormValidator.ClearFormErrors();
+        var errors = new Dictionary<string, List<string>>();
+        try
+        {
+            SaveOperation = false;
+            if (Product.Id == 0)
+            {
+                var record = await productService.GetByCode(Product.Code);
+                if (record != null)
+                {
+
+                    errors.Add(nameof(Product.Code),
+                    new() { ConstantClass.ProductCannotAddRecordCodeUsed });
+                    customFormValidator.DisplayFormErrors(errors);
+                }
+                else
+                {
+                    // Insert Procedure.
+                    if (Product.Id == 0)
+                    {
+                        Product.CreatedBy = ConstantClass.SystemUser;
+                        Product.CreatedDate = System.DateTime.Now;
+                        //Product.Carrier = await carrierService.GetById(Product.CarrierId);
+                        //Product.ProductType = await productTypeService.GetById(Product.ProductTypeId);
+                        Product = await productService.Create(Product);
+                    }
+                    SaveOperation = true;
+                }
+            }
+            else
+            {
+                var record = await productService.GetByCodeAndNotID(Product.Code,Product.Id);
+                if (record != null && record.Any())
+                {
+                    errors.Add(nameof(Product.Code),
+                    new() { ConstantClass.ProductCannotAddRecordCodeUsed });
+                    customFormValidator.DisplayFormErrors(errors);
+                }
+                else
+                {
+                    // Update the record
+                    Product.ModifiedBy = ConstantClass.SystemUser;
+                    Product.ModifiedDate = System.DateTime.Now;
+                    await productService.Update(Product);
+                    SaveOperation = true;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errors.Add(nameof(Product.Code),
+                    new() { ex.Message });
+                    customFormValidator.DisplayFormErrors(errors);
+            SaveOperation = false;
+        }
+    }
+
+}

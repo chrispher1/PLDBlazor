@@ -4,56 +4,125 @@
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">   
+         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+        <AuthorizeView Policy="@CaseRolePolicy">
+            <Authorized>
+                <li class="nav-item">
             <NavLink class="nav-link" href="cases" Match="NavLinkMatch.All">
                <i class="bi bi-briefcase-fill"></i> Cases
-            </NavLink>          
-        </li>
-        <li class="nav-item">
+            </NavLink>  
+             </li>
+            </Authorized>
+        </AuthorizeView>
+
+        <AuthorizeView Policy="@CommissionRolePolicy">
+           <Authorized>
+               <li class="nav-item">
           <NavLink class="nav-link" href="commission">
                 <i class="bi bi-wallet-fill"></i> Commissions
             </NavLink>
-        </li>
-        <li class="nav-item">
+            </li>
+           </Authorized>
+        </AuthorizeView>
+
+        <AuthorizeView Policy="@PaymentRolePolicy">
+            <Authorized>
+                <li class="nav-item">
              <NavLink class="nav-link" href="payment">
                 <i class="bi bi-credit-card-2-front-fill"></i> Payments
             </NavLink>
         </li>
-        <li class="nav-item">
+            </Authorized>
+        </AuthorizeView>
+
+        <AuthorizeView Policy="@ReportRolePolicy">
+            <Authorized>
+                <li class="nav-item">
              <NavLink class="nav-link" href="report">
                 <i class="bi bi-file-spreadsheet-fill"></i> Reports
             </NavLink>
         </li>
-        <li class="nav-item dropdown">          
+            </Authorized>
+        </AuthorizeView>
+
+        <AuthorizeView Policy="@MaintenanceRolePolicy">
+            <Authorized>
+                <li class="nav-item dropdown">          
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
           <i class="bi bi-menu-button-wide-fill"></i> Maintenance
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="#"><i class="bi bi-people-fill"></i> Users</a></li>
+            <li><a class="dropdown-item" href="user">Users</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="carrier"><i class="bi bi-truck"></i> Carriers</a></li>
+            <li><a class="dropdown-item" href="role">Roles</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#"><i class="bi bi-list-task"></i> Products</a></li>
+            <li><a class="dropdown-item" href="carrier">Carriers</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#"><i class="bi bi-list-stars"></i> Product Types</a></li>
+            <li><a class="dropdown-item" href="product">Products</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#"><i class="bi bi-play-fill"></i> Transaction Types</a></li>
+            <li><a class="dropdown-item" href="producttype">Product Types</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#">Transaction Types</a></li>
           </ul>
-        </li>
-      </ul>     
+        </li>   
+            </Authorized>
+        </AuthorizeView>
+        </ul> 
+
+      <AuthorizeView>           
+          <Authorized>  
+        <div class="ms-auto">
+                  <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="logout">
+                            <i class="bi bi-person-check-fill"></i> Hi @context?.User?.Identity?.Name Logout                
+                        </NavLink>
+                    </li>                     
+                  </ul>
+              </div> 
+          </Authorized>                     
+      </AuthorizeView>       
+
+       <AuthorizeView>
+           <NotAuthorized>
+                <div class="ms-auto">
+                  <ul class="navbar-nav">
+              <li class="nav-item">
+                  <NavLink class="nav-link" href="register">
+                <i class="bi bi-person-check-fill"></i>Register                
+            </NavLink>
+                  </li>
+                  <li class="nav-item">
+                      <NavLink class="nav-link" href="login">
+                <i class="bi bi-pencil-fill"></i> Login
+            </NavLink>
+                  </li>      
+                  </ul>
+              </div>    
+           </NotAuthorized>
+       </AuthorizeView>
+
     </div>
   </div>
 </nav>
 
-
-
-
 @code {
     private bool collapseNavMenu = true;
-
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    //private string CommissionRoles = $"{ConstantClass.Role_Commission_User}, {ConstantClass.Role_Commission_User_Read}";
+    //private string CaseRoles = $"{ConstantClass.Role_Case_User}, {ConstantClass.Role_Case_User_Read}";
+    //private string PaymentRoles = $" {ConstantClass.Role_Payment_User}";
+    //private string ReportsRoles = $"{ConstantClass.Role_Reports_User}";
+
+    private string CaseRolePolicy = ConstantClass.CaseRolePolicy;
+    private string CommissionRolePolicy = ConstantClass.CommissionRolePolicy;
+    private string PaymentRolePolicy = ConstantClass.PaymentRolePolicy;
+    private string ReportRolePolicy = ConstantClass.ReportRolePolicy;
+    private string MaintenanceRolePolicy = ConstantClass.MaintenanceRolePolicy;
+
+
 
     private void ToggleNavMenu()
     {

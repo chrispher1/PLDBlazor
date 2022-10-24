@@ -1,0 +1,145 @@
+﻿@page "/register/registerUpdate/{Id:int}"
+@page "/register"
+@using PLD.Blazor.Common
+@inject IUserService userService
+@inject IRoleService roleService
+@inject NavigationManager navigationManager
+
+@if (@Id == 0)
+{
+    <h3>Register</h3>
+}
+
+@if (SaveOperation == true)
+{
+    <span>User successfully register</span>
+    <br/>
+}
+
+<div class="container border mt-2 p-4">
+
+    @if (UserForRegister != null)
+    {
+        <EditForm Model="@UserForRegister" OnValidSubmit="InsertUserForRegister">
+            <DataAnnotationsValidator />
+            <CustomFormValidator @ref="customFormValidator" />
+
+            <div class="row mb-3 mt-3">
+                <div  class="offset-4 col-auto ps-0">
+                <ValidationSummary />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(UserForRegister.UserName)" class="offset-3 col-2 col-form-label text-end">User Name</label>
+                <div class="col-auto">    
+                   <InputText type="text" @bind-Value="UserForRegister.UserName" class="form-control" />
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <label for="@nameof(UserForRegister.Password)" class="offset-3 col-2 col-fom-label text-end">Password</label>
+                <div class="col-auto">
+                   <InputText type="password" @bind-Value="UserForRegister.Password" class="form-control" />                       
+                </div>
+            </div>          
+
+            <div class="row mb-3">
+                <label for="@nameof(UserForRegister.ConfirmPassword)" class="offset-3 col-2 col-fom-label text-end">Confirm Password</label>
+                <div class="col-auto">
+                   <InputText type="password" @bind-Value="UserForRegister.ConfirmPassword" class="form-control" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(UserForRegister.FirstName)" class="offset-3 col-2 col-fom-label text-end">First Name</label>
+                <div class="col-auto">
+                   <InputText type="text" @bind-Value="UserForRegister.FirstName" class="form-control" />               
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(UserForRegister.LastName)" class="offset-3 col-2 col-fom-label text-end">Last Name</label>
+                <div class="col-auto">
+                   <InputText type="text" @bind-Value="UserForRegister.LastName" class="form-control" />                 
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(UserForRegister.BirthDate)" class="offset-3 col-2 col-fom-label text-end">Birth Date</label>
+                <div class="col-auto">                    
+                    <InputDate @bind-Value="UserForRegister.BirthDate" class="form-control" />             
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="offset-5 col-7">
+                    <button class="btn btn-primary">Save</button>
+                    <NavLink class="btn btn-secondary" href="">Cancel</NavLink>
+                </div>
+            </div>
+        </EditForm>
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+    private UserForRegisterDTO UserForRegister { get; set; } = new UserForRegisterDTO();    
+    private bool SaveOperation = false;
+    protected CustomFormValidator customFormValidator;
+
+    protected override void OnInitialized()
+    {
+        if (@Id == 0)
+        {
+            UserForRegister = new UserForRegisterDTO();
+            UserForRegister.BirthDate = System.DateTime.Now;
+        }
+    }
+
+    private async Task InsertUserForRegister()
+    {
+        customFormValidator.ClearFormErrors();
+        var errors = new Dictionary<string, List<string>>();
+        try
+        {
+            SaveOperation = false;
+            var record = await userService.GetByUserName(UserForRegister.UserName);
+            if (record != null)
+                {
+
+                    errors.Add(nameof(UserForRegister.UserName),
+                    new() { ConstantClass.UserCannotAddRecordUserNameUsed });
+                    customFormValidator.DisplayFormErrors(errors);
+                }
+                else
+                {
+                    // Insert Procedure.
+                    UserForRegister.CreatedBy = ConstantClass.SystemUser;
+                    UserForRegister.CreatedDate = System.DateTime.Now;
+                    // Add default role
+                    UserForRegister.UserRoles = new List<UserRoleDTO>();
+                    
+                    UserRoleDTO objUserRoleCommmissionUserRead = new UserRoleDTO();
+                    objUserRoleCommmissionUserRead.CreatedDate = System.DateTime.Now;
+                    objUserRoleCommmissionUserRead.CreatedBy =ConstantClass.SystemUser;                   
+                    objUserRoleCommmissionUserRead.RoleId =( await roleService.GetByName(ConstantClass.Role_Commission_User_Read) as RoleDTO).Id;                    
+                    UserForRegister.UserRoles.Add(objUserRoleCommmissionUserRead);
+                    
+                    UserRoleDTO objUserRoleCaseUserRead = new UserRoleDTO();
+                    objUserRoleCaseUserRead.CreatedDate = System.DateTime.Now;
+                    objUserRoleCaseUserRead.CreatedBy =ConstantClass.SystemUser;                   
+                    objUserRoleCaseUserRead.RoleId =( await roleService.GetByName(ConstantClass.Role_Case_User_Read) as RoleDTO).Id;                    
+                    UserForRegister.UserRoles.Add(objUserRoleCaseUserRead);
+                    await userService.Register(UserForRegister);
+
+                    SaveOperation = true;
+                    navigationManager.NavigateTo("registerSuccess");
+                }            
+        }
+        catch (Exception ex)
+        {
+            errors.Add(nameof(UserForRegister.UserName),
+                    new() { ex.Message });
+                    customFormValidator.DisplayFormErrors(errors);
+            SaveOperation = false;
+        }
+    }
+}

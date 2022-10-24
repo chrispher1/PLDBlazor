@@ -1,0 +1,138 @@
+﻿@page "/role/roleUpdate/{Id:int}"
+@page "/role/roleInsert"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+
+@using PLD.Blazor.Common
+@inject IRoleService roleService
+
+@if (@Id == 0)
+{
+    <h3>New Role</h3>
+}
+else
+{
+    <h3>Update Role</h3>
+}
+
+@if (SaveOperation == true)
+{
+    <span>Role successfully saved</span>
+    <br/>
+}
+
+<div class="container border mt-2 p-4">
+
+    @if (Role != null)
+    {
+        <EditForm Model="@Role" OnValidSubmit="UpsertRole">
+            <DataAnnotationsValidator />
+            <CustomFormValidator @ref="customFormValidator" />
+            <div class="row mb-3">
+                <div class="col">
+                <ValidationSummary />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(Role.Name)" class="col-2 col-form-label text-end">Name</label>
+                <div class="col-10">
+                   <input type="text" @bind-value="Role.Name" class="form-control" />                    
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="offset-4 col-8">
+                    <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy" Context="authorizedContext">
+                        <Authorized>
+                            <button class="btn btn-primary">Save</button>
+                        </Authorized>
+                        <NotAuthorized>
+                            <button class="btn btn-primary" disabled>Save</button>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                    <NavLink class="btn btn-secondary" href="role">Back</NavLink>
+                </div>
+            </div>
+        </EditForm>
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+    private RoleDTO Role { get; set; } = new RoleDTO();
+    private bool SaveOperation = false;
+    protected CustomFormValidator customFormValidator;
+    
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (@Id == 0)
+        {
+            Role = new RoleDTO();
+        }
+        else
+        {
+            // Populate role if already exists
+            Role = await roleService.GetById(Id);                    
+        }
+    }
+
+    private async Task UpsertRole()
+    {
+        customFormValidator.ClearFormErrors();
+        var errors = new Dictionary<string, List<string>>();
+        try
+        {
+            SaveOperation = false;
+            if (Role.Id == 0)
+            {
+                var record = await roleService.GetByName(Role.Name);
+                if (record != null)
+                {
+
+                    errors.Add(nameof(Role.Name),
+                    new() { ConstantClass.RoleCannotAddRecordNameUsed });
+                    customFormValidator.DisplayFormErrors(errors);
+                }
+                else
+                {
+                    // Insert Procedure.
+                    if (Role.Id == 0)
+                    {
+                        Role.CreatedBy = ConstantClass.SystemUser;
+                        Role.CreatedDate = System.DateTime.Now;
+                        Role = await roleService.Create(Role);
+                    }
+                    SaveOperation = true;
+                }
+            }
+            else
+            {
+                var record = await roleService.GetByNameAndNotID(Role.Name,Role.Id);
+                if (record != null && record.Any())
+                {
+                    errors.Add(nameof(Role.Name),
+                    new() { ConstantClass.RoleCannotAddRecordNameUsed });
+                    customFormValidator.DisplayFormErrors(errors);
+                }
+                else
+                {
+                    // Update the record
+                    Role.ModifiedBy = ConstantClass.SystemUser;
+                    Role.ModifiedDate = System.DateTime.Now;
+                    await roleService.Update(Role);
+                    SaveOperation = true;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errors.Add(nameof(Role.Name),
+                    new() { ex.Message });
+                    customFormValidator.DisplayFormErrors(errors);
+            SaveOperation = false;
+        }
+    }
+
+}

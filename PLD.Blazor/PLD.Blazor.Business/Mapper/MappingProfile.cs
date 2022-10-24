@@ -14,6 +14,12 @@ namespace PLD.Blazor.Business.Mapper
         public MappingProfile()
         {
             CreateMap<Carrier, CarrierDTO>().ReverseMap();
+            CreateMap<ProductType, ProductTypeDTO>().ReverseMap();
+            CreateMap<Product, ProductDTO>().ReverseMap();
+            CreateMap<Role, RoleDTO>().ReverseMap();
+            CreateMap<UserRole, UserRoleDTO>().ReverseMap();
+            CreateMap<User, UserDTO>().ReverseMap();
+            CreateMap<UserDTO, UserForRegisterDTO>().ReverseMap();
         }
     }
 }

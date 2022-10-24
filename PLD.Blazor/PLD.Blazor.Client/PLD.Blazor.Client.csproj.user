@@ -7,5 +7,6 @@
     <ActiveDebugProfile>PLD.Blazor.Client</ActiveDebugProfile>
     <RazorPage_SelectedScaffolderID>RazorComponentScaffolder</RazorPage_SelectedScaffolderID>
     <RazorPage_SelectedScaffolderCategoryPath>root/Common/RazorComponent</RazorPage_SelectedScaffolderCategoryPath>
+    <NameOfLastUsedPublishProfile>D:\PLDBlazor\PLD.Blazor\PLD.Blazor.Client\Properties\PublishProfiles\PLDBlazorClient - Web Deploy.pubxml</NameOfLastUsedPublishProfile>
   </PropertyGroup>
 </Project>

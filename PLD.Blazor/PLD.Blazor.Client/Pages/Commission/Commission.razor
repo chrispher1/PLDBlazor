@@ -1,6 +1,6 @@
 ﻿@page "/commission"
-@page "/"
-
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Policy = ConstantClass.CommissionRolePolicy)]
 <PageTitle>Commission</PageTitle>
 <h3>Commission</h3>
 <TelerikTabStrip @bind-ActiveTabIndex="@ActiveTabIndex">
@@ -8,7 +8,9 @@
             1
         </TabStripTab>
         <TabStripTab Title="Error">
+            <AuthorizeView Policy="@ConstantClass.CommissionUpsertRolePolicy">
             <NavLink href="/commissionerror/upsert" class="btn btn-primary"><i class="bi bi-plus-circle-fill"></i> Create</NavLink>
+            </AuthorizeView>
         </TabStripTab>
         <TabStripTab Title="Final">
             3

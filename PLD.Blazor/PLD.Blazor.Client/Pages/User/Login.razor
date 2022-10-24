@@ -1,0 +1,72 @@
+﻿@page "/login"
+@using PLD.Blazor.Common
+@inject IUserService userService
+@inject NavigationManager navigationManager
+
+<div class="container border mt-2 p-4">
+
+    @if (UserForLogin != null)
+    {
+        <EditForm Model="@UserForLogin" OnValidSubmit="UserLogin">      
+            <DataAnnotationsValidator />
+            <CustomFormValidator @ref="customFormValidator" />
+            <div class="row mb-3 mt-3">
+                <div  class="offset-5 col-auto">
+                <ValidationMessage For="() => UserForLogin.UserName"></ValidationMessage>
+                <ValidationMessage For="() => UserForLogin.Password"></ValidationMessage>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(UserForLogin.UserName)" class="offset-3 col-2 col-form-label text-end">User Name</label>
+                <div class="col-auto">    
+                   <InputText type="text" @bind-Value="UserForLogin.UserName" class="form-control" />
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <label for="@nameof(UserForLogin.Password)" class="offset-3 col-2 col-fom-label text-end">Password</label>
+                <div class="col-auto">
+                   <InputText type="password" @bind-Value="UserForLogin.Password" class="form-control" />                       
+                </div>
+            </div>          
+
+                        <div class="row mb-3">
+                <div class="offset-5 col-7">
+                    <button class="btn btn-primary">Login</button>
+                    <NavLink class="btn btn-secondary" href="">Cancel</NavLink>
+                </div>
+            </div>
+        </EditForm>
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+    private UserForLoginDTO UserForLogin { get; set; } = new UserForLoginDTO();    
+    protected CustomFormValidator customFormValidator;
+
+    protected override void OnInitialized()
+    {
+        UserForLogin = new UserForLoginDTO();
+    }
+
+    private async Task UserLogin()
+    {
+        customFormValidator.ClearFormErrors();
+        var errors = new Dictionary<string, List<string>>();
+        try
+        {
+
+            await userService.Login(UserForLogin);
+            navigationManager.NavigateTo("loginSuccess");
+        }
+        catch (Exception ex)
+        {
+            errors.Add(nameof(UserForLogin.UserName),
+                    new() { ex.Message });
+                    customFormValidator.DisplayFormErrors(errors);
+        }
+    }
+}

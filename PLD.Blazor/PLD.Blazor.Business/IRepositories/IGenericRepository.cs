@@ -9,7 +9,8 @@ namespace PLD.Blazor.Business.IRepositories
 {
     public interface IGenericRepository<T>
     {
-        Task Add(T entity);        
+        Task Add(T entity);
+        Task Add(IEnumerable<T> entities);
         Task<T?> Get(Expression<Func<T,bool>>? filter=null, string? includeProperties=null);       
         Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null, string? includeProperties = null);
         Task Remove(T entity);

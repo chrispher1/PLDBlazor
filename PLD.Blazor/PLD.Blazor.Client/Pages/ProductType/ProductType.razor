@@ -1,0 +1,138 @@
+﻿@page "/producttype"
+@using Telerik.DataSource.Extensions;
+@using Microsoft.AspNetCore.Authorization;
+@attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+@inject IProductTypeService productTypeService
+@inject IJSRuntime jsRuntime
+
+<h3>Product Type</h3>
+
+@if (DeleteOperation == true)
+{
+    <span>Product Type successfully deleted</span>
+    <br/>
+}
+
+@if(ErrorMessage != null)
+{
+    <span>@ErrorMessage</span>
+    <br/>
+    <br/>
+}
+
+@if (ProductTypeList != null)
+{
+    <TelerikGrid Data=@ProductTypeList
+             Sortable=true
+             Pageable=true
+             @bind-PageSize="@PageSize"
+             FilterMode="@GridFilterMode.FilterRow"
+             Height=@Height>
+
+        <GridSettings>
+            <GridPagerSettings PageSizes="@PageSizes" />
+        </GridSettings>
+        <GridColumns>
+            <GridColumn Field="@nameof(ProductTypeDTO.Id)" Title="Id" Visible=false>
+                <Template><input type="hidden" asp-for="@nameof(ProductTypeDTO.Id)"> </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(ProductTypeDTO.Code)" Title="Code" Width="50px">
+            </GridColumn>
+            <GridColumn Field="@nameof(ProductTypeDTO.Name)" Title="Name" Width="195px" />
+            <GridCommandColumn Width="35px" Context="productTypeContext">
+                <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy" >
+                    <Authorized>
+                            @{
+                                ProductTypeDTO? record = (productTypeContext as ProductTypeDTO);
+                                <NavLink class="btn btn-primary" href="@($"productType/productTypeUpdate/{record?.Id}")">Edit</NavLink>
+                                <NavLink class="btn btn-secondary" @onclick=" (args) => ConfirmDelete(args, record.Id)">Delete</NavLink>
+
+                                <DeleteModal ModalTitle="Product Type" BodyText="Are you sure you want to delete this product type ?"
+                                    PrimaryButtonText="Delete" SecondaryButtonText="Cancel" Id=record.Id
+                                    SelectedMethod="DeleteProductType">
+                                </DeleteModal>
+                            }
+                    </Authorized>
+                </AuthorizeView>
+                
+        </GridCommandColumn>
+    </GridColumns>
+    <GridToolBar>
+        <div class="col d-flex justify-content-end">
+            <div>
+                <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy">
+                    <Authorized>
+                        <NavLink class="btn btn-primary" href="productType/productTypeInsert">New</NavLink>
+                    </Authorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </GridToolBar>
+</TelerikGrid>
+}
+else
+{
+    <div class="loader-container">
+        <span class="loader-size-title">Fetching data</span>
+        <TelerikLoader Class="loader-indicator" Type="@LoaderType.ConvergingSpinner" Size="@(ThemeConstants.Loader.Size.Large)"></TelerikLoader>
+    </div>
+}
+
+@code {
+    private IEnumerable<ProductTypeDTO> ProductTypeList { get; set; }
+    int PageSize = 10;
+    string Height = "400px";
+    private List<int?> PageSizes => new List<int?> { 5, 10, 25, 50, null };
+    private bool DeleteOperation = false;
+    private string ErrorMessage = null;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await GetGridData();
+    }
+
+    async Task GetGridData()
+    {
+        ProductTypeList = await productTypeService.GetAll();
+    }
+
+    private async Task ConfirmDelete(MouseEventArgs e, int id)
+    {
+        // modify the function to display modal window
+        await jsRuntime.InvokeVoidAsync("DisplayModal", "DeleteModal_"+ id.ToString());
+    }
+
+    private async Task DeleteProductType (int id)
+    {
+        try
+        {
+            DeleteOperation = false;
+            // Perform delete producttype
+            await productTypeService.Delete(id);
+            await GetGridData();
+            DeleteOperation = true;
+            ErrorMessage = null;
+        }
+        catch (Exception ex)
+        {   
+            DeleteOperation = false;
+            ErrorMessage = ex.Message.ToString();   
+        }
+    }
+}
+
+<style>
+    .loader-size-title {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .loader-container {
+        text-align: center;
+        width: 150px;
+        display: inline-table;
+        padding-top: 10px;
+        position: absolute;
+        left: 50%;
+    }
+</style>

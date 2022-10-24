@@ -1,0 +1,45 @@
+﻿<!-- Modal -->
+<div class="modal fade" id="DeleteModal_@Id"  tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">@ModalTitle</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        @BodyText
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" @onclick= "(args) => PrimaryButtonSelected(args, Id)" data-bs-dismiss="modal">@PrimaryButtonText</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@SecondaryButtonText</button>
+      </div>
+    </div>
+  </div>
+</div>
+@code {
+
+    [Parameter]
+    public string ModalTitle{ get; set; }
+
+    [Parameter]
+    public string PrimaryButtonText { get; set; }
+
+    [Parameter]
+    public string SecondaryButtonText { get; set; } 
+
+    [Parameter]
+    public string BodyText { get; set; } 
+
+    [Parameter]
+    public int Id { get; set; }
+
+    [Parameter]
+    public EventCallback<int> SelectedMethod { get; set; }
+
+    private async Task PrimaryButtonSelected (MouseEventArgs e, int id)
+    {
+        await SelectedMethod.InvokeAsync(id);
+    }
+
+
+}

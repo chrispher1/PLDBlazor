@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PLD.Blazor.WebApi", "PLD.Bl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PLD.Blazor.Business", "PLD.Blazor.Business\PLD.Blazor.Business.csproj", "{DA001EF7-1C98-4B9A-B212-1FB52D9D47DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PLD.Blazor.Common", "PLD.Blazor.Common\PLD.Blazor.Common.csproj", "{89898A66-9DC2-4B67-8AB8-E17D1E62B6F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PLD.Blazor.Common", "PLD.Blazor.Common\PLD.Blazor.Common.csproj", "{89898A66-9DC2-4B67-8AB8-E17D1E62B6F4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PLD.Blazor.Service", "PLD.Blazor.Service\PLD.Blazor.Service.csproj", "{C3018B4D-054E-4466-9EE8-609A836F40DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{89898A66-9DC2-4B67-8AB8-E17D1E62B6F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89898A66-9DC2-4B67-8AB8-E17D1E62B6F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{89898A66-9DC2-4B67-8AB8-E17D1E62B6F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3018B4D-054E-4466-9EE8-609A836F40DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3018B4D-054E-4466-9EE8-609A836F40DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3018B4D-054E-4466-9EE8-609A836F40DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3018B4D-054E-4466-9EE8-609A836F40DE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

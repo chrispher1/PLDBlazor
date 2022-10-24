@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PLD.Blazor.Business.IRepositories
 {
-    public interface ICarrierRepository<T> : IGenericRepository<T>
+    public interface ICarrierRepository<T> : IGenericRepository<T> where T : class
     {
         void Update(T entity);
     }

@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "84ddc1ed-5def-411e-a0ea-5f8644d4ca98": {
+      "ProjectGuid": "84ddc1ed-5def-411e-a0ea-5f8644d4ca98",
+      "DisplayName": "PLD.Blazor.Client",
+      "ColorIndex": 0
+    }
+  },
+  "NextColorIndex": 1
+}

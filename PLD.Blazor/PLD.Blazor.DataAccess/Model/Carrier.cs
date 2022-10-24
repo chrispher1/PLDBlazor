@@ -12,11 +12,11 @@ namespace PLD.Blazor.DataAccess.Model
     public class Carrier
     {
         [Key]
-        [Column("CARR_ID")]
+        [Column("Carr_Id")]
         public int Id { get; set; }
         
         [Required]
-        [Column("CARR_CD")]
+        [Column("Carr_Cd")]
         [MaxLength(25)]
         public string CarrierCode { get; set; }
 
@@ -25,20 +25,22 @@ namespace PLD.Blazor.DataAccess.Model
         public string Name { get; set; }
 
         [Required]
-        [Column("CRT_DT")]
+        [Column("Crt_Dt")]
         public DateTime CreatedDate { get; set; }
 
         [Required]
-        [Column("CRT_BY")]
+        [Column("Crt_By")]
         [MaxLength(100)]
         public string CreatedBy { get; set; }
         
-        [Column("MOD_DT")]
+        [Column("Mod_Dt")]
         public DateTime? ModifiedDate { get; set; }
 
-        [Column("MOD_BY")]
+        [Column("Mod_By")]
         [MaxLength(100)]
         public string? ModifiedBy { get; set; }
+
+        public virtual ICollection<Product> Products { get; set; }
 
     }
 }

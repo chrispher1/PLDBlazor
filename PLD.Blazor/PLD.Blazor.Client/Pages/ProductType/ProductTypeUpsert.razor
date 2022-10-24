@@ -1,0 +1,140 @@
+﻿@page "/productType/productTypeUpdate/{Id:int}"
+@page "/productType/productTypeInsert"
+@using PLD.Blazor.Common;
+@using Microsoft.AspNetCore.Authorization;
+@attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+@inject IProductTypeService productTypeService
+
+
+@if (@Id == 0)
+{
+    <h3>New Product Type</h3>
+}
+else
+{
+    <h3>Update Product Type</h3>
+}
+
+@if (SaveOperation == true)
+{
+    <span>Product Type successfully saved</span>
+    <br/>
+}
+
+<div class="container border mt-2 p-4">
+
+    @if (ProductType != null)
+    {
+        <EditForm Model="@ProductType" OnValidSubmit="UpsertProductType">
+            <DataAnnotationsValidator />
+            <CustomFormValidator @ref="customFormValidator" />
+            <div class="row mb-3">
+                <label for="@nameof(ProductType.Code)" class="col-4 text-end">Code</label>
+                <div class="col-8">
+                    <input type="text" @bind-value="ProductType.Code" />
+                    <ValidationMessage For=" ()=> ProductType.Code "></ValidationMessage>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(ProductType.Name)" class="col-4 text-end">Name</label>
+                <div class="col-8">
+                    <input type="text" @bind-value="ProductType.Name" />
+                    <ValidationMessage For=" ()=> ProductType.Name" />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="offset-4 col-8">
+                    <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy" Context="authorizedContext">
+                        <Authorized>
+                            <button class="btn btn-primary">Save</button>
+                        </Authorized>
+                        <NotAuthorized>
+                            <button class="btn btn-primary" disabled>Save</button>
+                        </NotAuthorized>
+                    </AuthorizeView>                       
+                    <NavLink class="btn btn-secondary" href="productType">Back</NavLink>
+                </div>
+            </div>
+        </EditForm>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private ProductTypeDTO ProductType { get; set; } = new ProductTypeDTO();
+    private bool SaveOperation = false;
+    protected CustomFormValidator customFormValidator;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        if (@Id == 0)
+        {
+             ProductType = new ProductTypeDTO();
+        }
+        else
+        {
+            // Populate carrier if already exists
+            ProductType = await productTypeService.GetById(Id);            
+        }
+    }
+
+    private async Task UpsertProductType()
+    {
+            customFormValidator.ClearFormErrors();
+            var errors = new Dictionary<string, List<string>>();
+        try
+        {
+            SaveOperation = false;
+            if (ProductType.Id == 0)
+            {
+                var record = await productTypeService.GetByCode(ProductType.Code);
+                if (record != null)
+                {
+                    
+                    errors.Add(nameof(ProductType.Code),
+                    new() { ConstantClass.ProductTypeCannotAddRecordCodeUsed });
+                    customFormValidator.DisplayFormErrors(errors);
+                }
+                else
+                {
+                    // Insert Procedure.
+                    if (ProductType.Id == 0)
+                    {
+                        ProductType.CreatedBy = ConstantClass.SystemUser;
+                        ProductType.CreatedDate = System.DateTime.Now;
+                        ProductType = await productTypeService.Create(ProductType);
+                    }
+                    SaveOperation = true;
+                }
+            }
+            else
+            {
+                var record = await productTypeService.GetByCodeAndNotID(ProductType.Code,ProductType.Id);
+                if (record != null && record.Any())
+                {
+                    errors.Add(nameof(ProductType.Code),
+                    new() { ConstantClass.ProductTypeCannotAddRecordCodeUsed });
+                    customFormValidator.DisplayFormErrors(errors);
+                }
+                else
+                {
+                    // Update the record
+                    ProductType.ModifiedBy = ConstantClass.SystemUser;
+                    ProductType.ModifiedDate = System.DateTime.Now;
+                    await productTypeService.Update(ProductType);
+                    SaveOperation = true;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errors.Add(nameof(ProductType.Code),
+                    new() { ex.Message });                    
+                    customFormValidator.DisplayFormErrors(errors);
+            SaveOperation = false;
+        }
+    }
+
+}
