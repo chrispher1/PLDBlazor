@@ -38,8 +38,7 @@ namespace PLD.Blazor.WebApi.Controllers
         public async Task<IActionResult> Register(UserForRegisterDTO userForRegisterDTO)
         {   
             try
-            {               
-
+            { 
                 if (await _unitOfWork.User.UserExists(userForRegisterDTO.UserName.ToLower()))
                 {
                     return BadRequest(
@@ -57,7 +56,6 @@ namespace PLD.Blazor.WebApi.Controllers
                     Token = await GenerateToken(user),
                     User  = _mapper.Map<User,UserDTO>(user)
                 });
-
             }
             catch (Exception ex)
             {
@@ -75,8 +73,7 @@ namespace PLD.Blazor.WebApi.Controllers
         public async Task<IActionResult> Create(UserDTO user)
         {
             try
-            {   
-                
+            {                   
                 if (await _unitOfWork.User.UserExists(user.UserName.ToLower()))
                 {
                     return BadRequest(
@@ -88,8 +85,15 @@ namespace PLD.Blazor.WebApi.Controllers
                         );
                 }
                 var userForRegisterDTO = _mapper.Map<UserDTO, UserForRegisterDTO>(user);
+                
+                // Assign default password for new users
+                userForRegisterDTO.Password =  _configuration.GetValue<string>("NewUserDefautPassword");                
+
                 var userObject = await _unitOfWork.User.Register(userForRegisterDTO);
-                return Ok();                
+
+                return Ok(
+                         _mapper.Map<User, UserDTO>(userObject)
+                    );  
             }
             catch (Exception ex)
             {
@@ -155,10 +159,7 @@ namespace PLD.Blazor.WebApi.Controllers
                 APISettings objectAPISettings = new APISettings();
                 _configuration.GetSection("APISettings").Bind(objectAPISettings);
 
-
                 APISettings APISettings2 = _configuration.GetSection("APISettings2").Get<APISettings>();
-
-                //sectionLogging.bi
 
                 var user = await _unitOfWork.User.LogIn(userForLoginDTO.UserName.ToLower(), userForLoginDTO.Password);
 
@@ -258,6 +259,43 @@ namespace PLD.Blazor.WebApi.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        [Route("{id}")]
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {                
+                var record = await _unitOfWork.User.Get(obj => obj.Id == id);
+
+                if (record != null)
+                {
+                    await _unitOfWork.User.Remove(record);
+                    await _unitOfWork.Save();
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest(
+                                new ErrorModelDTO()
+                                {
+                                    StatusCode = StatusCodes.Status400BadRequest,
+                                    ErrorMessage = ConstantClass.NoRecordFound
+                                }
+                               );
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(
+                            new ErrorModelDTO()
+                            {
+                                StatusCode = StatusCodes.Status400BadRequest,
+                                ErrorMessage = ex.InnerException.Message.Substring(0, ex.InnerException.Message.Length - 1)
+                            }
+                       );
             }
         }
 

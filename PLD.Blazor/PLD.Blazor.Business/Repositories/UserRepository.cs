@@ -101,7 +101,7 @@ namespace PLD.Blazor.Business.Repositories
 
         public void Update(User entity)
         {
-            var record = _applicationDBContext.User.Where(obj => obj.Id == entity.Id).Single();
+            var record = _applicationDBContext.User.Where(obj => obj.Id == entity.Id).Include(prop => prop.UserRoles).Single();
             record.UserName = entity.UserName;
             record.PasswordHash = entity.PasswordHash;
             record.PasswordSalt = entity.PasswordSalt;
@@ -110,11 +110,14 @@ namespace PLD.Blazor.Business.Repositories
             record.BirthDate = entity.BirthDate;
             record.ModifiedBy = entity.ModifiedBy;
             record.ModifiedDate = entity.ModifiedDate;
-            record.UserRoles = entity.UserRoles;
+
+            // Clear the userRoles
+            record.UserRoles.Clear();
 
             var userRoleList = new List<UserRole>();
             foreach (var userRoleDTO in entity.UserRoles)
             {
+                // Add the new userRoles
                 var userRole = new UserRole();
                 userRole.CreatedDate = userRoleDTO.CreatedDate;
                 userRole.CreatedBy = userRoleDTO.CreatedBy;
@@ -122,9 +125,7 @@ namespace PLD.Blazor.Business.Repositories
                 userRole.RoleId = userRoleDTO.RoleId;
                 userRoleList.Add(userRole);
             }
-
             record.UserRoles = userRoleList;
-            //await _applicationDBContext.User.AddAsync(user);
         }
     }
 }

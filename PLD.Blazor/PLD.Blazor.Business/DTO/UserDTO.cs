@@ -9,11 +9,21 @@ namespace PLD.Blazor.Business.DTO
 {
     public class UserDTO
     {   
+        public UserDTO()
+        {
+            UserRoles = new List<UserRoleDTO>();
+            UserName = String.Empty;
+            FirstName = String.Empty;
+            LastName = String.Empty;
+            CreatedBy = String.Empty;
+        }
         public int Id { get; set; }
-        
-        public byte[] PasswordHash { get; set; }
 
-        public byte[] PasswordSalt { get; set; }
+
+        // don't make PasswordHash and PasswordSalt required
+        public byte[]? PasswordHash { get; set; }
+
+        public byte[]? PasswordSalt { get; set; }
                         
         public DateTime? ModifiedDate { get; set; }
         
@@ -22,13 +32,7 @@ namespace PLD.Blazor.Business.DTO
         public DateTime? LastLoginDate { get; set; }
 
         [Required]
-        public string UserName { get; set; }
-
-        //[Required]
-        //public string Password { get; set; }
-
-        //[Compare("Password", ErrorMessage = "Entered password does not match with the confirmed password")]
-        //public string ConfirmPassword { get; set; }
+        public string UserName { get; set; }        
 
         [Required]
         public string FirstName { get; set; }
