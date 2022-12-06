@@ -45,7 +45,7 @@
                         @{
                             CarrierDTO? record = (carrierContext as CarrierDTO);
                             <NavLink class="btn btn-primary" href="@($"carrier/carrierUpdate/{record?.Id}")">Edit</NavLink>
-                            <NavLink class="btn btn-secondary" @onclick=" (args) => ConfirmDelete(args, record.Id)">Delete</NavLink>
+                            <NavLink class="btn btn-secondary" @onclick=" args => ConfirmDelete(args, record.Id)">Delete</NavLink>
                             <DeleteModal ModalTitle="Carrier" BodyText="Are you sure you want to delete this carrier ?"
                                  PrimaryButtonText="Delete" SecondaryButtonText="Cancel" Id=record.Id
                                  SelectedMethod="DeleteCarrier">

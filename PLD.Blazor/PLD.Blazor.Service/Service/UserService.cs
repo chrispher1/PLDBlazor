@@ -146,18 +146,24 @@ namespace PLD.Blazor.Service
                 throw new Exception(errorModel.ErrorMessage);
             }
         }
-        public async Task Create(UserDTO user)
+        public async Task<UserDTO> Create(UserDTO user)
         {
             var content = JsonConvert.SerializeObject(user);
             var bodyContent = new StringContent(content, Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync("/api/User", bodyContent);
             var responseContent = await response.Content.ReadAsStringAsync();
-            
-            if (!response.IsSuccessStatusCode)
+
+            if (response.IsSuccessStatusCode)
             {
-                var errorModel = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(errorModel.ErrorMessage);
+                var result = JsonConvert.DeserializeObject<UserDTO>(responseContent);
+                return result;
             }
+            else
+            {
+                var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
+
+                throw new Exception(result.ErrorMessage);
+            }            
         }
         public async Task Update(UserDTO user)
         {
@@ -183,6 +189,17 @@ namespace PLD.Blazor.Service
             _httpClient.DefaultRequestHeaders.Authorization = null;
         }
 
+        public async Task Delete(int id)
+        {
+            var response = await _httpClient.DeleteAsync("/api/User/" + id);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            if (! response.IsSuccessStatusCode)
+            {
+                var result = JsonConvert.DeserializeObject<ErrorModelDTO> (responseContent);
+                throw new Exception(result.ErrorMessage);
+            }
+        }
         
     }
 }

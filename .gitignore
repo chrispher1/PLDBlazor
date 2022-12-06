@@ -15,6 +15,7 @@
 *.sublime-workspace
 
 # IDE - VSCode
+.vs/
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -37,3 +38,5 @@ Thumbs.db
 bin/
 obj/
 
+# Specific Files
+*.suo

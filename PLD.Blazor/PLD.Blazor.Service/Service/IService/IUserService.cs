@@ -15,8 +15,9 @@ namespace PLD.Blazor.Service.IService
         Task Logout();
         Task<IEnumerable<UserDTO>> GetAll();
         Task<UserDTO> GetById(int id);
-        Task Create(UserDTO user);
+        Task<UserDTO> Create(UserDTO user);
         Task Update(UserDTO user);
         Task<IEnumerable<UserDTO>> GetByUserNameAndNotID(string userName, int id);
+        Task Delete(int id);
     }
 }
