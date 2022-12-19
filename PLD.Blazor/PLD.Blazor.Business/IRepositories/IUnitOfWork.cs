@@ -16,6 +16,7 @@ namespace PLD.Blazor.Business.IRepositories
         IUserRepository<User, UserForRegisterDTO> User { get; }
         IRoleRepository<Role> Role { get; }
         IUserRoleRepository<UserRole> UserRole { get; }
+        IActivityRepository<Activity> Activity { get; }
 
         Task Save();
     }

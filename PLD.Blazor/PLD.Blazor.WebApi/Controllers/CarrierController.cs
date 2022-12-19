@@ -68,7 +68,7 @@ namespace PLD.Blazor.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CarrierDTO carrier)
+        public async Task<IActionResult> Post(CarrierDTO carrier)
         {
             try
             {

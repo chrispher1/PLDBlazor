@@ -100,15 +100,15 @@ namespace PLD.Blazor.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(ProductDTO product)
+        public async Task<IActionResult> Post(ProductDTO product)
         {
             try
             {
-                var productObject = _mapper.Map<ProductDTO, Product>(product);
-                await _unitOfWork.Product.Add(productObject);
+                var record = _mapper.Map<ProductDTO, Product>(product);
+                await _unitOfWork.Product.Add(record);
                 await _unitOfWork.Save();
                 return Ok(
-                    _mapper.Map<Product, ProductDTO>(productObject)
+                    _mapper.Map<Product, ProductDTO>(record)
                     );
             }
             catch (Exception ex)

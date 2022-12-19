@@ -18,6 +18,8 @@ namespace PLD.Blazor.Business.Repositories
         public IUserRepository<User, UserForRegisterDTO> User { get; }
         public IRoleRepository<Role> Role { get; }
         public IUserRoleRepository<UserRole> UserRole { get; }
+        public IActivityRepository<Activity> Activity { get; }
+
 
         private readonly ApplicationDBContext _applicationDBContext;
 
@@ -30,6 +32,7 @@ namespace PLD.Blazor.Business.Repositories
             User = new UserRepository(applicationDBContext);
             Role = new RoleRepository(applicationDBContext);
             UserRole = new UserRoleRepository(applicationDBContext);
+            Activity = new ActivityRepository(applicationDBContext);
         }
         public async Task Save()
         {

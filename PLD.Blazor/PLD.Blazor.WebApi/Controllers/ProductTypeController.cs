@@ -50,7 +50,7 @@ namespace PLD.Blazor.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(ProductTypeDTO productType)
+        public async Task<IActionResult> Post(ProductTypeDTO productType)
         {
             try
             {

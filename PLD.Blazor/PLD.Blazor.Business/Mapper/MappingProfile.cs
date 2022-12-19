@@ -20,6 +20,7 @@ namespace PLD.Blazor.Business.Mapper
             CreateMap<UserRole, UserRoleDTO>().ReverseMap();
             CreateMap<User, UserDTO>().ReverseMap();
             CreateMap<UserDTO, UserForRegisterDTO>().ReverseMap();
+            CreateMap<Activity, ActivityDTO>().ReverseMap();
         }
     }
 }

@@ -1,0 +1,135 @@
+﻿@page "/activity"
+@using Microsoft.AspNetCore.Authorization
+@using Telerik.DataSource.Extensions;
+@attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+@inject IActivityService activityService
+@inject IJSRuntime jsRuntime
+
+<h3>Transaction Type</h3>
+
+@if (DeleteOperation == true)
+{
+    <span>Transaction Type successfully deleted</span>
+    <br />
+}
+
+@if (ErrorMessage != null)
+{
+    <span>@ErrorMessage</span>
+    <br />
+    <br />
+}
+
+@if (ActivityList != null)
+{
+    <TelerikGrid Data=@ActivityList
+             Sortable=true
+             Pageable=true
+             @bind-PageSize="@PageSize"
+             FilterMode="@GridFilterMode.FilterRow"
+             Height=@Height>
+
+        <GridSettings>
+            <GridPagerSettings PageSizes="@PageSizes" />
+        </GridSettings>
+        <GridColumns>            
+            <GridColumn Field="@nameof(ActivityDTO.Code)" Title="Code" Width="50px">
+            </GridColumn>
+            <GridColumn Field="@nameof(ActivityDTO.Description)" Title="Description" Width="195px" />
+            <GridCommandColumn Width="35px" Context="activityContext">
+                <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy">
+                    <Authorized>
+                        @{
+                            ActivityDTO? record = (activityContext as ActivityDTO);
+
+                            <NavLink class="btn btn-primary" href="@($"activity/activityUpdate/Edit/{record?.Code}")">Edit</NavLink>
+                            <NavLink class="btn btn-secondary" @onclick=" args => ConfirmDelete(args, record.Code)">Delete</NavLink>
+                            <DeleteModal ModalTitle="Transacton Type" BodyText="Are you sure you want to delete this transaction type ?"
+                                 PrimaryButtonText="Delete" SecondaryButtonText="Cancel" Code= "@record?.Code"
+                                 SelectedMethodForString="DeleteActivity">
+                            </DeleteModal>
+                        }
+                    </Authorized>
+                </AuthorizeView>
+
+            </GridCommandColumn>
+        </GridColumns>
+        <GridToolBar>
+            <div class="col d-flex justify-content-end">
+                <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy">
+                    <Authorized>
+                        <div>
+                            <NavLink class="btn btn-primary" href="activity/activityInsert/Add">New</NavLink>
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
+            </div>
+        </GridToolBar>
+    </TelerikGrid>
+}
+else
+{
+    <div class="loader-container">
+        <span class="loader-size-title">Fetching data</span>
+        <TelerikLoader Class="loader-indicator" Type="@LoaderType.ConvergingSpinner" Size="@(ThemeConstants.Loader.Size.Large)"></TelerikLoader>
+    </div>
+}
+
+@code {
+    private IEnumerable<ActivityDTO> ActivityList { get; set; }
+    int PageSize = 10;
+    string Height = "400px";
+    private List<int?> PageSizes => new List<int?> { 5, 10, 25, 50, null };
+    private bool DeleteOperation = false;
+    private string ErrorMessage = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetGridData();
+    }
+
+    async Task GetGridData()
+    {
+        ActivityList = await activityService.GetAll();
+    }
+
+    private async Task ConfirmDelete(MouseEventArgs e, string code)
+    {
+        // modify the function to display modal window
+        await jsRuntime.InvokeVoidAsync("DisplayModal", "DeleteModal_" + code);
+    }
+
+    private async Task DeleteActivity(string code)
+    {
+        try
+        {
+            DeleteOperation = false;
+            // Perform delete activity
+            await activityService.Delete(code);
+            await GetGridData();
+            DeleteOperation = true;
+            ErrorMessage = null;
+        }
+        catch (Exception ex)
+        {
+            DeleteOperation = false;
+            ErrorMessage = ex.Message.ToString();
+        }
+    }
+}
+
+<style>
+    .loader-size-title {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .loader-container {
+        text-align: center;
+        width: 150px;
+        display: inline-table;
+        padding-top: 10px;
+        position: absolute;
+        left: 50%;
+    }
+</style>

@@ -15,6 +15,8 @@
         public const string RoleCannotUpdateRecordNameUsed = "Cannot update the record.Name already used.";
         public const string UserNoRecordFound = @"Username\Password is incorrect.";
         public const string UserCannotAddRecordUserNameUsed = "Cannot register user. User Name already used.";
+        public const string ActivityCannotUpdateRecordCodeNotExists = "Cannot update a record. Code not exists.";
+        public const string ActivityCannotAddRecordCodeUsed = "Cannot add a record. Code already used.";
 
         // List of roles
         public const string Role_Commission_User = "Commission_User";
@@ -48,5 +50,8 @@
         public const string ReportRolePolicy = "ReportRolePolicy";
         public const string MaintenanceRolePolicy = "MaintenanceRolePolicy";
 
+        //List of Actions
+        public const string EditAction = "Edit";
+        public const string AddAction = "Add";
     }
 }

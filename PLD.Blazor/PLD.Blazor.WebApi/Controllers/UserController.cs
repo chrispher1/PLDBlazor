@@ -70,7 +70,7 @@ namespace PLD.Blazor.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(UserDTO user)
+        public async Task<IActionResult> Post(UserDTO user)
         {
             try
             {                   
