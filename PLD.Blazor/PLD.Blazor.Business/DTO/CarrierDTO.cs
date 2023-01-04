@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PLD.Blazor.DataAccess.Model;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -22,5 +23,6 @@ namespace PLD.Blazor.Business.DTO
         public DateTime? ModifiedDate { get; set; }
         public string? ModifiedBy { get; set; }
         public ICollection<ProductDTO>? Products { get; set; }
+        public ICollection<TimeActivityMappingDTO>? TimeActivityMappings { get; set; }
     }
 }

@@ -1,0 +1,213 @@
+﻿@page "/timeactivitymapping/timeactivitymappingInsert"
+@page "/timeactivitymapping/timeactivitymappingUpdate/{Id:int}"
+@using Microsoft.AspNetCore.Authorization;
+@attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+@using PLD.Blazor.Common;
+
+@inject ICarrierService carrierService
+@inject IActivityService activityService
+@inject ITimeActivityMappingService timeActivityMappingService
+
+
+@if (@Id == 0)
+{
+    <h3>New Time and Activity Mapping</h3>
+}
+else
+{
+    <h3>Update Time and Activity Mapping</h3>
+}
+
+@if (SaveOperation == true)
+{
+    <span>Time Activity Mapping successfully saved</span>
+    <br />
+}
+
+<div class="container border mt-2 p-4">
+    @if (TimeActivityMapping != null) {
+        <EditForm Model="@TimeActivityMapping" OnValidSubmit="UpsertTimeActivityMapping">
+            <DataAnnotationsValidator/>
+            <CustomFormValidator @ref="customFormValidator" />
+            <div class="row mb-3">
+                <div class="col">
+                    <ValidationSummary />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(TimeActivityMapping.Carrier.Name)" class="col-2 col-form-label text-end">Carrier</label>
+                <div class="col-3">
+                    <InputSelect @bind-Value="TimeActivityMapping.CarrierId" class="form-select">
+                        <option value="0" disabled="disabled" selected>--Select Carrier--</option>
+                        @foreach (var carrier in CarrierList)
+                        {
+                            <option value="@carrier.Id">@carrier.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+                <label for="@nameof(TimeActivityMapping.CarrierTime)" class="col-4 col-form-label text-end">Carrier Time</label>
+                <div class="col-3">
+                    <input type="text" @bind-value="TimeActivityMapping.CarrierTime" class="form-control" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(TimeActivityMapping.CarrierActivity)" class="col-2 col-form-label text-end">Carrier Activity</label>
+                <div class="col-3">
+                    <input type="text" @bind-value="TimeActivityMapping.CarrierActivity" class="form-control" />
+                </div>
+                <label for="@nameof(TimeActivityMapping.PolicyYearStart)" class="col-4 col-form-label text-end">Policy Year Start</label>
+                <div class="col-3">
+                    <input type="number" @bind-value="TimeActivityMapping.PolicyYearStart" class="form-control" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(TimeActivityMapping.PolicyYearEnd)" class="col-2 col-form-label text-end">Policy Year End</label>
+                <div class="col-3">
+                    <input type="number" @bind-value="TimeActivityMapping.PolicyYearEnd" class="form-control" />
+                </div>
+                <label for="@nameof(TimeActivityMapping.TimeCode)" class="col-4 col-form-label text-end">Time Code</label>
+                <div class="col-3">
+                    <input type="text" @bind-value="TimeActivityMapping.TimeCode" class="form-control" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(TimeActivityMapping.Activity.Description)" class="col-2 col-form-label text-end">Transaction Type</label>
+                <div class="col-3">
+                    <InputSelect @bind-Value="TimeActivityMapping.TransactionType" class="form-select">
+                        <option value=null disabled="disabled" selected>--Select Transaction Type--</option>
+                        @foreach (var activity in Activityist)
+                        {
+                            <option value="@activity.Code">@activity.Description</option>
+                        }
+                    </InputSelect>
+                </div>
+                <label for="@nameof(TimeActivityMapping.CompensableIndicator)" class="col-4 col-form-label text-end">Compensable Indicator</label>
+                <div class="col-3">
+                    <InputSelect @bind-Value="TimeActivityMapping.CompensableIndicator" class="form-select">
+                        <option value=null disabled="disabled" selected>--Select Indicator--</option>
+                        <option value="Y">True</option>
+                        <option value="N">False</option>
+                    </InputSelect>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="offset-5 col-7">
+                    <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy" Context="authorizedContext">
+                        <Authorized>
+                            <button class="btn btn-primary">Save</button>
+                        </Authorized>
+                        <NotAuthorized>
+                            <button class="btn btn-primary" disabled>Save</button>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                    <NavLink class="btn btn-secondary" href="timeactivitymapping">Back</NavLink>
+                </div>
+            </div>
+        </EditForm>
+    }
+
+</div>
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+    private TimeActivityMappingDTO TimeActivityMapping { get; set; } = new TimeActivityMappingDTO();
+    private IEnumerable<CarrierDTO> CarrierList { get; set; } = new List<CarrierDTO>();
+    private IEnumerable<ActivityDTO> Activityist { get; set; } = new List<ActivityDTO>();
+    private bool SaveOperation = false;
+    protected CustomFormValidator customFormValidator;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await PopulateForm();
+
+        if ( @Id == 0)
+        {
+            TimeActivityMapping = new TimeActivityMappingDTO();
+        }
+        else
+        {
+            TimeActivityMapping = await timeActivityMappingService.GetById(@Id);
+        }
+
+        //await base.OnInitializedAsync();
+    }
+
+    async Task PopulateForm()
+    {
+        CarrierList = await carrierService.GetAll();
+        Activityist = await activityService.GetAll();
+    }
+
+    private async Task UpsertTimeActivityMapping()
+    {
+        customFormValidator.ClearFormErrors();
+        var errors = new Dictionary<string, List<string>>();
+        try
+        {
+            SaveOperation = false;
+            if (TimeActivityMapping.Id == 0)
+            {
+                var record = await timeActivityMappingService.GetByCarrierIdCarrierTimeCarrierActivityPolicyYearStartPolicyYearEnd(
+                    TimeActivityMapping.CarrierId,
+                    TimeActivityMapping.CarrierActivity,
+                    TimeActivityMapping.PolicyYearStart,
+                    TimeActivityMapping.PolicyYearEnd,
+                    TimeActivityMapping.CarrierTime
+                );
+
+                if (record != null)
+                {
+
+                    errors.Add(nameof(TimeActivityMapping.CarrierActivity),
+                    new() { ConstantClass.TimeActivityMappingCannotAddRecordCombinationUsed });
+                    customFormValidator.DisplayFormErrors(errors);
+                }
+                else
+                {
+                    // Insert Procedure.
+                    if (TimeActivityMapping.Id == 0)
+                    {
+                        TimeActivityMapping.CreatedBy = ConstantClass.SystemUser;
+                        TimeActivityMapping.CreatedDate = System.DateTime.Now;                        
+                        TimeActivityMapping = await timeActivityMappingService.Create(TimeActivityMapping);
+                    }
+                    SaveOperation = true;
+                }
+            }
+            else
+            {   
+                var record = await timeActivityMappingService.GetByCarrierIdCarrierTimeCarrierActivityPolicyYearStartPolicyYearEndAndNotById(
+                    TimeActivityMapping.CarrierId,
+                    TimeActivityMapping.CarrierActivity,
+                    TimeActivityMapping.PolicyYearStart,
+                    TimeActivityMapping.PolicyYearEnd,
+                    TimeActivityMapping.Id,
+                    TimeActivityMapping.CarrierTime
+                );
+
+                if (record != null && record.Any())
+                {
+                    errors.Add(nameof(TimeActivityMapping.CarrierActivity),
+                    new() { ConstantClass.TimeActivityMappingCannotUpdateRecordCombinationUsed });
+                    customFormValidator.DisplayFormErrors(errors);
+                }
+                else
+                {
+                    // Update the record
+                    TimeActivityMapping.ModifiedBy = ConstantClass.SystemUser;
+                    TimeActivityMapping.ModifiedDate = System.DateTime.Now;
+                    await timeActivityMappingService.Update(TimeActivityMapping);
+                    SaveOperation = true;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errors.Add(nameof(TimeActivityMapping.CarrierActivity),
+                    new() { ex.Message });
+            customFormValidator.DisplayFormErrors(errors);
+            SaveOperation = false;
+        }
+    }
+}

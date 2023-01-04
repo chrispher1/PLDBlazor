@@ -22,6 +22,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
+builder.Services.AddScoped<ITimeActivityMappingService, TimeActivityMappingService>();
 
 // register the Telerik services
 builder.Services.AddTelerikBlazor();

@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PLD.Blazor.DataAccess.Model;
 
 namespace PLD.Blazor.Business.DTO
 {
@@ -20,5 +21,6 @@ namespace PLD.Blazor.Business.DTO
         public string CreatedBy { get; set; }                
         public DateTime? ModifiedDate { get; set; }                
         public string? ModifiedBy { get; set; }
+        public ICollection<TimeActivityMappingDTO>? TimeActivityMappings { get; set; }
     }
 }

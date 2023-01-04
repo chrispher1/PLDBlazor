@@ -18,6 +18,9 @@
         public const string ActivityCannotUpdateRecordCodeNotExists = "Cannot update a record. Code not exists.";
         public const string ActivityCannotAddRecordCodeUsed = "Cannot add a record. Code already used.";
 
+        public const string TimeActivityMappingCannotAddRecordCombinationUsed = "Cannot add a record. Carrier, Carrier Time, Carrier Activity, Policy Year Start, Policy Year End already used.";
+        public const string TimeActivityMappingCannotUpdateRecordCombinationUsed = "Cannot update record. Carrier, Carrier Time, Carrier Activity, Policy Year Start, Policy Year End already used.";
+
         // List of roles
         public const string Role_Commission_User = "Commission_User";
         public const string Role_Commission_User_Read = "Commission_User_Read";

@@ -40,7 +40,8 @@ namespace PLD.Blazor.DataAccess.Model
         [MaxLength(100)]
         public string? ModifiedBy { get; set; }
 
-        public virtual ICollection<Product> Products { get; set; }
-
+        public virtual ICollection<Product>? Products { get; set; }
+        public virtual ICollection<TimeActivityMapping>? TimeActivityMappings { get; set; }
+        
     }
 }
