@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PLD.Blazor.DataAccess;
 
@@ -11,9 +12,10 @@ using PLD.Blazor.DataAccess;
 namespace PLD.Blazor.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20221207155641_AddingActivityTableDecember072022")]
+    partial class AddingActivityTableDecember072022
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -256,84 +258,6 @@ namespace PLD.Blazor.DataAccess.Migrations
                     b.ToTable("DMT_ROLE");
                 });
 
-            modelBuilder.Entity("PLD.Blazor.DataAccess.Model.TimeActivityMapping", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Time_Activity_Id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("CarrierActivity")
-                        .IsRequired()
-                        .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)")
-                        .HasColumnName("Src_Act_Cd");
-
-                    b.Property<int>("CarrierId")
-                        .HasColumnType("int")
-                        .HasColumnName("Carr_Id");
-
-                    b.Property<string>("CarrierTime")
-                        .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)")
-                        .HasColumnName("Src_Tm_Cd");
-
-                    b.Property<string>("CompensableIndicator")
-                        .IsRequired()
-                        .HasMaxLength(2)
-                        .HasColumnType("nvarchar(2)")
-                        .HasColumnName("Comp_Ind");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("Crt_By");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Crt_Dt");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("Mod_By");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Mod_Dt");
-
-                    b.Property<int>("PolicyYearEnd")
-                        .HasColumnType("int")
-                        .HasColumnName("Yr_End_Num");
-
-                    b.Property<int>("PolicyYearStart")
-                        .HasColumnType("int")
-                        .HasColumnName("Yr_Start_Num");
-
-                    b.Property<string>("TimeCode")
-                        .HasMaxLength(4)
-                        .HasColumnType("nvarchar(4)")
-                        .HasColumnName("Tm_Cd");
-
-                    b.Property<string>("TransactionType")
-                        .IsRequired()
-                        .HasMaxLength(4)
-                        .HasColumnType("nvarchar(4)")
-                        .HasColumnName("Act_Cd");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TransactionType");
-
-                    b.HasIndex("CarrierId", "CarrierTime", "CarrierActivity", "PolicyYearStart", "PolicyYearEnd")
-                        .IsUnique();
-
-                    b.ToTable("DMT_TM_ACT_MAP");
-                });
-
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.User", b =>
                 {
                     b.Property<int>("Id")
@@ -455,25 +379,6 @@ namespace PLD.Blazor.DataAccess.Migrations
                     b.Navigation("ProductType");
                 });
 
-            modelBuilder.Entity("PLD.Blazor.DataAccess.Model.TimeActivityMapping", b =>
-                {
-                    b.HasOne("PLD.Blazor.DataAccess.Model.Carrier", "Carrier")
-                        .WithMany("TimeActivityMappings")
-                        .HasForeignKey("CarrierId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("PLD.Blazor.DataAccess.Model.Activity", "Activity")
-                        .WithMany("TimeActivityMappings")
-                        .HasForeignKey("TransactionType")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Activity");
-
-                    b.Navigation("Carrier");
-                });
-
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.UserRole", b =>
                 {
                     b.HasOne("PLD.Blazor.DataAccess.Model.Role", "Role")
@@ -493,16 +398,9 @@ namespace PLD.Blazor.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Activity", b =>
-                {
-                    b.Navigation("TimeActivityMappings");
-                });
-
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Carrier", b =>
                 {
                     b.Navigation("Products");
-
-                    b.Navigation("TimeActivityMappings");
                 });
 
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.ProductType", b =>

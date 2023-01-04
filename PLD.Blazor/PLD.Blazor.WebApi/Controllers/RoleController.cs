@@ -101,7 +101,7 @@ namespace PLD.Blazor.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(RoleDTO role)
+        public async Task<IActionResult> Post(RoleDTO role)
         {
             try
             {

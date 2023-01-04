@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PLD.Blazor.DataAccess;
 
@@ -11,9 +12,10 @@ using PLD.Blazor.DataAccess;
 namespace PLD.Blazor.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20221228135605_ModifyTimeActivityMappingTableDecember2820220955")]
+    partial class ModifyTimeActivityMappingTableDecember2820220955
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -326,10 +328,9 @@ namespace PLD.Blazor.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TransactionType");
+                    b.HasIndex("CarrierId");
 
-                    b.HasIndex("CarrierId", "CarrierTime", "CarrierActivity", "PolicyYearStart", "PolicyYearEnd")
-                        .IsUnique();
+                    b.HasIndex("TransactionType");
 
                     b.ToTable("DMT_TM_ACT_MAP");
                 });

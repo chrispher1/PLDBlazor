@@ -14,6 +14,8 @@ namespace PLD.Blazor.DataAccess
         public DbSet<User> User { get; set; }
         public DbSet<Role> Role { get; set; }
         public DbSet<UserRole> UserRole { get; set; }
+        public DbSet<Activity> Activity { get; set; }
+        public DbSet<TimeActivityMapping> TimeActivityMapping { get; set; }    
 
        protected override void OnModelCreating (ModelBuilder modelBuilder)
         {
@@ -27,6 +29,14 @@ namespace PLD.Blazor.DataAccess
             modelBuilder.Entity<UserRole>().HasKey(ur => new { ur.UserId, ur.RoleId });
             modelBuilder.Entity<UserRole>().HasOne(ur => ur.User).WithMany(u => u.UserRoles).HasForeignKey(f => f.UserId);
             modelBuilder.Entity<UserRole>().HasOne(ur => ur.Role).WithMany(u => u.UserRoles).HasForeignKey(f => f.RoleId);
+
+            //TimeActivtyMapping
+            modelBuilder.Entity<TimeActivityMapping>().HasOne(p => p.Carrier).WithMany(t => t.TimeActivityMappings).HasForeignKey( f => f.CarrierId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<TimeActivityMapping>().HasOne( p => p.Activity).WithMany( t => t.TimeActivityMappings).HasForeignKey( f => f.TransactionType)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<TimeActivityMapping>().HasIndex(p => new { p.CarrierId, p.CarrierTime, p.CarrierActivity, p.PolicyYearStart, p.PolicyYearEnd })
+                .IsUnique().HasFilter(null);
         }
     }
 }

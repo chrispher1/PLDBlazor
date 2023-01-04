@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PLD.Blazor.DataAccess;
 
@@ -11,9 +12,10 @@ using PLD.Blazor.DataAccess;
 namespace PLD.Blazor.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20221221151120_ModifyTimeActivityMappingTableDecember2120221111")]
+    partial class ModifyTimeActivityMappingTableDecember2120221111
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -314,6 +316,7 @@ namespace PLD.Blazor.DataAccess.Migrations
                         .HasColumnName("Yr_Start_Num");
 
                     b.Property<string>("TimeCode")
+                        .IsRequired()
                         .HasMaxLength(4)
                         .HasColumnType("nvarchar(4)")
                         .HasColumnName("Tm_Cd");
@@ -325,11 +328,6 @@ namespace PLD.Blazor.DataAccess.Migrations
                         .HasColumnName("Act_Cd");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TransactionType");
-
-                    b.HasIndex("CarrierId", "CarrierTime", "CarrierActivity", "PolicyYearStart", "PolicyYearEnd")
-                        .IsUnique();
 
                     b.ToTable("DMT_TM_ACT_MAP");
                 });
@@ -455,25 +453,6 @@ namespace PLD.Blazor.DataAccess.Migrations
                     b.Navigation("ProductType");
                 });
 
-            modelBuilder.Entity("PLD.Blazor.DataAccess.Model.TimeActivityMapping", b =>
-                {
-                    b.HasOne("PLD.Blazor.DataAccess.Model.Carrier", "Carrier")
-                        .WithMany("TimeActivityMappings")
-                        .HasForeignKey("CarrierId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("PLD.Blazor.DataAccess.Model.Activity", "Activity")
-                        .WithMany("TimeActivityMappings")
-                        .HasForeignKey("TransactionType")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Activity");
-
-                    b.Navigation("Carrier");
-                });
-
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.UserRole", b =>
                 {
                     b.HasOne("PLD.Blazor.DataAccess.Model.Role", "Role")
@@ -493,16 +472,9 @@ namespace PLD.Blazor.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Activity", b =>
-                {
-                    b.Navigation("TimeActivityMappings");
-                });
-
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Carrier", b =>
                 {
                     b.Navigation("Products");
-
-                    b.Navigation("TimeActivityMappings");
                 });
 
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.ProductType", b =>

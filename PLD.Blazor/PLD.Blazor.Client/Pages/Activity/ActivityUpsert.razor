@@ -1,0 +1,138 @@
+﻿@page "/activity/activityUpdate/{Action}/{Code}"
+@page "/activity/activityInsert/{Action}"
+@using Microsoft.AspNetCore.Authorization;
+@attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+@inject IActivityService activityService
+
+
+
+@if (Action == ConstantClass.AddAction)
+{
+    <h3>New Transaction Type</h3>
+}
+else if (Action == ConstantClass.EditAction)
+{
+    <h3>Update Transaction Type</h3>
+}
+
+@if (SaveOperation == true)
+{
+    <span>Transaction Type successfully saved</span>
+    <br />
+}
+
+<div class="container border mt-2 p-4">
+    @if (Activity != null)
+    {
+        <EditForm Model="@Activity" OnValidSubmit="@UpsertActivity">
+            <DataAnnotationsValidator />
+            <CustomFormValidator @ref="customFormValidator" />
+            <div class="row mb-3">
+                <div class="col">
+                    <ValidationSummary />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(Activity.Code)" class="col-2 col-form-label text-end">Code</label>
+                <div class="col-2">
+                    <input type="text" @bind-value="Activity.Code" class="form-control" />
+                </div>
+                <label for="@nameof(Activity.Description)" class="col-5 col-form-label text-end">Code</label>
+                <div class="col-3">
+                    <input type="text" @bind-value="Activity.Description" class="form-control" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="offset-4 col-8">
+                    <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy" Context="authorizedContext">
+                        <Authorized>
+                            <button class="btn btn-primary">Save</button>
+                        </Authorized>
+                        <NotAuthorized>
+                            <button class="btn btn-primary" disabled>Save</button>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                    <NavLink class="btn btn-secondary" href="activity">Back</NavLink>
+                </div>
+            </div>
+        </EditForm>
+    }
+</div>
+@code {
+    [Parameter]
+    public string Code { get; set; }
+    [Parameter]
+    public string Action { get; set; }
+
+    private bool SaveOperation = false;
+    private ActivityDTO Activity { get; set; } = new ActivityDTO();
+    protected CustomFormValidator customFormValidator;    
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (String.IsNullOrEmpty(@Code))
+        {
+            Activity = new ActivityDTO();
+        }
+        else
+        {
+            // Populate carrier if already exists
+            Activity = await activityService.GetByCode(Code);
+        }
+
+        base.OnInitializedAsync();
+    }
+
+    private async Task UpsertActivity()
+    {
+        customFormValidator.ClearFormErrors();
+        var errors = new Dictionary<string, List<string>>();
+        try
+        {
+            SaveOperation = false;
+            var record = await activityService.GetByCode(Activity.Code);
+
+            if (Action == ConstantClass.EditAction)
+            {
+                if (record != null)
+                {
+                    // Update the record
+                    Activity.ModifiedBy = ConstantClass.SystemUser;
+                    Activity.ModifiedDate = System.DateTime.Now;
+                    await activityService.Update(Activity);
+                    SaveOperation = true;
+                }
+                else
+                {
+                    errors.Add(nameof(Activity.Code),
+                    new() { ConstantClass.ActivityCannotUpdateRecordCodeNotExists });
+                    customFormValidator.DisplayFormErrors(errors);
+                }
+            }
+            else if (Action == ConstantClass.AddAction)
+            {                
+                if (record != null)
+                {
+                    errors.Add(nameof(Activity.Code),
+                    new() { ConstantClass.ActivityCannotAddRecordCodeUsed });
+                    customFormValidator.DisplayFormErrors(errors);
+                }
+                else
+                {
+                    Activity.CreatedBy = ConstantClass.SystemUser;
+                    Activity.CreatedDate = System.DateTime.Now;
+                    Activity = await activityService.Create(Activity);
+                    SaveOperation = true;
+                    Action = ConstantClass.EditAction;
+                }
+            }            
+        }
+        catch (Exception ex)
+        {
+            errors.Add(nameof(Activity.Code),
+                    new() { ex.Message });
+            customFormValidator.DisplayFormErrors(errors);
+            SaveOperation = false;
+        }
+    }
+}
