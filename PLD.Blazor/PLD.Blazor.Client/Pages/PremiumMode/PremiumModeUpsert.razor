@@ -1,31 +1,29 @@
-﻿@page "/activity/activityUpdate/{Action}/{Code}"
-@page "/activity/activityInsert/{Action}"
+﻿@page "/premiummode/premiummodeInsert/{Action}"
+@page "/premiummode/premiummodeUpdate/{Action}/{Code}"
 @using Microsoft.AspNetCore.Authorization;
 @attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
-@inject IActivityService activityService
-
-
+@inject IPremiumModeService premiumModeService
 
 @if (Action == ConstantClass.AddAction)
 {
-    <h3>New Transaction Type</h3>
+    <h3>New Premium Mode</h3>
 }
 else if (Action == ConstantClass.EditAction)
 {
-    <h3>Update Transaction Type</h3>
+    <h3>Update Premium Mode</h3>
 }
 
 @if (SaveOperation == true)
 {
-    <span>Transaction Type successfully saved</span>
+    <span>Premium Mode successfully saved</span>
     <br />
 }
 
 <div class="container border mt-2 p-4">
-    @if (Activity != null)
+    @if(PremiumMode != null)
     {
-        <EditForm Model="@Activity" OnValidSubmit="@UpsertActivity">
-            <DataAnnotationsValidator />
+        <EditForm Model="@PremiumMode" OnValidSubmit="UpsertPremiumMode">
+            <DataAnnotationsValidator/>
             <CustomFormValidator @ref="customFormValidator" />
             <div class="row mb-3">
                 <div class="col">
@@ -33,17 +31,17 @@ else if (Action == ConstantClass.EditAction)
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(Activity.Code)" class="col-2 col-form-label text-end">Code</label>
-                <div class="col-2">
-                    <input type="text" @bind-value="Activity.Code" class="form-control" />
-                </div>
-                <label for="@nameof(Activity.Description)" class="col-5 col-form-label text-end">Code</label>
+                <label for="@nameof(PremiumModeDTO.Code)" class="col-2 col-form-label text-end">Code</label>
                 <div class="col-3">
-                    <input type="text" @bind-value="Activity.Description" class="form-control" />
+                    <input type="text" @bind="PremiumMode.Code" class="form-control" />
+                </div>
+                <label for="@nameof(PremiumModeDTO.Description)" class="col-4 col-form-label text-end">Description</label>
+                <div class="col-3">
+                    <input type="text" @bind="PremiumMode.Description" class="form-control" />
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="offset-4 col-8">
+                <div class="offset-5 col-7">
                     <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy" Context="authorizedContext">
                         <Authorized>
                             <button class="btn btn-primary">Save</button>
@@ -52,84 +50,87 @@ else if (Action == ConstantClass.EditAction)
                             <button class="btn btn-primary" disabled>Save</button>
                         </NotAuthorized>
                     </AuthorizeView>
-                    <NavLink class="btn btn-secondary" href="activity">Back</NavLink>
+                    <NavLink class="btn btn-secondary" href="premiummode">Back</NavLink>
                 </div>
             </div>
         </EditForm>
     }
+
 </div>
 @code {
+
     [Parameter]
     public string Code { get; set; }
     [Parameter]
     public string Action { get; set; }
 
+    private PremiumModeDTO PremiumMode { get; set; } = new PremiumModeDTO();
     private bool SaveOperation = false;
-    private ActivityDTO Activity { get; set; } = new ActivityDTO();
-    protected CustomFormValidator customFormValidator;    
+    protected CustomFormValidator customFormValidator;
 
     protected override async Task OnInitializedAsync()
     {
+        
         if (String.IsNullOrEmpty(@Code))
         {
-            Activity = new ActivityDTO();
+            PremiumMode = new PremiumModeDTO();
         }
         else
         {
-            // Populate activity if already exists
-            Activity = await activityService.GetByCode(Code);
+            // Populate premiummode if already exists
+            PremiumMode = await premiumModeService.GetByCode(Code);
         }
 
-        base.OnInitializedAsync();
+        await base.OnInitializedAsync();
     }
 
-    private async Task UpsertActivity()
+    private async Task UpsertPremiumMode()
     {
         customFormValidator.ClearFormErrors();
         var errors = new Dictionary<string, List<string>>();
         try
         {
             SaveOperation = false;
-            var record = await activityService.GetByCode(Activity.Code);
+            var record = await premiumModeService.GetByCode(PremiumMode.Code);
 
             if (Action == ConstantClass.EditAction)
             {
                 if (record != null)
                 {
                     // Update the record
-                    Activity.ModifiedBy = ConstantClass.SystemUser;
-                    Activity.ModifiedDate = System.DateTime.Now;
-                    await activityService.Update(Activity);
+                    PremiumMode.ModifiedBy = ConstantClass.SystemUser;
+                    PremiumMode.ModifiedDate = System.DateTime.Now;
+                    await premiumModeService.Update(PremiumMode);
                     SaveOperation = true;
                 }
                 else
                 {
-                    errors.Add(nameof(Activity.Code),
+                    errors.Add(nameof(PremiumMode.Code),
                     new() { ConstantClass.ActivityCannotUpdateRecordCodeNotExists });
                     customFormValidator.DisplayFormErrors(errors);
                 }
             }
             else if (Action == ConstantClass.AddAction)
-            {                
+            {
                 if (record != null)
                 {
-                    errors.Add(nameof(Activity.Code),
+                    errors.Add(nameof(PremiumMode.Code),
                     new() { ConstantClass.ActivityCannotAddRecordCodeUsed });
                     customFormValidator.DisplayFormErrors(errors);
                 }
                 else
                 {
-                    Activity.CreatedBy = ConstantClass.SystemUser;
-                    Activity.CreatedDate = System.DateTime.Now;
-                    Activity = await activityService.Create(Activity);
+                    PremiumMode.CreatedBy = ConstantClass.SystemUser;
+                    PremiumMode.CreatedDate = System.DateTime.Now;
+                    PremiumMode = await premiumModeService.Create(PremiumMode);
                     SaveOperation = true;
                     Action = ConstantClass.EditAction;
                 }
-            }            
+            }
         }
         catch (Exception ex)
         {
-            errors.Add(nameof(Activity.Code),
+            errors.Add(nameof(PremiumMode.Code),
                     new() { ex.Message });
             customFormValidator.DisplayFormErrors(errors);
             SaveOperation = false;

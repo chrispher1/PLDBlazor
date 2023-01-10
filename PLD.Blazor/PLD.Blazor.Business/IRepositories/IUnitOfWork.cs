@@ -18,7 +18,7 @@ namespace PLD.Blazor.Business.IRepositories
         IUserRoleRepository<UserRole> UserRole { get; }
         IActivityRepository<Activity> Activity { get; }
         ITimeActivityMappingRepository<TimeActivityMapping> TimeActivityMapping { get; }
-
+        IPremiumModeRepository<PremiumMode> PremiumMode { get; }
         Task Save();
     }
 }
