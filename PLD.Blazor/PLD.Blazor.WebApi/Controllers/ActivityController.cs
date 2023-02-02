@@ -49,6 +49,11 @@ namespace PLD.Blazor.WebApi.Controllers
             try
             {
                 var record = _mapper.Map<Activity, ActivityDTO>(await _unitOfWork.Activity.Get(obj => obj.Code == code ) );
+                
+                if (record == null)
+                {
+                    return NotFound();
+                }
                 return Ok(record);
             }
             catch (Exception ex)

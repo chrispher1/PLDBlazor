@@ -63,6 +63,19 @@ namespace PLD.Blazor.Service
             return emptyList;
         }
 
+        public async Task<IEnumerable<ProductDTO>> GetByCarrierId(int carrierId)
+        {
+            var response = await _httpClient.GetAsync($"api/Product/GetByCarrierId/{carrierId}");
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonConvert.DeserializeObject< IEnumerable<ProductDTO>>(responseContent);
+                return result;
+            }
+            return null;
+        }
+
         public async Task<ProductDTO> GetByCode(string code)
         {
             var response = await _httpClient.GetAsync("/api/Product/GetByCode/" + code);

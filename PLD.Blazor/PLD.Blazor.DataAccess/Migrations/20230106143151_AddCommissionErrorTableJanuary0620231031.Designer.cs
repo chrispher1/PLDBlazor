@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PLD.Blazor.DataAccess;
 
@@ -11,9 +12,10 @@ using PLD.Blazor.DataAccess;
 namespace PLD.Blazor.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230106143151_AddCommissionErrorTableJanuary0620231031")]
+    partial class AddCommissionErrorTableJanuary0620231031
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -112,125 +114,45 @@ namespace PLD.Blazor.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int?>("CarrierId")
+                    b.Property<int>("CarrierId")
                         .HasColumnType("int")
                         .HasColumnName("Carr_Id");
 
-                    b.Property<DateTime?>("CommEffectiveDate")
+                    b.Property<DateTime>("CommEffectiveDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("Pol_Dt");
 
-                    b.Property<decimal?>("CommOverrideRate")
-                        .HasColumnType("decimal(12,9)")
-                        .HasColumnName("Comm_Rt");
-
-                    b.Property<decimal?>("CommOverriderPayment")
-                        .HasColumnType("numeric(16,2)")
-                        .HasColumnName("Comm_Amt");
-
-                    b.Property<decimal?>("CommPremium")
-                        .HasColumnType("numeric(16,2)")
+                    b.Property<decimal>("CommPremium")
+                        .HasColumnType("decimal(18,2)")
                         .HasColumnName("Comm_Prem_Amt");
 
-                    b.Property<string>("CommPremiumMode")
-                        .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)")
-                        .HasColumnName("Prem_Mode_Cd");
-
-                    b.Property<string>("Compensable")
-                        .HasMaxLength(2)
-                        .HasColumnType("nvarchar(2)")
-                        .HasColumnName("Comp_Ind");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("Crt_By");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Crt_Dt");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("Mod_By");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Mod_Dt");
-
                     b.Property<string>("Policy")
+                        .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)")
                         .HasColumnName("Pol_Num");
 
-                    b.Property<int?>("PolicyYear")
+                    b.Property<int>("PolicyYear")
                         .HasColumnType("int")
                         .HasColumnName("Yr_Num");
 
-                    b.Property<int?>("ProductId")
+                    b.Property<int>("ProductId")
                         .HasColumnType("int")
                         .HasColumnName("Prod_Id");
 
-                    b.Property<DateTime?>("TransDate")
+                    b.Property<DateTime>("TransDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("Trans_Dt");
 
                     b.Property<string>("TransType")
+                        .IsRequired()
                         .HasMaxLength(4)
                         .HasColumnType("nvarchar(4)")
                         .HasColumnName("Act_Cd");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CarrierId");
-
-                    b.HasIndex("CommPremiumMode");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("TransType");
-
                     b.ToTable("DMT_COMM_ERR");
-                });
-
-            modelBuilder.Entity("PLD.Blazor.DataAccess.Model.PremiumMode", b =>
-                {
-                    b.Property<string>("Code")
-                        .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)")
-                        .HasColumnName("Prem_Mode_Cd");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("Crt_By");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Crt_Dt");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("nvarchar(25)")
-                        .HasColumnName("Desc_Txt");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("Mod_By");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Mod_Dt");
-
-                    b.HasKey("Code");
-
-                    b.ToTable("DMT_PREM_MODE_CD");
                 });
 
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Product", b =>
@@ -566,37 +488,6 @@ namespace PLD.Blazor.DataAccess.Migrations
                     b.ToTable("DMT_USER_ROLE");
                 });
 
-            modelBuilder.Entity("PLD.Blazor.DataAccess.Model.CommissionError", b =>
-                {
-                    b.HasOne("PLD.Blazor.DataAccess.Model.Carrier", "Carrier")
-                        .WithMany("CommissionErrors")
-                        .HasForeignKey("CarrierId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("PLD.Blazor.DataAccess.Model.PremiumMode", "PremiumMode")
-                        .WithMany("CommissionErrors")
-                        .HasForeignKey("CommPremiumMode")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("PLD.Blazor.DataAccess.Model.Product", "Product")
-                        .WithMany("CommissionErrors")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("PLD.Blazor.DataAccess.Model.Activity", "Activity")
-                        .WithMany("CommissionErrors")
-                        .HasForeignKey("TransType")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Activity");
-
-                    b.Navigation("Carrier");
-
-                    b.Navigation("PremiumMode");
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Product", b =>
                 {
                     b.HasOne("PLD.Blazor.DataAccess.Model.Carrier", "Carrier")
@@ -656,28 +547,14 @@ namespace PLD.Blazor.DataAccess.Migrations
 
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Activity", b =>
                 {
-                    b.Navigation("CommissionErrors");
-
                     b.Navigation("TimeActivityMappings");
                 });
 
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Carrier", b =>
                 {
-                    b.Navigation("CommissionErrors");
-
                     b.Navigation("Products");
 
                     b.Navigation("TimeActivityMappings");
-                });
-
-            modelBuilder.Entity("PLD.Blazor.DataAccess.Model.PremiumMode", b =>
-                {
-                    b.Navigation("CommissionErrors");
-                });
-
-            modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Product", b =>
-                {
-                    b.Navigation("CommissionErrors");
                 });
 
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.ProductType", b =>

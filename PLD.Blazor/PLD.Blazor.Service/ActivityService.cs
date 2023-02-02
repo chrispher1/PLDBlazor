@@ -78,18 +78,7 @@ namespace PLD.Blazor.Service
                 var record = JsonConvert.DeserializeObject<ActivityDTO>(responseContent);
                 return record;
             }
-            else
-            {
-                var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                if (result.ErrorMessage == ConstantClass.NoRecordFound)
-                {
-                    return null;
-                }
-                else
-                {
-                    throw new Exception(result.ErrorMessage);
-                }
-            }
+            return null;
         }
         public async Task Update(ActivityDTO activity)
         {

@@ -75,7 +75,7 @@ else
                 <div class="col-3">
                     <InputSelect @bind-Value="TimeActivityMapping.TransactionType" class="form-select">
                         <option value=null disabled="disabled" selected>--Select Transaction Type--</option>
-                        @foreach (var activity in Activityist)
+                        @foreach (var activity in ActivityList)
                         {
                             <option value="@activity.Code">@activity.Description</option>
                         }
@@ -113,9 +113,9 @@ else
     public int Id { get; set; }
     private TimeActivityMappingDTO TimeActivityMapping { get; set; } = new TimeActivityMappingDTO();
     private IEnumerable<CarrierDTO> CarrierList { get; set; } = new List<CarrierDTO>();
-    private IEnumerable<ActivityDTO> Activityist { get; set; } = new List<ActivityDTO>();
+    private IEnumerable<ActivityDTO> ActivityList { get; set; } = new List<ActivityDTO>();
     private bool SaveOperation = false;
-    protected CustomFormValidator customFormValidator;
+    private CustomFormValidator? customFormValidator;
 
     protected override async Task OnInitializedAsync()
     {
@@ -133,10 +133,10 @@ else
         //await base.OnInitializedAsync();
     }
 
-    async Task PopulateForm()
+    private async Task PopulateForm()
     {
         CarrierList = await carrierService.GetAll();
-        Activityist = await activityService.GetAll();
+        ActivityList = await activityService.GetAll();
     }
 
     private async Task UpsertTimeActivityMapping()

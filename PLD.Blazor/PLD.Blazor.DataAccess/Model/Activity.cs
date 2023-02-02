@@ -37,5 +37,6 @@ namespace PLD.Blazor.DataAccess.Model
         [MaxLength(100)]
         public string? ModifiedBy { get; set; }
         public ICollection<TimeActivityMapping>? TimeActivityMappings { get; set;}
+        public ICollection<CommissionError>? CommissionErrors { get; set; }
     }
 }

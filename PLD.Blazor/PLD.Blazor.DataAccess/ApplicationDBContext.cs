@@ -16,6 +16,8 @@ namespace PLD.Blazor.DataAccess
         public DbSet<UserRole> UserRole { get; set; }
         public DbSet<Activity> Activity { get; set; }
         public DbSet<TimeActivityMapping> TimeActivityMapping { get; set; }    
+        public DbSet<CommissionError> CommissionError { get; set; }
+        public DbSet<PremiumMode> PremiumMode { get; set; }
 
        protected override void OnModelCreating (ModelBuilder modelBuilder)
         {
@@ -37,6 +39,24 @@ namespace PLD.Blazor.DataAccess
                 .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<TimeActivityMapping>().HasIndex(p => new { p.CarrierId, p.CarrierTime, p.CarrierActivity, p.PolicyYearStart, p.PolicyYearEnd })
                 .IsUnique().HasFilter(null);
+
+            //CommissionError
+            modelBuilder.Entity<CommissionError>().HasOne( c => c.Carrier).WithMany( carrier => carrier.CommissionErrors).
+                HasForeignKey( commissionError => commissionError.CarrierId )
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+            modelBuilder.Entity<CommissionError>().HasOne( p => p.Product).WithMany( product => product.CommissionErrors).
+                HasForeignKey( commissionError => commissionError.ProductId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+            modelBuilder.Entity<CommissionError>().HasOne( a => a.Activity).WithMany( activity => activity.CommissionErrors).
+                HasForeignKey( commissionError => commissionError.TransType)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+            modelBuilder.Entity<CommissionError>().HasOne(p => p.PremiumMode).WithMany(premiumMode => premiumMode.CommissionErrors).
+                HasForeignKey(commissionError => commissionError.CommPremiumMode)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
         }
     }
 }

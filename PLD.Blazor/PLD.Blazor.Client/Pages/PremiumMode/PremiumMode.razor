@@ -1,0 +1,143 @@
+﻿@page "/premiummode"
+@using Telerik.DataSource.Extensions;
+@using Microsoft.AspNetCore.Authorization;
+@attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+@inject IPremiumModeService premiumModeService
+@inject IJSRuntime jsRuntime
+
+<h3>Premium Mode</h3>
+
+@if (DeleteOperation == true)
+{
+    <span>Premium Mode successfully deleted</span>
+    <br />
+}
+
+@if (ErrorMessage != null)
+{
+    <span>@ErrorMessage</span>
+    <br />
+    <br />
+}
+
+@if (PremiumModeList != null)
+{
+    <TelerikGrid Data="@PremiumModeList"
+             Sortable=true
+             Pageable=true
+             @bind-PageSize="@PageSize"
+             FilterMode="@GridFilterMode.FilterRow"
+             Height="@Height">
+        <GridSettings>
+            <GridPagerSettings PageSizes="@PageSizes"></GridPagerSettings>
+        </GridSettings>
+        <GridColumns>
+            <GridColumn Field="@nameof(PremiumModeDTO.Code)" Title="Mode" Width="25px">
+                <Template>
+                    @{
+                        PremiumModeDTO? record = (context as PremiumModeDTO);
+                        @(record?.Code.ToString());
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(PremiumModeDTO.Description)" Width="25px">
+                <HeaderTemplate>
+                    Description
+                </HeaderTemplate>
+            </GridColumn>            
+            <GridCommandColumn Width="50px" Context="premiumModeContext">
+                <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy">
+                    <Authorized>
+                        @{
+                            PremiumModeDTO? record = (premiumModeContext as PremiumModeDTO);
+                            <NavLink class="btn btn-primary" href="@($"premiummode/premiummodeUpdate/Edit/{record?.Code}")">Edit</NavLink>
+                            <NavLink class="btn btn-secondary" @onclick=" (args) => ConfirmDelete(args, record.Code)">Delete</NavLink>
+                            <DeleteModal ModalTitle="Premium Mode" BodyText="Are you sure you want to delete this record ?"
+                                 PrimaryButtonText="Delete" SecondaryButtonText="Cancel" Code="@record.Code"
+                                 SelectedMethodForString="DeletePremiumMode">
+                            </DeleteModal>
+                        }
+                    </Authorized>
+                </AuthorizeView>
+            </GridCommandColumn>
+        </GridColumns>
+        <GridToolBar>
+            <div class="col d-flex justify-content-end">
+                <div>
+                    <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy">
+                        <Authorized>
+                            <NavLink class="btn btn-primary" href="premiummode/premiummodeInsert/Add">New</NavLink>
+                        </Authorized>
+                    </AuthorizeView>
+                </div>
+            </div>
+        </GridToolBar>
+    </TelerikGrid>
+}
+else
+{
+    <div class="loader-container">
+        <span class="loader-size-title">Fetching data</span>
+        <TelerikLoader Class="loader-indicator" Type="@LoaderType.ConvergingSpinner" Size="@(ThemeConstants.Loader.Size.Large)"></TelerikLoader>
+    </div>
+}
+
+@code {
+    private IEnumerable<PremiumModeDTO> PremiumModeList { get; set; }
+    int PageSize = 10;
+    string Height = "400px";
+    private List<int?> PageSizes => new List<int?> { 5, 10, 25, 50, null };
+    private bool DeleteOperation = false;
+    private string ErrorMessage = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetGridData();
+        await base.OnInitializedAsync();
+    }
+
+    async Task GetGridData()
+    {
+        PremiumModeList = await premiumModeService.GetAll();
+    }
+
+    private async Task ConfirmDelete(MouseEventArgs e, string code)
+    {
+        // modify the function to display modal window
+        await jsRuntime.InvokeVoidAsync("DisplayModal", "DeleteModal_" + code);
+    }
+
+    private async Task DeletePremiumMode(string code)
+    {
+        try
+        {
+            DeleteOperation = false;
+            // Perform delete activity
+            await premiumModeService.Delete(code);
+            await GetGridData();
+            DeleteOperation = true;
+            ErrorMessage = null;
+        }
+        catch (Exception ex)
+        {
+            DeleteOperation = false;
+            ErrorMessage = ex.Message.ToString();
+        }
+    }
+}
+
+<style>
+    .loader-size-title {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .loader-container {
+        text-align: center;
+        width: 150px;
+        display: inline-table;
+        padding-top: 10px;
+        position: absolute;
+        left: 50%;
+    }
+</style>

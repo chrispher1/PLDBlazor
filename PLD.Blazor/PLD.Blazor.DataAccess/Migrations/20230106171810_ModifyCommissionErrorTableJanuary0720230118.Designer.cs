@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PLD.Blazor.DataAccess;
 
@@ -11,9 +12,10 @@ using PLD.Blazor.DataAccess;
 namespace PLD.Blazor.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230106171810_ModifyCommissionErrorTableJanuary0720230118")]
+    partial class ModifyCommissionErrorTableJanuary0720230118
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -113,6 +115,7 @@ namespace PLD.Blazor.DataAccess.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<int?>("CarrierId")
+                        .IsRequired()
                         .HasColumnType("int")
                         .HasColumnName("Carr_Id");
 
@@ -171,6 +174,7 @@ namespace PLD.Blazor.DataAccess.Migrations
                         .HasColumnName("Yr_Num");
 
                     b.Property<int?>("ProductId")
+                        .IsRequired()
                         .HasColumnType("int")
                         .HasColumnName("Prod_Id");
 
@@ -187,50 +191,11 @@ namespace PLD.Blazor.DataAccess.Migrations
 
                     b.HasIndex("CarrierId");
 
-                    b.HasIndex("CommPremiumMode");
-
                     b.HasIndex("ProductId");
 
                     b.HasIndex("TransType");
 
                     b.ToTable("DMT_COMM_ERR");
-                });
-
-            modelBuilder.Entity("PLD.Blazor.DataAccess.Model.PremiumMode", b =>
-                {
-                    b.Property<string>("Code")
-                        .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)")
-                        .HasColumnName("Prem_Mode_Cd");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("Crt_By");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Crt_Dt");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("nvarchar(25)")
-                        .HasColumnName("Desc_Txt");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("Mod_By");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("Mod_Dt");
-
-                    b.HasKey("Code");
-
-                    b.ToTable("DMT_PREM_MODE_CD");
                 });
 
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Product", b =>
@@ -571,17 +536,14 @@ namespace PLD.Blazor.DataAccess.Migrations
                     b.HasOne("PLD.Blazor.DataAccess.Model.Carrier", "Carrier")
                         .WithMany("CommissionErrors")
                         .HasForeignKey("CarrierId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("PLD.Blazor.DataAccess.Model.PremiumMode", "PremiumMode")
-                        .WithMany("CommissionErrors")
-                        .HasForeignKey("CommPremiumMode")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("PLD.Blazor.DataAccess.Model.Product", "Product")
                         .WithMany("CommissionErrors")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("PLD.Blazor.DataAccess.Model.Activity", "Activity")
                         .WithMany("CommissionErrors")
@@ -591,8 +553,6 @@ namespace PLD.Blazor.DataAccess.Migrations
                     b.Navigation("Activity");
 
                     b.Navigation("Carrier");
-
-                    b.Navigation("PremiumMode");
 
                     b.Navigation("Product");
                 });
@@ -668,11 +628,6 @@ namespace PLD.Blazor.DataAccess.Migrations
                     b.Navigation("Products");
 
                     b.Navigation("TimeActivityMappings");
-                });
-
-            modelBuilder.Entity("PLD.Blazor.DataAccess.Model.PremiumMode", b =>
-                {
-                    b.Navigation("CommissionErrors");
                 });
 
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Product", b =>

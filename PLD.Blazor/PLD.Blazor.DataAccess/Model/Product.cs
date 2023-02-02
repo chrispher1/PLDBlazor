@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace PLD.Blazor.DataAccess.Model
 {
     [Table("DMT_PROD")]
@@ -62,6 +63,7 @@ namespace PLD.Blazor.DataAccess.Model
         [Column("Mod_By")]
         [MaxLength(100)]
         public string? ModifiedBy { get; set; }
+        public ICollection<CommissionError>? CommissionErrors { get; set; }
 
     }
 }

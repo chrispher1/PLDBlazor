@@ -16,5 +16,7 @@ namespace PLD.Blazor.Service.IService
         Task<ProductDTO> GetById(int id);
         Task Update(ProductDTO product);
         Task Delete(int id);
+        Task<IEnumerable<ProductDTO>> GetByCarrierId(int carrierId);
+
     }
 }

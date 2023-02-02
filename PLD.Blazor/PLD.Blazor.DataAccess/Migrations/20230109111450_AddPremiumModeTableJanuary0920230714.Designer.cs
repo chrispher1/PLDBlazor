@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PLD.Blazor.DataAccess;
 
@@ -11,9 +12,10 @@ using PLD.Blazor.DataAccess;
 namespace PLD.Blazor.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230109111450_AddPremiumModeTableJanuary0920230714")]
+    partial class AddPremiumModeTableJanuary0920230714
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -186,8 +188,6 @@ namespace PLD.Blazor.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CarrierId");
-
-                    b.HasIndex("CommPremiumMode");
 
                     b.HasIndex("ProductId");
 
@@ -573,11 +573,6 @@ namespace PLD.Blazor.DataAccess.Migrations
                         .HasForeignKey("CarrierId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("PLD.Blazor.DataAccess.Model.PremiumMode", "PremiumMode")
-                        .WithMany("CommissionErrors")
-                        .HasForeignKey("CommPremiumMode")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("PLD.Blazor.DataAccess.Model.Product", "Product")
                         .WithMany("CommissionErrors")
                         .HasForeignKey("ProductId")
@@ -591,8 +586,6 @@ namespace PLD.Blazor.DataAccess.Migrations
                     b.Navigation("Activity");
 
                     b.Navigation("Carrier");
-
-                    b.Navigation("PremiumMode");
 
                     b.Navigation("Product");
                 });
@@ -668,11 +661,6 @@ namespace PLD.Blazor.DataAccess.Migrations
                     b.Navigation("Products");
 
                     b.Navigation("TimeActivityMappings");
-                });
-
-            modelBuilder.Entity("PLD.Blazor.DataAccess.Model.PremiumMode", b =>
-                {
-                    b.Navigation("CommissionErrors");
                 });
 
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Product", b =>
