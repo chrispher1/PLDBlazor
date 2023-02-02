@@ -19,6 +19,7 @@ namespace PLD.Blazor.Business.IRepositories
         IActivityRepository<Activity> Activity { get; }
         ITimeActivityMappingRepository<TimeActivityMapping> TimeActivityMapping { get; }
         IPremiumModeRepository<PremiumMode> PremiumMode { get; }
+        ICommissionErrorRepository<CommissionError> CommissionError { get; }
         Task Save();
     }
 }

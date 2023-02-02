@@ -53,6 +53,10 @@ namespace PLD.Blazor.DataAccess
                 HasForeignKey( commissionError => commissionError.TransType)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired(false);
+            modelBuilder.Entity<CommissionError>().HasOne(p => p.PremiumMode).WithMany(premiumMode => premiumMode.CommissionErrors).
+                HasForeignKey(commissionError => commissionError.CommPremiumMode)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
         }
     }
 }

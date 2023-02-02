@@ -1,7 +1,247 @@
-﻿@page "/commissionerror/upsert"
+﻿@page "/commissionerror/commissionerrorUpdate/{id:int}"
+@page "/commissionerror/commissionerrorInsert"
+@using Blazored.LocalStorage;
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize(Policy = ConstantClass.CommissionUpsertRolePolicy)]
-<h3>CommissionErrorUpsert the</h3>
-@code {
 
+@inject ICommissionErrorService commissionErrorService
+@inject ICarrierService carrierService
+@inject IActivityService activityService
+@inject IPremiumModeService premiumModeService
+@inject IProductService productService
+@inject IProductTypeService productTypeService
+@inject ILocalStorageService localStorage
+
+@if (@Id == 0)
+{
+    <h3>New Commission</h3>
+}
+else
+{
+    <h3>Update Commission</h3>
+}
+
+@if (SaveOperation == true)
+{
+    <span>Commission Error successfully saved</span>
+    <br />
+}
+
+<div class="container border mt-2 p-4">
+    @if (CommissionError != null)
+    {
+        <EditForm Model="@CommissionError" OnValidSubmit="@UpsertCommissionError">
+            <DataAnnotationsValidator />
+            <CustomFormValidator @ref="customFormValidator" />
+            <div class="row mb-3">
+                <div class="col">
+                    <ValidationSummary />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(CommissionError.Carrier.Name)" class="col-2 col-form-label text-end">Carrier</label>
+                <div class="col-3">
+                    <InputSelect                      
+                        class="form-select"
+                             Value="@CommissionError.CarrierId"
+                             ValueExpression="@(()=> CommissionError.CarrierId)"
+                             ValueChanged="@((int value) => ChangeSelectedCarrier(value) )">
+                        <option value="0" disabled="disabled" selected>--Select Carrier--</option>
+                        @foreach (var carrier in CarrierList)
+                        {
+                            <option value="@carrier.Id">@carrier.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+                <label for="@nameof(CommissionError.Policy)" class="col-4 col-form-label text-end">Policy</label>
+                <div class="col-3">
+                    <input type="text" @bind-value="CommissionError.Policy" class="form-control" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(CommissionError.TransDate)" class="col-2 col-form-label text-end">Trans Date</label>
+                <div class="col-3">
+                    <InputDate @bind-Value="CommissionError.TransDate" class="form-control" />
+                </div>                
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(CommissionError.ProductId)" class="col-2 col-form-label text-end">Product</label>
+                <div class="col-3">
+                    <InputSelect @bind-Value="CommissionError.ProductId" class="form-select">
+                        <option value=-1 disabled="disabled" selected>--Select Product--</option>
+                        @foreach (var product in ProductList)
+                        {
+                            <option value="@product.Id">@product.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(CommissionError.Product.ProductType.Name)" class="col-2 col-form-label text-end">Product Type</label>
+                <div class="col-3">
+                    <label class="col-form-label">@(ProductType?.Name?.ToString())</label>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(CommissionError.PolicyYear)" class="col-2 col-form-label text-end">Policy Year</label>
+                <div class="col-3">
+                    <input type="number" @bind-value="CommissionError.PolicyYear" class="form-control" />
+                </div>
+                <label for="@nameof(CommissionError.CommEffectiveDate)" class="col-4 col-form-label text-end">COMM Effective Date</label>
+                <div class="col-3">
+                    <InputDate @bind-Value="CommissionError.CommEffectiveDate" class="form-control" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(CommissionError.Activity.Description)" class="col-2 col-form-label text-end">Transaction Type</label>
+                <div class="col-3">
+                    <InputSelect @bind-Value="CommissionError.TransType" class="form-select">
+                        <option value=null disabled="disabled" selected>--Select Transaction Type--</option>
+                        @foreach (var activity in ActivityList)
+                        {
+                            <option value="@activity.Code">@activity.Description</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(CommissionError.CommPremium)" class="col-2 col-form-label text-end">COMM Premium</label>
+                <div class="col-3">
+                    <input type="number" @bind-value="CommissionError.CommPremium" class="form-control" step="any" />
+                </div>
+                <label for="@nameof(CommissionError.CommPremiumMode)" class="col-4 col-form-label text-end">COMM Premium Mode</label>
+                <div class="col-3">
+                    <InputSelect @bind-Value="CommissionError.CommPremiumMode" class="form-select">
+                        <option value=null disabled="disabled" selected>--Select Premium Mode--</option>
+                        @foreach (var premiumMode in PremiumModeList)
+                        {
+                            <option value="@premiumMode.Code">@premiumMode.Description</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(CommissionError.CommOverrideRate)" class="col-2 col-form-label text-end">COMM Override Rate</label>
+                <div class="col-3">
+                    <input type="number" @bind-value="CommissionError.CommOverrideRate" class="form-control" step="any" />
+                </div>
+                <label for="@nameof(CommissionError.CommOverridePayment)" class="col-4 col-form-label text-end">COMM Override Payment</label>
+                <div class="col-3">
+                    <input type="number" @bind-value="CommissionError.CommOverridePayment" class="form-control" step="any"/>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(CommissionError.Compensable)" class="col-2 col-form-label text-end">Compensable Indicator</label>
+                <div class="col-3">
+                    <InputSelect @bind-Value="CommissionError.Compensable" class="form-select">
+                        <option value=null disabled="disabled" selected>--Select Indicator--</option>
+                        <option value="Y">True</option>
+                        <option value="N">False</option>
+                    </InputSelect>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="offset-5 col-7">
+                    <AuthorizeView Policy="@ConstantClass.CommissionUpsertRolePolicy" Context="authorizedContext">
+                        <Authorized>
+                            <button class="btn btn-primary">Save</button>
+                        </Authorized>
+                        <NotAuthorized>
+                            <button class="btn btn-primary" disabled>Save</button>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                    <NavLink class="btn btn-secondary" href="commission">Back</NavLink>
+                </div>
+            </div>            
+        </EditForm>
+    }
+
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private bool SaveOperation = false;
+    private CommissionErrorDTO CommissionError { get; set; } = new CommissionErrorDTO();
+    private ProductTypeDTO ProductType { get; set; } = new ProductTypeDTO();
+    private CustomFormValidator? customFormValidator;
+    private IEnumerable<CarrierDTO> CarrierList { get; set; } = new List<CarrierDTO>();
+    private IEnumerable<ActivityDTO> ActivityList { get; set; } = new List<ActivityDTO>();
+    private IEnumerable<PremiumModeDTO> PremiumModeList { get; set; } = new List<PremiumModeDTO>();
+    private IEnumerable<ProductDTO> ProductList { get; set; } = new List<ProductDTO>();
+
+    private const string CompensableDefaultValue = "N";
+    private const int ProductIdDefaultValue = -1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await PopulateForm();
+
+        if (@Id == 0)
+        {
+            CommissionError = new CommissionErrorDTO();
+            CommissionError.Compensable = CompensableDefaultValue;
+            CommissionError.ProductId = ProductIdDefaultValue;
+        }
+        else
+        {
+            CommissionError = await commissionErrorService.GetById(@Id);
+            ProductType = await productTypeService.GetById(CommissionError.Product.ProductTypeId);
+            await PopulateProductListByCarrierId(CommissionError.CarrierId);
+        }
+    }
+
+    private async Task PopulateForm()
+    {
+        CarrierList = await carrierService.GetAll();
+        ActivityList = await activityService.GetAll();
+        PremiumModeList = await premiumModeService.GetAll();
+        //ProductList = await productService.GetAll();
+    }
+
+    private async Task UpsertCommissionError()
+    {
+        customFormValidator.ClearFormErrors();
+        var errors = new Dictionary<string, List<string>>();
+        try
+        {
+            SaveOperation = false;
+            if (CommissionError.Id == 0)
+            {
+                CommissionError.CreatedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
+                CommissionError.CreatedDate = System.DateTime.Now;
+                CommissionError = await commissionErrorService.Create(CommissionError);
+                SaveOperation = true;
+
+            }
+            else
+            {
+                // Update the record                
+                CommissionError.ModifiedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
+                CommissionError.ModifiedDate = System.DateTime.Now;
+                await commissionErrorService.Update(CommissionError);
+                SaveOperation = true;                
+            }
+        }
+        catch (Exception ex)
+        {
+            errors.Add(nameof(CommissionError.Carrier),
+                    new() { ex.Message });
+            customFormValidator.DisplayFormErrors(errors);
+            SaveOperation = false;
+        }
+    }
+
+    private async Task ChangeSelectedCarrier(int carrierId)
+    {
+        CommissionError.CarrierId = carrierId;
+        await PopulateProductListByCarrierId(carrierId);
+        CommissionError.ProductId = ProductIdDefaultValue;
+    }
+
+    private async Task PopulateProductListByCarrierId(int carrierId)
+    {
+        //Populate the Product dropdownlist based on selected carrier
+        ProductList = await productService.GetByCarrierId(carrierId);
+    }
 }

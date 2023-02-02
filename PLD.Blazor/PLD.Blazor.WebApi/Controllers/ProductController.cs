@@ -99,6 +99,21 @@ namespace PLD.Blazor.WebApi.Controllers
             }            
         }
 
+        [Route("GetByCarrierId/{carrierId}")]
+        [HttpGet]
+        public async Task<IActionResult> GetByCarrierId(int carrierId)
+        {
+            try
+            {
+                var record = _mapper.Map<IEnumerable<Product>, IEnumerable<ProductDTO>>(await _unitOfWork.Product.GetAll(obj => obj.CarrierId == carrierId , includeProperties: "Carrier,ProductType"));
+                return Ok(record);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post(ProductDTO product)
         {

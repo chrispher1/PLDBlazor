@@ -23,6 +23,7 @@ namespace PLD.Blazor.Business.Mapper
             CreateMap<Activity, ActivityDTO>().ReverseMap();
             CreateMap<TimeActivityMapping, TimeActivityMappingDTO>().ReverseMap();
             CreateMap<PremiumMode, PremiumModeDTO>().ReverseMap();
+            CreateMap<CommissionError, CommissionErrorDTO>().ReverseMap();
         }
     }
 }

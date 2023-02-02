@@ -24,6 +24,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
 builder.Services.AddScoped<ITimeActivityMappingService, TimeActivityMappingService>();
 builder.Services.AddScoped<IPremiumModeService, PremiumModeService>();
+builder.Services.AddScoped<ICommissionErrorService, CommissionErrorService>();
 
 // register the Telerik services
 builder.Services.AddTelerikBlazor();

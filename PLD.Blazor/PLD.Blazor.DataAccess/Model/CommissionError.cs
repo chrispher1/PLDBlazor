@@ -48,12 +48,13 @@ namespace PLD.Blazor.DataAccess.Model
         [Column("Prem_Mode_Cd")]
         [StringLength(5)]
         public string? CommPremiumMode { get; set;}
+        public PremiumMode PremiumMode { get; set; }
 
         [Column("Comm_Rt",TypeName ="decimal(12, 9)")]
         public decimal? CommOverrideRate { get; set; }
 
         [Column("Comm_Amt", TypeName="numeric(16, 2)")]
-        public decimal? CommOverriderPayment { get; set; }
+        public decimal? CommOverridePayment { get; set; }
 
         [Column("Comp_Ind")]
         [StringLength(2)]
