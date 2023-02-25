@@ -21,8 +21,9 @@ namespace PLD.Blazor.Business.Repositories
         public IActivityRepository<Activity> Activity { get; }
         public ITimeActivityMappingRepository<TimeActivityMapping> TimeActivityMapping { get; }
         public IPremiumModeRepository<PremiumMode> PremiumMode { get; }
-
         public ICommissionErrorRepository<CommissionError> CommissionError { get; }
+        public ICommissionFinalRepository<CommissionFinal> CommissionFinal { get; }
+
 
         private readonly ApplicationDBContext _applicationDBContext;
 
@@ -39,6 +40,7 @@ namespace PLD.Blazor.Business.Repositories
             TimeActivityMapping = new TimeActivityMappingRepository(applicationDBContext);
             PremiumMode = new PremiumModeRepository(applicationDBContext);
             CommissionError = new CommissionErrorRepository(applicationDBContext);
+            CommissionFinal = new CommissionFinalRepository(applicationDBContext);
         }
         public async Task Save()
         {

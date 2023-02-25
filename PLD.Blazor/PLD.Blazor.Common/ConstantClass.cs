@@ -1,6 +1,6 @@
 ﻿namespace PLD.Blazor.Common
 {
-    public static class ConstantClass
+    public class ConstantClass
     {
         public const string SystemUser = "SYSTEM";
 
@@ -56,5 +56,6 @@
         //List of Actions
         public const string EditAction = "Edit";
         public const string AddAction = "Add";
+        
     }
 }

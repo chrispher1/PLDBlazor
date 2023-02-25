@@ -7,7 +7,7 @@ using PLD.Blazor.Common.Utilities.AuthenticationProviders;
 using PLD.Blazor.Service;
 using PLD.Blazor.Service.IService;
 using PLD.Blazor.Common;
-
+using PLD.Blazor.Business.Mapper;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -25,6 +25,11 @@ builder.Services.AddScoped<IActivityService, ActivityService>();
 builder.Services.AddScoped<ITimeActivityMappingService, TimeActivityMappingService>();
 builder.Services.AddScoped<IPremiumModeService, PremiumModeService>();
 builder.Services.AddScoped<ICommissionErrorService, CommissionErrorService>();
+builder.Services.AddScoped<ICommissionFinalService, CommissionFinalService>();
+builder.Services.AddScoped<ICommissionService, CommissionService>();
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+
 
 // register the Telerik services
 builder.Services.AddTelerikBlazor();

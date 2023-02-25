@@ -39,9 +39,9 @@ namespace PLD.Blazor.DataAccess.Model
         [Column("Mod_By")]
         [MaxLength(100)]
         public string? ModifiedBy { get; set; }
-
         public virtual ICollection<Product>? Products { get; set; }
         public virtual ICollection<TimeActivityMapping>? TimeActivityMappings { get; set; }
-        public virtual ICollection<CommissionError>? CommissionErrors { get; set; }        
+        public virtual ICollection<CommissionError>? CommissionErrors { get; set; }
+        public virtual ICollection<CommissionFinal>? CommissionFinals { get; set; }
     }
 }

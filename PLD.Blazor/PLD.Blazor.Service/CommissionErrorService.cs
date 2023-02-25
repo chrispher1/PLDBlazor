@@ -18,6 +18,12 @@ namespace PLD.Blazor.Service
         }
         public async Task<CommissionErrorDTO> Create(CommissionErrorDTO commissionErrorDTO)
         {
+            commissionErrorDTO.Id = 0;
+            commissionErrorDTO.Activity = null;
+            commissionErrorDTO.Carrier = null;
+            commissionErrorDTO.PremiumMode = null;
+            commissionErrorDTO.Product = null;
+
             var content = JsonConvert.SerializeObject(commissionErrorDTO);
             var bodyContent = new StringContent(content, Encoding.UTF8,"application/json");
             var response = await _httpClient.PostAsync("/api/CommissionError",bodyContent);
@@ -43,6 +49,7 @@ namespace PLD.Blazor.Service
             if (!response.IsSuccessStatusCode)
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
+                throw new Exception(result.ErrorMessage);
             }
         }
 
