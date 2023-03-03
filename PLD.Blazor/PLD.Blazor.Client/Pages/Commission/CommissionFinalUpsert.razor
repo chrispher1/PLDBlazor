@@ -1,24 +1,23 @@
-﻿@page "/commissionerror/commissionerrorUpdate/{id:int}"
-@page "/commissionerror/commissionerrorInsert"
+﻿@page "/commissionfinal/commissionfinalUpdate/{id:int}"
+@page "/commissionfinal/commissionfinalInsert"
 
 @using Blazored.LocalStorage;
 @using Microsoft.AspNetCore.Authorization;
 @using AutoMapper;
-
 @attribute [Authorize(Policy = ConstantClass.CommissionUpsertRolePolicy)]
 
-@inject ICommissionErrorService commissionErrorService
+@inject ICommissionFinalService commissionFinalService
 @inject ICarrierService carrierService
 @inject IActivityService activityService
 @inject IPremiumModeService premiumModeService
 @inject IProductService productService
 @inject IProductTypeService productTypeService
 @inject ILocalStorageService localStorage
+@inject ICommissionErrorService commissionErrorService
 @inject IMapper mapper
-@inject ICommissionFinalService commissionFinalService
 @inject NavigationManager navigationManager
 
-@if ((_editContext != null) && (CommissionError.Id == 0))
+@if ((_editContext != null) && (CommissionFinal.Id == 0))
 {
     <h3>New Commission</h3>
 }
@@ -29,14 +28,14 @@ else if (_editContext != null)
 
 @if (_saveOperation == true)
 {
-    <span>Commission Error successfully saved</span>
+    <span>Commission Final successfully saved</span>
     <br />
 }
 
 <div class="container border mt-2 p-4">
     @if (_editContext != null)
     {
-        <EditForm OnValidSubmit="@UpsertCommissionError" EditContext="@_editContext">
+        <EditForm EditContext="@_editContext" OnValidSubmit="@UpsertCommissionFinal">
             <DataAnnotationsValidator />
             <CustomFormValidator @ref="_customFormValidator" />
             <div class="row mb-3">
@@ -45,11 +44,11 @@ else if (_editContext != null)
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(CommissionError.Carrier.Name)" class="col-2 col-form-label text-end">Carrier</label>
+                <label for="@nameof(CommissionFinal.Carrier.Name)" class="col-2 col-form-label text-end">Carrier</label>
                 <div class="col-3">
                     <InputSelect class="form-select"
-                             Value="@CommissionError.CarrierId"
-                             ValueExpression="@(()=> CommissionError.CarrierId)"
+                             Value="@CommissionFinal.CarrierId"
+                             ValueExpression="@(()=> CommissionFinal.CarrierId)"
                              ValueChanged="@((int value) => ChangeSelectedCarrier(value) )">
                         <option value="0" disabled="disabled" selected>--Select Carrier--</option>
                         @foreach (var carrier in CarrierList)
@@ -58,21 +57,21 @@ else if (_editContext != null)
                         }
                     </InputSelect>
                 </div>
-                <label for="@nameof(CommissionError.Policy)" class="col-4 col-form-label text-end">Policy</label>
+                <label for="@nameof(CommissionFinal.Policy)" class="col-4 col-form-label text-end">Policy</label>
                 <div class="col-3">
-                    <InputText @bind-Value="CommissionError.Policy" class="form-control" />
+                    <InputText @bind-Value="CommissionFinal.Policy" class="form-control" />
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(CommissionError.TransDate)" class="col-2 col-form-label text-end">Trans Date</label>
+                <label for="@nameof(CommissionFinal.TransDate)" class="col-2 col-form-label text-end">Trans Date</label>
                 <div class="col-3">
-                    <InputDate @bind-Value="CommissionError.TransDate" class="form-control" />
+                    <InputDate @bind-Value="CommissionFinal.TransDate" class="form-control" />
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(CommissionError.ProductId)" class="col-2 col-form-label text-end">Product</label>
+                <label for="@nameof(CommissionFinal.ProductId)" class="col-2 col-form-label text-end">Product</label>
                 <div class="col-3">
-                    <InputSelect @bind-Value="CommissionError.ProductId" class="form-select">
+                    <InputSelect @bind-Value="CommissionFinal.ProductId" class="form-select">
                         <option value=-1 disabled="disabled" selected>--Select Product--</option>
                         @foreach (var product in ProductList)
                         {
@@ -82,25 +81,25 @@ else if (_editContext != null)
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(CommissionError.Product.ProductType.Name)" class="col-2 col-form-label text-end">Product Type</label>
+                <label for="@nameof(CommissionFinal.Product.ProductType.Name)" class="col-2 col-form-label text-end">Product Type</label>
                 <div class="col-3">
                     <label class="col-form-label">@(ProductType?.Name?.ToString())</label>
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(CommissionError.PolicyYear)" class="col-2 col-form-label text-end">Policy Year</label>
+                <label for="@nameof(CommissionFinal.PolicyYear)" class="col-2 col-form-label text-end">Policy Year</label>
                 <div class="col-3">
-                    <InputNumber @bind-Value="CommissionError.PolicyYear" class="form-control" />
+                    <InputNumber @bind-Value="CommissionFinal.PolicyYear" class="form-control" />
                 </div>
-                <label for="@nameof(CommissionError.CommEffectiveDate)" class="col-4 col-form-label text-end">COMM Effective Date</label>
+                <label for="@nameof(CommissionFinal.CommEffectiveDate)" class="col-4 col-form-label text-end">COMM Effective Date</label>
                 <div class="col-3">
-                    <InputDate @bind-Value="CommissionError.CommEffectiveDate" class="form-control" />
+                    <InputDate @bind-Value="CommissionFinal.CommEffectiveDate" class="form-control" />
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(CommissionError.Activity.Description)" class="col-2 col-form-label text-end">Transaction Type</label>
+                <label for="@nameof(CommissionFinal.Activity.Description)" class="col-2 col-form-label text-end">Transaction Type</label>
                 <div class="col-3">
-                    <InputSelect @bind-Value="CommissionError.TransType" class="form-select">
+                    <InputSelect @bind-Value="CommissionFinal.TransType" class="form-select">
                         <option value=null disabled="disabled" selected>--Select Transaction Type--</option>
                         @foreach (var activity in ActivityList)
                         {
@@ -110,13 +109,13 @@ else if (_editContext != null)
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(CommissionError.CommPremium)" class="col-2 col-form-label text-end">COMM Premium</label>
+                <label for="@nameof(CommissionFinal.CommPremium)" class="col-2 col-form-label text-end">COMM Premium</label>
                 <div class="col-3">
-                    <InputNumber @bind-Value="CommissionError.CommPremium" class="form-control" step="any" />
+                    <InputNumber @bind-Value="CommissionFinal.CommPremium" class="form-control" step="any" />
                 </div>
-                <label for="@nameof(CommissionError.CommPremiumMode)" class="col-4 col-form-label text-end">COMM Premium Mode</label>
+                <label for="@nameof(CommissionFinal.CommPremiumMode)" class="col-4 col-form-label text-end">COMM Premium Mode</label>
                 <div class="col-3">
-                    <InputSelect @bind-Value="CommissionError.CommPremiumMode" class="form-select">
+                    <InputSelect @bind-Value="CommissionFinal.CommPremiumMode" class="form-select">
                         <option value=null disabled="disabled" selected>--Select Premium Mode--</option>
                         @foreach (var premiumMode in PremiumModeList)
                         {
@@ -126,19 +125,19 @@ else if (_editContext != null)
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(CommissionError.CommOverrideRate)" class="col-2 col-form-label text-end">COMM Override Rate</label>
+                <label for="@nameof(CommissionFinal.CommOverrideRate)" class="col-2 col-form-label text-end">COMM Override Rate</label>
                 <div class="col-3">
-                    <InputNumber @bind-Value="CommissionError.CommOverrideRate" class="form-control" step="any" />
+                    <InputNumber @bind-Value="CommissionFinal.CommOverrideRate" class="form-control" step="any" />
                 </div>
-                <label for="@nameof(CommissionError.CommOverridePayment)" class="col-4 col-form-label text-end">COMM Override Payment</label>
+                <label for="@nameof(CommissionFinal.CommOverridePayment)" class="col-4 col-form-label text-end">COMM Override Payment</label>
                 <div class="col-3">
-                    <InputNumber @bind-Value="CommissionError.CommOverridePayment" class="form-control" step="any" />
+                    <InputNumber @bind-Value="CommissionFinal.CommOverridePayment" class="form-control" step="any" />
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(CommissionError.Compensable)" class="col-2 col-form-label text-end">Compensable Indicator</label>
+                <label for="@nameof(CommissionFinal.Compensable)" class="col-2 col-form-label text-end">Compensable Indicator</label>
                 <div class="col-3">
-                    <InputSelect @bind-Value="CommissionError.Compensable" class="form-select">
+                    <InputSelect @bind-Value="CommissionFinal.Compensable" class="form-select">
                         <option value=null disabled="disabled" selected>--Select Indicator--</option>
                         <option value="Y">True</option>
                         <option value="N">False</option>
@@ -150,12 +149,7 @@ else if (_editContext != null)
                     <AuthorizeView Policy="@ConstantClass.CommissionUpsertRolePolicy" Context="authorizedContext">
                         <Authorized>
                             <button class="btn btn-primary">Save</button>
-                            @if (CommissionError.Id != 0)
-                            {
-                                var commissionError = CommissionError;
-
-                                <NavLink class="btn btn-primary ms-1" @onclick=" (args) => MoveToFinal(args, commissionError)">Process</NavLink>
-                            }
+                            <NavLink class="btn btn-primary ms-1" @onclick=" (args) => MoveToError(args, CommissionFinal)">Revalidate</NavLink>
                         </Authorized>
                         <NotAuthorized>
                             <button class="btn btn-primary" disabled>Save</button>
@@ -177,17 +171,9 @@ else if (_editContext != null)
 
     #endregion
 
-    #region Fields
-
-    private bool _saveOperation = false;
-    private CustomFormValidator? _customFormValidator;
-    private EditContext? _editContext;
-
-    #endregion
-
     #region Properties
 
-    private CommissionErrorDTO CommissionError { get; set; } = new CommissionErrorDTO();
+    private CommissionFinalDTO CommissionFinal { get; set; } = new CommissionFinalDTO();
     private ProductTypeDTO ProductType { get; set; } = new ProductTypeDTO();
     private IEnumerable<CarrierDTO> CarrierList { get; set; } = new List<CarrierDTO>();
     private IEnumerable<ActivityDTO> ActivityList { get; set; } = new List<ActivityDTO>();
@@ -196,10 +182,18 @@ else if (_editContext != null)
 
     #endregion
 
+    #region Fields
+
+    private bool _saveOperation = false;
+    private CustomFormValidator? _customFormValidator;
+    private EditContext? _editContext;
+
+    #endregion
+
     #region Constants
 
-    private const string compensableDefaultValue = "N";
-    private const int productIdDefaultValue = -1;
+    private const string _compensableDefaultValue = "N";
+    private const int _productIdDefaultValue = -1;
     private const string commissionPage = "commission";
 
     #endregion
@@ -210,51 +204,17 @@ else if (_editContext != null)
 
         if (@Id == 0)
         {
-            CommissionError = new CommissionErrorDTO();
-            CommissionError.Compensable = compensableDefaultValue;
-            CommissionError.ProductId = productIdDefaultValue;
+            CommissionFinal = new CommissionFinalDTO();
+            CommissionFinal.Compensable = _compensableDefaultValue;
+            CommissionFinal.ProductId = _productIdDefaultValue;
         }
         else
         {
-            CommissionError = await commissionErrorService.GetById(@Id);
-            ProductType = await productTypeService.GetById(CommissionError?.Product?.ProductTypeId == null ? 0 :
-            CommissionError.Product.ProductTypeId);
-            await PopulateProductListByCarrierId(CommissionError?.CarrierId == null ? 0 :
-            CommissionError.CarrierId);
+            CommissionFinal = await commissionFinalService.GetById(@Id);
+            ProductType = await productTypeService.GetById(CommissionFinal.Product.ProductTypeId);
+            await PopulateProductListByCarrierId(CommissionFinal.CarrierId);
         }
-        _editContext = new(CommissionError == null ? new CommissionErrorDTO() :
-        CommissionError);
-    }
-
-    private async Task MoveToFinal(MouseEventArgs e, CommissionErrorDTO commissionError)
-    {
-        if ((_editContext != null) && (_editContext.Validate()))
-        {
-            _customFormValidator?.ClearFormErrors();
-            var errors = new Dictionary<string, List<string>>();
-            try
-            {
-                // Update the record
-                commissionError.ModifiedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
-                commissionError.ModifiedDate = System.DateTime.Now;
-                CommissionFinalDTO commissionFinal = mapper.Map<CommissionFinalDTO>(commissionError);
-
-                // Create record in final table
-                await commissionFinalService.Create(commissionFinal);
-
-                // Delete the record in the error table after inserting in the final table
-                await commissionErrorService.Delete(commissionError.Id);
-
-                navigationManager.NavigateTo(commissionPage, true);
-
-            }
-            catch (Exception ex)
-            {
-                errors.Add(nameof(CommissionError.Carrier),
-                        new() { ex.Message });
-                _customFormValidator?.DisplayFormErrors(errors);
-            }
-        }
+        _editContext = new(CommissionFinal);
     }
 
     private async Task PopulateForm()
@@ -264,33 +224,64 @@ else if (_editContext != null)
         PremiumModeList = await premiumModeService.GetAll();
     }
 
-    private async Task UpsertCommissionError()
+    private async Task MoveToError(MouseEventArgs e, CommissionFinalDTO commissionFinal)
+    {
+        // to be fixed
+        if ((_editContext != null) && (_editContext.Validate()))
+        {
+            _customFormValidator?.ClearFormErrors();
+            var errors = new Dictionary<string, List<string>>();
+
+            try
+            {
+                // Update the record
+                commissionFinal.ModifiedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
+                commissionFinal.ModifiedDate = System.DateTime.Now;
+                CommissionErrorDTO commissionError = mapper.Map<CommissionErrorDTO>(commissionFinal);
+
+                // Create record in error table
+                await commissionErrorService.Create(commissionError);
+                await commissionFinalService.Delete(commissionFinal.Id);
+                navigationManager.NavigateTo(commissionPage, true);
+            }
+            catch (Exception ex)
+            {
+                errors.Add(nameof(CommissionFinal.Carrier),
+                        new() { ex.Message });
+                _customFormValidator?.DisplayFormErrors(errors);
+            }
+
+
+        }
+    }
+
+    private async Task UpsertCommissionFinal()
     {
         _customFormValidator?.ClearFormErrors();
         var errors = new Dictionary<string, List<string>>();
         try
         {
             _saveOperation = false;
-            if (CommissionError.Id == 0)
+            if (CommissionFinal.Id == 0)
             {
-                CommissionError.CreatedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
-                CommissionError.CreatedDate = System.DateTime.Now;
-                CommissionError = await commissionErrorService.Create(CommissionError);
+                CommissionFinal.CreatedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
+                CommissionFinal.CreatedDate = System.DateTime.Now;
+                CommissionFinal = await commissionFinalService.Create(CommissionFinal);
                 _saveOperation = true;
             }
             else
             {
                 // Update the record
-                CommissionError.ModifiedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
-                CommissionError.ModifiedDate = System.DateTime.Now;
-                await commissionErrorService.Update(CommissionError);
+                CommissionFinal.ModifiedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
+                CommissionFinal.ModifiedDate = System.DateTime.Now;
+                await commissionFinalService.Update(CommissionFinal);
                 _saveOperation = true;
             }
-            _editContext = new(CommissionError);
+            _editContext = new(CommissionFinal);
         }
         catch (Exception ex)
         {
-            errors.Add(nameof(CommissionError.Carrier),
+            errors.Add(nameof(CommissionFinal.Carrier),
                     new() { ex.Message });
             _customFormValidator?.DisplayFormErrors(errors);
             _saveOperation = false;
@@ -299,9 +290,9 @@ else if (_editContext != null)
 
     private async Task ChangeSelectedCarrier(int carrierId)
     {
-        CommissionError.CarrierId = carrierId;
+        CommissionFinal.CarrierId = carrierId;
         await PopulateProductListByCarrierId(carrierId);
-        CommissionError.ProductId = productIdDefaultValue;
+        CommissionFinal.ProductId = _productIdDefaultValue;
     }
 
     private async Task PopulateProductListByCarrierId(int carrierId)

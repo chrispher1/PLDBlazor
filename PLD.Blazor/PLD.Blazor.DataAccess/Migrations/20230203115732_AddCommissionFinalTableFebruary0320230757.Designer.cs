@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PLD.Blazor.DataAccess;
 
@@ -11,9 +12,10 @@ using PLD.Blazor.DataAccess;
 namespace PLD.Blazor.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230203115732_AddCommissionFinalTableFebruary0320230757")]
+    partial class AddCommissionFinalTableFebruary0320230757
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -202,6 +204,9 @@ namespace PLD.Blazor.DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("Comm_Id");
 
+                    b.Property<string>("ActivityCode")
+                        .HasColumnType("nvarchar(4)");
+
                     b.Property<int?>("CarrierId")
                         .HasColumnType("int")
                         .HasColumnName("Carr_Id");
@@ -260,6 +265,10 @@ namespace PLD.Blazor.DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("Yr_Num");
 
+                    b.Property<string>("PremiumModeCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(5)");
+
                     b.Property<int?>("ProductId")
                         .HasColumnType("int")
                         .HasColumnName("Prod_Id");
@@ -275,13 +284,13 @@ namespace PLD.Blazor.DataAccess.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ActivityCode");
+
                     b.HasIndex("CarrierId");
 
-                    b.HasIndex("CommPremiumMode");
+                    b.HasIndex("PremiumModeCode");
 
                     b.HasIndex("ProductId");
-
-                    b.HasIndex("TransType");
 
                     b.ToTable("DMT_COMM");
                 });
@@ -689,25 +698,23 @@ namespace PLD.Blazor.DataAccess.Migrations
 
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.CommissionFinal", b =>
                 {
+                    b.HasOne("PLD.Blazor.DataAccess.Model.Activity", "Activity")
+                        .WithMany()
+                        .HasForeignKey("ActivityCode");
+
                     b.HasOne("PLD.Blazor.DataAccess.Model.Carrier", "Carrier")
-                        .WithMany("CommissionFinals")
-                        .HasForeignKey("CarrierId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .WithMany()
+                        .HasForeignKey("CarrierId");
 
                     b.HasOne("PLD.Blazor.DataAccess.Model.PremiumMode", "PremiumMode")
-                        .WithMany("CommissionFinals")
-                        .HasForeignKey("CommPremiumMode")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .WithMany()
+                        .HasForeignKey("PremiumModeCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("PLD.Blazor.DataAccess.Model.Product", "Product")
-                        .WithMany("CommissionFinals")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("PLD.Blazor.DataAccess.Model.Activity", "Activity")
-                        .WithMany("CommissionFinals")
-                        .HasForeignKey("TransType")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .WithMany()
+                        .HasForeignKey("ProductId");
 
                     b.Navigation("Activity");
 
@@ -779,16 +786,12 @@ namespace PLD.Blazor.DataAccess.Migrations
                 {
                     b.Navigation("CommissionErrors");
 
-                    b.Navigation("CommissionFinals");
-
                     b.Navigation("TimeActivityMappings");
                 });
 
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Carrier", b =>
                 {
                     b.Navigation("CommissionErrors");
-
-                    b.Navigation("CommissionFinals");
 
                     b.Navigation("Products");
 
@@ -798,15 +801,11 @@ namespace PLD.Blazor.DataAccess.Migrations
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.PremiumMode", b =>
                 {
                     b.Navigation("CommissionErrors");
-
-                    b.Navigation("CommissionFinals");
                 });
 
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Product", b =>
                 {
                     b.Navigation("CommissionErrors");
-
-                    b.Navigation("CommissionFinals");
                 });
 
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.ProductType", b =>

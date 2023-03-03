@@ -64,6 +64,6 @@ namespace PLD.Blazor.DataAccess.Model
         [MaxLength(100)]
         public string? ModifiedBy { get; set; }
         public ICollection<CommissionError>? CommissionErrors { get; set; }
-
+        public ICollection<CommissionFinal>? CommissionFinals { get; set; }
     }
 }

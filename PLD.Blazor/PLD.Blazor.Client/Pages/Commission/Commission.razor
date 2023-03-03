@@ -1,29 +1,158 @@
 ﻿@page "/commission"
+
 @using Microsoft.AspNetCore.Authorization
 @using Telerik.DataSource.Extensions;
 @using Telerik.DataSource;
+
 @attribute [Authorize(Policy = ConstantClass.CommissionRolePolicy)]
+
 @inject ICommissionErrorService commissionErrorService
 @inject IJSRuntime jsRuntime
+@inject ICommissionFinalService commissionFinalService
+@inject ICommissionService commissionService
 
 <h3>Commission</h3>
 
-@if (DeleteCommissionErrorOperation == true)
+@if (_deleteCommissionErrorOperation == true)
 {
+    <br />
     <span>Commission Error record successfully deleted</span>
     <br />
+    <br />
 }
 
-@if (ErrorMessage != null)
+@if (_deleteCommissionFinalOperation == true)
 {
-    <span>@ErrorMessage</span>
+    <br />
+    <span>Commission Final record successfully deleted</span>
     <br />
     <br />
 }
 
-<TelerikTabStrip @bind-ActiveTabIndex="@ActiveTabIndex" PersistTabContent="true">
+@if (_errorMessage != null)
+{
+    <span>@_errorMessage</span>
+    <br />
+    <br />
+}
+
+<TelerikTabStrip @bind-ActiveTabIndex="@ActiveTabIndex" PersistTabContent="false">
     <TabStripTab Title="All">
-        1
+        <AuthorizeView Policy="@ConstantClass.CommissionRolePolicy">
+            <Authorized>
+                @if (CommissionList != null)
+                {
+                    <TelerikGrid Data="@CommissionList"
+                             Sortable=true
+                             Pageable=true
+                             @bind-PageSize=@_pageSize
+                             FilterMode="@GridFilterMode.FilterRow"
+                             Height="@_height">
+                        <GridSettings>
+                            <GridPagerSettings PageSizes="@_pageSizes" />
+                        </GridSettings>
+                        <GridColumns>
+                            <GridColumn Field="TransDate" Title="Trans Date" Width="25px" Context="datasource">
+                                <Template>
+                                    @{
+                                        CommissionDTO? record = (datasource as CommissionDTO);
+                                        @(record?.TransDate?.ToString("MM/dd/yyyy"))
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="Carrier.Name" Title="Carrier" Width="25px" Context="datasource">
+                                <Template>
+                                    @{
+                                        CommissionDTO? record = (datasource as CommissionDTO);
+                                        @(String.Concat(record.Carrier?.Name, " (", record.Carrier?.CarrierCode, ")").ToString())
+                                        ;
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="Policy" Title="Policy" Width="25px" />
+                            <GridColumn Field="Activity.Description" Title="Trans Type" Width="25px" Context="datasource">
+                                <Template>
+                                    @{
+                                        CommissionDTO? record = (datasource as CommissionDTO);
+                                        @(record?.Activity?.Description?.ToString())
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CommPremium" Width="25px" Context="datasource">
+                                <HeaderTemplate>
+                                    COMM Premium
+                                    <br />
+                                    Amount
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        CommissionDTO? record = (datasource as CommissionDTO);
+                                        <div class="text-end">
+                                            @(String.Format("{0:C2}", record?.CommPremium))
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CommOverrideRate" Width="25px" Context="datasource">
+                                <HeaderTemplate>
+                                    COMM Premium
+                                    <br />
+                                    Rate
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        CommissionDTO? record = (datasource as CommissionDTO);
+                                        <div class="text-end">
+                                            @(String.Format("{0:P1}", record?.CommOverrideRate))
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CommOverridePayment" Width="25px" Context="datasource">
+                                <HeaderTemplate>
+                                    COMM Override
+                                    <br />
+                                    Payment
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        CommissionDTO? record = (datasource as CommissionDTO);
+                                        <div class="text-end">
+                                            @(String.Format("{0:C2}", record?.CommOverridePayment))
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridCommandColumn Width="25px" Context="datasource">
+                                <AuthorizeView Policy="@ConstantClass.CommissionRolePolicy" Context="AuthorizeContext">
+                                    <Authorized>
+                                        @{
+                                            CommissionDTO? record = (datasource as CommissionDTO);
+
+                                            if (record?.TableName == EnumClass.Commission.Error)
+                                            {
+                                                <NavLink class="btn btn-primary" href="@($"commissionerror/commissionerrorUpdate/{record?.Id}")">Edit</NavLink>                                                
+                                            }
+                                            else if (record?.TableName == EnumClass.Commission.Final) {
+                                                <NavLink class="btn btn-primary" href="@($"commissionfinal/commissionfinalUpdate/{record?.Id}")">Edit</NavLink>
+                                            }
+                                        }
+                                    </Authorized>
+                                </AuthorizeView>
+                            </GridCommandColumn>
+                        </GridColumns>
+                    </TelerikGrid>
+                }
+                else
+                {
+                    <div class="loader-container">
+                        <span class="loader-size-title">Fetching data</span>
+                        <TelerikLoader Class="loader-indicator" Type="@LoaderType.ConvergingSpinner" Size="@(ThemeConstants.Loader.Size.Large)"></TelerikLoader>
+                    </div>
+                }
+            </Authorized>
+        </AuthorizeView>
+
     </TabStripTab>
     <TabStripTab Title="Error">
         <AuthorizeView Policy="@ConstantClass.CommissionRolePolicy">
@@ -33,11 +162,11 @@
                     <TelerikGrid Data="@CommissionErrorList"
                              Sortable=true
                              Pageable=true
-                             @bind-PageSize=@PageSize
+                             @bind-PageSize=@_pageSize
                              FilterMode="@GridFilterMode.FilterRow"
-                             Height="@Height">
+                             Height="@_height">
                         <GridSettings>
-                            <GridPagerSettings PageSizes="@PageSizes" />
+                            <GridPagerSettings PageSizes="@_pageSizes" />
                         </GridSettings>
                         <GridColumns>
                             <GridColumn Field="TransDate" Title="Trans Date" Width="25px" Context="datasource">
@@ -152,29 +281,159 @@
         </AuthorizeView>
     </TabStripTab>
     <TabStripTab Title="Final">
-        3
+        <AuthorizeView Policy="@ConstantClass.CommissionRolePolicy">
+            <Authorized>
+                @if (CommissionFinalList != null)
+                {
+                    <TelerikGrid Data="@CommissionFinalList"
+                             Sortable=true
+                             Pageable=true
+                             @bind-PageSize=@_pageSize
+                             FilterMode="@GridFilterMode.FilterRow"
+                             Height="@_height">
+                        <GridSettings>
+                            <GridPagerSettings PageSizes="@_pageSizes" />
+                        </GridSettings>
+                        <GridColumns>
+                            <GridColumn Field="TransDate" Title="Trans Date" Width="25px" Context="datasource">
+                                <Template>
+                                    @{
+                                        CommissionFinalDTO? record = (datasource as CommissionFinalDTO);
+                                        @(record?.TransDate?.ToString("MM/dd/yyyy"))
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="Carrier.Name" Title="Carrier" Width="25px" Context="datasource">
+                                <Template>
+                                    @{
+                                        CommissionFinalDTO? record = (datasource as CommissionFinalDTO);
+                                        @(String.Concat(record.Carrier?.Name, " (", record.Carrier?.CarrierCode, ")").ToString())
+                                        ;
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="Policy" Title="Policy" Width="25px" />
+                            <GridColumn Field="Activity.Description" Title="Trans Type" Width="25px" Context="datasource">
+                                <Template>
+                                    @{
+                                        CommissionFinalDTO? record = (datasource as CommissionFinalDTO);
+                                        @(record?.Activity?.Description?.ToString())
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CommPremium" Width="25px" Context="datasource">
+                                <HeaderTemplate>
+                                    COMM Premium
+                                    <br />
+                                    Amount
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        CommissionFinalDTO? record = (datasource as CommissionFinalDTO);
+                                        <div class="text-end">
+                                            @(String.Format("{0:C2}", record?.CommPremium))
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CommOverrideRate" Width="25px" Context="datasource">
+                                <HeaderTemplate>
+                                    COMM Premium
+                                    <br />
+                                    Rate
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        CommissionFinalDTO? record = (datasource as CommissionFinalDTO);
+                                        <div class="text-end">
+                                            @(String.Format("{0:P1}", record?.CommOverrideRate))
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CommOverridePayment" Width="25px" Context="datasource">
+                                <HeaderTemplate>
+                                    COMM Override
+                                    <br />
+                                    Payment
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        CommissionFinalDTO? record = (datasource as CommissionFinalDTO);
+                                        <div class="text-end">
+                                            @(String.Format("{0:C2}", record?.CommOverridePayment))
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridCommandColumn Width="25px" Context="datasource">
+                                <AuthorizeView Policy="@ConstantClass.CommissionRolePolicy" Context="AuthorizeContext">
+                                    <Authorized>
+                                        @{
+                                            CommissionFinalDTO? record = (datasource as CommissionFinalDTO);
+                                            <NavLink class="btn btn-primary" href="@($"commissionfinal/commissionfinalUpdate/{record?.Id}")">Edit</NavLink>
+                                            <NavLink class="btn btn-secondary" @onclick=" (args) => ConfirmDelete(args, record.Id)">Delete</NavLink>
+
+                                            <DeleteModal ModalTitle="Commission" BodyText="Are you sure you want to delete this record ?"
+                                                 PrimaryButtonText="Delete" SecondaryButtonText="Cancel" Id=record.Id
+                                                 SelectedMethod="DeleteCommissionFinal">
+                                            </DeleteModal>
+                                        }
+                                    </Authorized>
+                                </AuthorizeView>
+                            </GridCommandColumn>
+                        </GridColumns>
+                        <GridToolBar>
+                        </GridToolBar>
+                    </TelerikGrid>
+                }
+                else
+                {
+                    <div class="loader-container">
+                        <span class="loader-size-title">Fetching data</span>
+                        <TelerikLoader Class="loader-indicator" Type="@LoaderType.ConvergingSpinner" Size="@(ThemeConstants.Loader.Size.Large)"></TelerikLoader>
+                    </div>
+                }
+            </Authorized>
+        </AuthorizeView>
     </TabStripTab>
 </TelerikTabStrip>
 
 @code {
-    public int ActiveTabIndex { get; set; } = 0;
 
-    private IEnumerable<CommissionErrorDTO> CommissionErrorList { get; set; }
-    int PageSize = 10;
-    string Height = "400px";
-    private List<int?> PageSizes => new List<int?> { 5, 10, 25, 50, null };
-    private bool DeleteCommissionErrorOperation = false;
-    private string ErrorMessage = null;
+    #region Properties
+
+    private int ActiveTabIndex { get; set; } = 0;
+    private IEnumerable<CommissionErrorDTO>? CommissionErrorList { get; set; }
+    private IEnumerable<CommissionFinalDTO>? CommissionFinalList { get; set; }
+    private IEnumerable<CommissionDTO>? CommissionList { get; set; }
+
+    #endregion
+
+    #region Fields
+
+    private List<int?> _pageSizes => new List<int?> { 5, 10, 25, 50, null };
+    private bool _deleteCommissionErrorOperation = false;
+    private bool _deleteCommissionFinalOperation = false;
+    private string? _errorMessage = null;
+    private int _pageSize = 10;
+    private string _height = "400px";
+
+    #endregion
+
 
     protected override async Task OnInitializedAsync()
     {
-        await GetGridData();
         await base.OnInitializedAsync();
+        await GetGridData();
     }
 
     async Task GetGridData()
     {
         CommissionErrorList = await commissionErrorService.GetAll();
+        CommissionFinalList = await commissionFinalService.GetAll();
+        CommissionList = await commissionService.GetAll();
+
     }
 
     private async Task ConfirmDelete(MouseEventArgs e, int id)
@@ -187,18 +446,39 @@
     {
         try
         {
-            DeleteCommissionErrorOperation = false;
-            // Perform delete product
+            _deleteCommissionErrorOperation = false;
+            _deleteCommissionFinalOperation = false;
+
+            // Perform delete commission
             await commissionErrorService.Delete(id);
             await GetGridData();
-            DeleteCommissionErrorOperation = true;
-            ErrorMessage = null;
+            _deleteCommissionErrorOperation = true;
+            _errorMessage = null;
+        }
+        catch (Exception ex)
+        {
+            _deleteCommissionErrorOperation = false;
+            _errorMessage = ex.Message.ToString();
+        }
+    }
+
+    private async Task DeleteCommissionFinal(int id)
+    {
+        try
+        {
+            _deleteCommissionFinalOperation = false;
+            _deleteCommissionErrorOperation = false;
+            // Perform delete commission
+            await commissionFinalService.Delete(id);
+            await GetGridData();
+            _deleteCommissionFinalOperation = true;
+            _errorMessage = null;
 
         }
         catch (Exception ex)
         {
-            DeleteCommissionErrorOperation = false;
-            ErrorMessage = ex.Message.ToString();
+            _deleteCommissionFinalOperation = false;
+            _errorMessage = ex.Message.ToString();
         }
     }
 }
