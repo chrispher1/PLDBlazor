@@ -17,7 +17,7 @@ namespace PLD.Blazor.Service
         {
             _httpClient = httpClient;
         }
-        public async Task<ProductDTO> Create(ProductDTO product)
+        public async Task<ProductDTO?> Create(ProductDTO product)
         {
             var content = JsonConvert.SerializeObject(product);
             var bodyContent = new StringContent(content, Encoding.UTF8, "application/json");
@@ -33,10 +33,9 @@ namespace PLD.Blazor.Service
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
 
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
-
         public async Task Delete(int id)
         {
             var response = await _httpClient.DeleteAsync("/api/Product/" + id);
@@ -45,10 +44,9 @@ namespace PLD.Blazor.Service
             if (!response.IsSuccessStatusCode)
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
-
         public async Task<IEnumerable<ProductDTO>> GetAll()
         {
             var response = await _httpClient.GetAsync("/api/Product");
@@ -58,12 +56,12 @@ namespace PLD.Blazor.Service
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var result = JsonConvert.DeserializeObject<IEnumerable<ProductDTO>>(responseContent);
-                return result;
+                return result ?? emptyList;
             }
             return emptyList;
         }
 
-        public async Task<IEnumerable<ProductDTO>> GetByCarrierId(int carrierId)
+        public async Task<IEnumerable<ProductDTO> ?> GetByCarrierId(int carrierId)
         {
             var response = await _httpClient.GetAsync($"api/Product/GetByCarrierId/{carrierId}");
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -76,7 +74,7 @@ namespace PLD.Blazor.Service
             return null;
         }
 
-        public async Task<ProductDTO> GetByCode(string code)
+        public async Task<ProductDTO?> GetByCode(string code)
         {
             var response = await _httpClient.GetAsync("/api/Product/GetByCode/" + code);
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -89,19 +87,18 @@ namespace PLD.Blazor.Service
             else
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                if (result.ErrorMessage == ConstantClass.NoRecordFound)
+                if (result?.ErrorMessage == ConstantClass.NoRecordFound)
                 {
                     return null;
                 }
                 else
                 {
-                    throw new Exception(result.ErrorMessage);
+                    throw new Exception(result?.ErrorMessage);
                 }
-            }
-            return null;            
+            }                    
         }
 
-        public async Task<IEnumerable<ProductDTO>> GetByCodeAndNotID(string code, int id)
+        public async Task<IEnumerable<ProductDTO>?> GetByCodeAndNotID(string code, int id)
         {
             var response = await _httpClient.GetAsync("/api/Product/GetByCodeAndNotID/" + code + "/" + id);
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -114,7 +111,7 @@ namespace PLD.Blazor.Service
             return null;
         }
 
-        public async Task<ProductDTO> GetById(int id)
+        public async Task<ProductDTO?> GetById(int id)
         {
             var response = await _httpClient.GetAsync("/api/Product/" + id);
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -137,7 +134,7 @@ namespace PLD.Blazor.Service
             if (!response.IsSuccessStatusCode)
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
     }

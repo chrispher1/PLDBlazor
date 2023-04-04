@@ -7,37 +7,37 @@
 
 <h3>Time and Activity Mapping</h3>
 
-@if (DeleteOperation == true)
+@if (_deleteOperation == true)
 {
     <span>Transaction Type successfully deleted</span>
     <br />
 }
 
-@if (ErrorMessage != null)
+@if (_errorMessage != null)
 {
-    <span>@ErrorMessage</span>
+    <span>@_errorMessage</span>
     <br />
     <br />
 }
 
-@if (TimeActivityMappingList != null)
+@if (_timeActivityMappingList != null)
 {
-    <TelerikGrid Data="@TimeActivityMappingList"
+    <TelerikGrid Data="@_timeActivityMappingList"
         Sortable=true
         Pageable=true
-        @bind-PageSize="@PageSize"
+        @bind-PageSize="@_pageSize"
         FilterMode="@GridFilterMode.FilterRow"
-        Height="@Height"
+        Height="@_height"
         >
         <GridSettings>
-            <GridPagerSettings PageSizes="@PageSizes"></GridPagerSettings>
+            <GridPagerSettings PageSizes="@_pageSizes"></GridPagerSettings>
         </GridSettings>
         <GridColumns>
             <GridColumn Field="Carrier.Name" Title="Carrier" Width="25px">
                 <Template>
                     @{
                         TimeActivityMappingDTO? record = (context as TimeActivityMappingDTO);
-                        @(String.Concat(record.Carrier?.Name, " (", record.Carrier?.CarrierCode, ")").ToString());
+                        @(String.Concat(record?.Carrier?.Name, " (", record?.Carrier?.CarrierCode, ")").ToString());
                     }
                 </Template>
             </GridColumn>
@@ -73,8 +73,7 @@
                 <Template>
                     @{
                         TimeActivityMappingDTO? record = (context as TimeActivityMappingDTO);
-                        @(record.Activity?.Description)
-                        ;
+                        @(record?.Activity?.Description);
                     }
                 </Template>
             </GridColumn>            
@@ -89,9 +88,9 @@
                         @{
                             TimeActivityMappingDTO? record = (timeActivityMappingContext as TimeActivityMappingDTO);
                             <NavLink class="btn btn-primary" href="@($"timeactivitymapping/timeactivitymappingUpdate/{record?.Id}")">Edit</NavLink>
-                            <NavLink class="btn btn-secondary" @onclick=" (args) => ConfirmDelete(args, record.Id)">Delete</NavLink>
+                            <NavLink class="btn btn-secondary" @onclick=" (args) => ConfirmDelete(args, record?.Id ==null ? 0:record.Id)">Delete</NavLink>
                             <DeleteModal ModalTitle="Time Activity Mapping" BodyText="Are you sure you want to delete this mapping ?"
-                                 PrimaryButtonText="Delete" SecondaryButtonText="Cancel" Id=record.Id
+                                 PrimaryButtonText="Delete" SecondaryButtonText="Cancel" Id=@(record?.Id ==null ? 0:record.Id)
                                  SelectedMethod="DeleteMapping">
                             </DeleteModal>
                         }
@@ -121,48 +120,63 @@ else
 }
 
 @code {
-    private IEnumerable<TimeActivityMappingDTO> TimeActivityMappingList { get; set; }
-    int PageSize = 10;
-    string Height = "400px";
-    private List<int?> PageSizes => new List<int?> { 5, 10, 25, 50, null };
-    private bool DeleteOperation = false;
-    private string ErrorMessage = null;
+    #region Fields
 
-    protected override async Task OnInitializedAsync()
-    {
-        await GetGridData();
-        await base.OnInitializedAsync();
-    }
+        private IEnumerable<TimeActivityMappingDTO>? _timeActivityMappingList;
+        private int _pageSize = 10;
+        private List<int?> _pageSizes => new List<int?> { 5, 10, 25, 50, null };
+        private bool _deleteOperation = false;
+        private string? _errorMessage = null;
 
-    async Task GetGridData()
-    {
-        TimeActivityMappingList = await timeActivityMappingService.GetAll();
-    }
+    #endregion
 
-    private async Task ConfirmDelete(MouseEventArgs e, int id)
-    {
-        // modify the function to display modal window
-        await jsRuntime.InvokeVoidAsync("DisplayModal", "DeleteModal_" + id.ToString());
-    }
+    #region Constants
+    
+        private const string _height = "400px";
 
-    private async Task DeleteMapping(int id)
-    {
-        try
+    #endregion
+
+    #region Methods
+
+        protected override async Task OnInitializedAsync()
         {
-            DeleteOperation = false;
-            // Perform delete mapping
-            await timeActivityMappingService.Delete(id);
             await GetGridData();
-            DeleteOperation = true;
-            ErrorMessage = null;
+            await base.OnInitializedAsync();
+        }
 
-        }
-        catch (Exception ex)
+        private async Task GetGridData()
         {
-            DeleteOperation = false;
-            ErrorMessage = ex.Message.ToString();
+            _timeActivityMappingList = await timeActivityMappingService.GetAll();
         }
-    }
+
+        private async Task ConfirmDelete(MouseEventArgs e, int id)
+        {
+            // modify the function to display modal window
+            await jsRuntime.InvokeVoidAsync("DisplayModal", "DeleteModal_" + id.ToString());
+        }
+
+        private async Task DeleteMapping(int id)
+        {
+            try
+            {
+                _deleteOperation = false;
+                // Perform delete mapping
+                await timeActivityMappingService.Delete(id);
+                await GetGridData();
+                _deleteOperation = true;
+                _errorMessage = null;
+
+            }
+            catch (Exception ex)
+            {
+                _deleteOperation = false;
+                _errorMessage = ex.Message.ToString();
+            }
+        }
+
+    #endregion
+
+    
 }
 <style>
     .loader-size-title {

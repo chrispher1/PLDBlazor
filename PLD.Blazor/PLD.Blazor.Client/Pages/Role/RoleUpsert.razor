@@ -15,7 +15,7 @@ else
     <h3>Update Role</h3>
 }
 
-@if (SaveOperation == true)
+@if (_saveOperation == true)
 {
     <span>Role successfully saved</span>
     <br/>
@@ -23,20 +23,20 @@ else
 
 <div class="container border mt-2 p-4">
 
-    @if (Role != null)
+    @if (_role != null)
     {
-        <EditForm Model="@Role" OnValidSubmit="UpsertRole">
+        <EditForm Model="@_role" OnValidSubmit="UpsertRole">
             <DataAnnotationsValidator />
-            <CustomFormValidator @ref="customFormValidator" />
+            <CustomFormValidator @ref="_customFormValidator" />
             <div class="row mb-3">
                 <div class="col">
                 <ValidationSummary />
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(Role.Name)" class="col-2 col-form-label text-end">Name</label>
+                <label for="@nameof(_role.Name)" class="col-2 col-form-label text-end">Name</label>
                 <div class="col-10">
-                   <input type="text" @bind-value="Role.Name" class="form-control" />                    
+                   <input type="text" @bind-value="_role.Name" class="form-control" />                    
                 </div>
             </div>
             <div class="row mb-3">
@@ -58,81 +58,95 @@ else
 
 @code {
 
-    [Parameter]
-    public int Id { get; set; }
-    private RoleDTO Role { get; set; } = new RoleDTO();
-    private bool SaveOperation = false;
-    protected CustomFormValidator customFormValidator;
+    #region Parameters
+
+        [Parameter]
+        public int Id { get; set; }
+
+    #endregion
+
+    #region Fields
     
+        private RoleDTO? _role;
+        private bool _saveOperation = false;
+        private CustomFormValidator? _customFormValidator;
+
+    #endregion
+    
+    #region Methods
 
     protected override async Task OnInitializedAsync()
     {
         if (@Id == 0)
         {
-            Role = new RoleDTO();
+            _role = new RoleDTO();
         }
         else
         {
             // Populate role if already exists
-            Role = await roleService.GetById(Id);                    
+            _role = await roleService.GetById(Id);
         }
     }
 
     private async Task UpsertRole()
     {
-        customFormValidator.ClearFormErrors();
+        _customFormValidator?.ClearFormErrors();
         var errors = new Dictionary<string, List<string>>();
         try
         {
-            SaveOperation = false;
-            if (Role.Id == 0)
+            _saveOperation = false;
+            if (_role?.Id == 0)
             {
-                var record = await roleService.GetByName(Role.Name);
+                var record = await roleService.GetByName(_role.Name);
                 if (record != null)
                 {
 
-                    errors.Add(nameof(Role.Name),
+                    errors.Add(nameof(_role.Name),
                     new() { ConstantClass.RoleCannotAddRecordNameUsed });
-                    customFormValidator.DisplayFormErrors(errors);
+                    _customFormValidator?.DisplayFormErrors(errors);
                 }
                 else
                 {
                     // Insert Procedure.
-                    if (Role.Id == 0)
+                    if (_role.Id == 0)
                     {
-                        Role.CreatedBy = ConstantClass.SystemUser;
-                        Role.CreatedDate = System.DateTime.Now;
-                        Role = await roleService.Create(Role);
+                        _role.CreatedBy = ConstantClass.SystemUser;
+                        _role.CreatedDate = System.DateTime.Now;
+                        _role = await roleService.Create(_role);
                     }
-                    SaveOperation = true;
+                    _saveOperation = true;
                 }
             }
             else
             {
-                var record = await roleService.GetByNameAndNotID(Role.Name,Role.Id);
+                var record = await roleService.GetByNameAndNotID(_role?.Name == null ? String.Empty : _role.Name,
+                    _role?.Id == null ? 0 : _role.Id);
+
                 if (record != null && record.Any())
                 {
-                    errors.Add(nameof(Role.Name),
+                    errors.Add(nameof(_role.Name),
                     new() { ConstantClass.RoleCannotAddRecordNameUsed });
-                    customFormValidator.DisplayFormErrors(errors);
+                    _customFormValidator?.DisplayFormErrors(errors);
                 }
                 else
                 {
                     // Update the record
-                    Role.ModifiedBy = ConstantClass.SystemUser;
-                    Role.ModifiedDate = System.DateTime.Now;
-                    await roleService.Update(Role);
-                    SaveOperation = true;
+                    (_role = _role ?? new RoleDTO()).ModifiedBy = ConstantClass.SystemUser;
+                    _role.ModifiedDate = System.DateTime.Now;
+                    await roleService.Update(_role);
+                    _saveOperation = true;
                 }
             }
         }
         catch (Exception ex)
         {
-            errors.Add(nameof(Role.Name),
+            errors.Add(nameof(_role.Name),
                     new() { ex.Message });
-                    customFormValidator.DisplayFormErrors(errors);
-            SaveOperation = false;
+            _customFormValidator?.DisplayFormErrors(errors);
+            _saveOperation = false;
         }
     }
+
+    #endregion
 
 }

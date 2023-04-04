@@ -99,19 +99,19 @@ builder.Services.AddAuthentication(opt =>
 });
 
 builder.Services.AddAuthorization(options =>
-{
+{    
     // Assign policy for the list of roles
     options.AddPolicy(ConstantClass.CaseRolePolicy, policy =>
-        policy.RequireRole(defaultRoles.Role_Case_User)
+        policy.RequireRole(defaultRoles.Role_Case_User, defaultRoles.Role_Admin)
         );
     options.AddPolicy(ConstantClass.CommissionRolePolicy, policy =>
-        policy.RequireRole(defaultRoles.Role_Commission_User)
+        policy.RequireRole(defaultRoles.Role_Commission_User, defaultRoles.Role_Admin)
         );
     options.AddPolicy(ConstantClass.PaymentRolePolicy, policy =>
-        policy.RequireRole(defaultRoles.Role_Payment_User)
+        policy.RequireRole(defaultRoles.Role_Payment_User, defaultRoles.Role_Admin)
         );
     options.AddPolicy(ConstantClass.ReportRolePolicy, policy =>
-        policy.RequireRole(defaultRoles.Role_Reports_User)
+        policy.RequireRole(defaultRoles.Role_Reports_User, defaultRoles.Role_Admin)
         );
     options.AddPolicy(ConstantClass.MaintenanceRolePolicy, policy =>
         // Code to support the policy must contain all roles
@@ -119,10 +119,11 @@ builder.Services.AddAuthorization(options =>
         //        context.User.IsInRole(defaultRoles.Role_Maintenance_User) &&
         //        context.User.IsInRole(defaultRoles.Role_Case_User) 
         //)
-        policy.RequireRole(defaultRoles.Role_Maintenance_User)
+        policy.RequireRole(defaultRoles.Role_Maintenance_User,defaultRoles.Role_Admin)
         );
     options.AddPolicy(ConstantClass.CommissionUpsertRolePolicy, policy =>
-        policy.RequireRole(defaultRoles.Role_Commission_User_Create, defaultRoles.Role_Commission_User_Edit)
+        policy.RequireRole(defaultRoles.Role_Commission_User_Create, defaultRoles.Role_Commission_User_Edit
+        , defaultRoles.Role_Admin)
         );
 });
 

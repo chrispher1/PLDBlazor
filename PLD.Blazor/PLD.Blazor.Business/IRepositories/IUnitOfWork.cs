@@ -1,4 +1,5 @@
 ﻿using PLD.Blazor.Business.DTO;
+using PLD.Blazor.Business.Repositories;
 using PLD.Blazor.DataAccess.Model;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,8 @@ namespace PLD.Blazor.Business.IRepositories
         IPremiumModeRepository<PremiumMode> PremiumMode { get; }
         ICommissionErrorRepository<CommissionError> CommissionError { get; }
         ICommissionFinalRepository<CommissionFinal> CommissionFinal { get; }
+        IStateCodeRepository<StateCode> StateCode { get; }
+        ICommissionRepository<CommissionDTO> Commission { get; }
         Task Save();
     }
 }

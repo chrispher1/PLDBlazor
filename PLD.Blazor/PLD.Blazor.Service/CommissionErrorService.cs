@@ -16,7 +16,7 @@ namespace PLD.Blazor.Service
         {
             _httpClient = httpClient;
         }
-        public async Task<CommissionErrorDTO> Create(CommissionErrorDTO commissionErrorDTO)
+        public async Task<CommissionErrorDTO?> Create(CommissionErrorDTO commissionErrorDTO)
         {
             commissionErrorDTO.Id = 0;
             commissionErrorDTO.Activity = null;
@@ -37,10 +37,9 @@ namespace PLD.Blazor.Service
             else
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
-
         public async Task Delete(int id)
         {
             var response = await _httpClient.DeleteAsync($"/api/CommissionError/{id}");
@@ -49,11 +48,10 @@ namespace PLD.Blazor.Service
             if (!response.IsSuccessStatusCode)
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
-
-        public async Task<CommissionErrorDTO> GetById(int id)
+        public async Task<CommissionErrorDTO?> GetById(int id)
         {
             var response = await _httpClient.GetAsync($"/api/CommissionError/{id}");
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -63,10 +61,8 @@ namespace PLD.Blazor.Service
                 var result = JsonConvert.DeserializeObject<CommissionErrorDTO>(responseContent);
                 return result;
             }
-
             return null;
         }
-
         public async Task<IEnumerable<CommissionErrorDTO>> GetAll()
         {
             var response = await _httpClient.GetAsync("/api/CommissionError");
@@ -75,7 +71,7 @@ namespace PLD.Blazor.Service
             if (response.IsSuccessStatusCode)
             {
                 var result = JsonConvert.DeserializeObject<IEnumerable<CommissionErrorDTO>>(responseContent);
-                return result;
+                return result ?? emptyList;
             }
             else
             {
@@ -92,7 +88,7 @@ namespace PLD.Blazor.Service
             if(!response.IsSuccessStatusCode)
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
     }

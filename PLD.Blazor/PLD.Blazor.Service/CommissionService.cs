@@ -16,7 +16,7 @@ namespace PLD.Blazor.Service
         {
             _httpClient = httpClient;
         }
-        public async Task<IEnumerable<CommissionDTO>> GetAll()
+        public async Task<IEnumerable<CommissionDTO>?> GetAll()
         {
             var response = await _httpClient.GetAsync("/api/Commission");
             var responseContent = await response.Content.ReadAsStringAsync();

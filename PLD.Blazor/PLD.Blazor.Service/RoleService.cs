@@ -17,7 +17,7 @@ namespace PLD.Blazor.Service
         {
             _httpClient = httpClient;
         }
-        public async Task<RoleDTO> Create(RoleDTO role)
+        public async Task<RoleDTO?> Create(RoleDTO role)
         {
             var content = JsonConvert.SerializeObject(role);
             var bodyContent = new StringContent(content, Encoding.UTF8, "application/json");
@@ -32,7 +32,7 @@ namespace PLD.Blazor.Service
             else
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
         public async Task Delete(int id)
@@ -44,10 +44,9 @@ namespace PLD.Blazor.Service
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
 
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
-
         public async Task<IEnumerable<RoleDTO>> GetAll()
         {
             var response = await _httpClient.GetAsync("/api/Role");
@@ -57,11 +56,11 @@ namespace PLD.Blazor.Service
             if (response.IsSuccessStatusCode)
             {
                 var result = JsonConvert.DeserializeObject<IEnumerable<RoleDTO>>(responseContent);
-                return result;
+                return result ?? emptyList;
             }
             return emptyList;
         }
-        public async Task<RoleDTO> GetById(int id)
+        public async Task<RoleDTO?> GetById(int id)
         {
             var response = await _httpClient.GetAsync($"/api/Role/{id}");
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -73,7 +72,7 @@ namespace PLD.Blazor.Service
             }
             return null;            
         }
-        public async Task<RoleDTO> GetByName(string name)
+        public async Task<RoleDTO?> GetByName(string name)
         {
             var response = await _httpClient.GetAsync($"/api/Role/GetByName/{name}");
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -86,18 +85,17 @@ namespace PLD.Blazor.Service
             else
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                if (result.ErrorMessage == ConstantClass.NoRecordFound)
+                if (result?.ErrorMessage == ConstantClass.NoRecordFound)
                 {
                     return null;
                 }
                 else
                 {
-                    throw new Exception(result.ErrorMessage);
+                    throw new Exception(result?.ErrorMessage);
                 }
-            }
-            return null;
+            }            
         }
-        public async Task<IEnumerable<RoleDTO>> GetByNameAndNotID(string name, int id)
+        public async Task<IEnumerable<RoleDTO>?> GetByNameAndNotID(string name, int id)
         {
             var response = await _httpClient.GetAsync($"/api/Role/GetByNameAndNotID/{name}/{id}");
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -119,7 +117,7 @@ namespace PLD.Blazor.Service
             if (!response.IsSuccessStatusCode)
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
     }

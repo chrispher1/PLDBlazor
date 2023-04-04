@@ -18,7 +18,7 @@ else
     <h3>Update User</h3>
 }
 
-@if (SaveOperation == true)
+@if (_saveOperation == true)
 {
     <span>User successfully saved</span>
     <br />
@@ -26,11 +26,11 @@ else
 
 <div class="container border mt-2 p-4">
 
-    @if (User != null)
+    @if (_user != null)
     {
-        <EditForm Model="@User" OnValidSubmit="UpsertUser">
+        <EditForm Model="@_user" OnValidSubmit="UpsertUser">
             <DataAnnotationsValidator />
-            <CustomFormValidator @ref="customFormValidator" />
+            <CustomFormValidator @ref="_customFormValidator" />
 
             <div class="row mb-3">
                 <div class="col">
@@ -38,26 +38,25 @@ else
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(User.FirstName)" class="col-2 col-form-label text-end">First Name</label>
+                <label for="@nameof(_user.FirstName)" class="col-2 col-form-label text-end">First Name</label>
                 <div class="col-2">
-                    <input type="text" @bind-value="User.FirstName" class="form-control" />
+                    <input type="text" @bind-value="_user.FirstName" class="form-control" />
                 </div>
 
-                <label for="@nameof(User.LastName)" class="col-5 col-form-label text-end">Last Name</label>
+                <label for="@nameof(_user.LastName)" class="col-5 col-form-label text-end">Last Name</label>
                 <div class="col-3">
-                    <input type="text" @bind-value="User.LastName" class="form-control" />
+                    <input type="text" @bind-value="_user.LastName" class="form-control" />
                 </div>
             </div>
 
             <div class="row mb-4">
-                <label for="@nameof(User.BirthDate)" class="col-2 col-fom-label text-end">Birth Date</label>
+                <label for="@nameof(_user.BirthDate)" class="col-2 col-fom-label text-end">Birth Date</label>
                 <div class="col-2">
-                    <InputDate @bind-Value="User.BirthDate" class="form-control" />
+                    <InputDate @bind-Value="_user.BirthDate" class="form-control" />
                 </div>
-                <label for="@nameof(User.UserName)" class="col-5 col-form-label text-end">User Name</label>
+                <label for="@nameof(_user.UserName)" class="col-5 col-form-label text-end">User Name</label>
                 <div class="col-3">
-                    <input type="text" @bind-value="User.UserName" class="form-control" />
-
+                    <input type="text" @bind-value="_user.UserName" class="form-control" />
                 </div>
             </div>
 
@@ -65,20 +64,20 @@ else
                 <div class=" offset-1 col-11"> <b>Roles</b> </div>
             </div>
 
-            @if (RoleList != null)
+            @if (_roleList != null)
             {
                 int i = 1, j = 0;
-                @foreach (RoleDTO role in RoleList)
+                @foreach (RoleDTO role in _roleList)
                 {
                     @if (i % 3 == 0)
                     {
                         <div class="row mb-3">
                             @for (j = i - 3; j < i; j++)
                             {
-                                RoleDTO currentRole = RoleList.ToList()[j];
+                                RoleDTO currentRole = _roleList.ToList()[j];
                                 <div class="offset-1 col-3">
                                     @{
-                                        if ((UserRoleList != null) && (UserRoleList.Any(u => u.RoleId == currentRole.Id)))
+                                        if ((_userRoleList != null) && (_userRoleList.Any(u => u.RoleId == currentRole.Id)))
                                         {
                                             <input type="checkbox" class="form-check-input" @onchange=" args => CheckboxClicked(currentRole.Id, args)" checked />
                                         }
@@ -94,7 +93,7 @@ else
                     }
                     else
                     {
-                        if (i >= RoleList.Count())
+                        if (i >= _roleList.Count())
                         {
                             <div class="row mb-5">
                                 @{
@@ -103,10 +102,10 @@ else
 
                                 @for (int k = i - diff; k < i; k++)
                                 {
-                                    RoleDTO currentRole = RoleList.ToList()[k];
+                                    RoleDTO currentRole = _roleList.ToList()[k];
                                     <div class="offset-1 col-3">
                                         @{
-                                            if ((UserRoleList != null) && (UserRoleList.Any(u => u.RoleId == currentRole.Id)))
+                                            if ((_userRoleList != null) && (_userRoleList.Any(u => u.RoleId == currentRole.Id)))
                                             {
                                                 <input type="checkbox" @onchange=" args => CheckboxClicked(currentRole.Id, args)" class="form-check-input" checked />
                                             }
@@ -136,7 +135,7 @@ else
                     </AuthorizeView>
                 </div>
             </div>
-            @if (ProcessingIndicator)
+            @if (_processingIndicator)
             {
                 <div class="row">
                     <div class="d-flex justify-content-center"><span class="loader-size-title">Processing. Please wait.</span> </div>
@@ -157,158 +156,176 @@ else
 </div>
 
 @code {
+
+    #region Parameters
+
     [Parameter]
     public int Id { get; set; }
-    private bool SaveOperation = false;
-    private UserDTO User { get; set; } = new UserDTO();
-    protected CustomFormValidator customFormValidator;
-    private IEnumerable<RoleDTO> RoleList { get; set; }
-    private ICollection<UserRoleDTO> UserRoleList { get; set; }
-    private ICollection<int> SelectedRoleList { get; set; } = new List<int>();
-    private bool ProcessingIndicator = false;
+
+    #endregion
+
+    #region Fields
+
+        private bool _saveOperation = false;
+        private UserDTO? _user;
+        private CustomFormValidator? _customFormValidator;
+        private IEnumerable<RoleDTO> _roleList = new List<RoleDTO>();
+        private ICollection<UserRoleDTO> _userRoleList = new List<UserRoleDTO>();
+        private ICollection<int> _selectedRoleList { get; set; } = new List<int>();
+        private bool _processingIndicator = false;
+
+    #endregion
 
 
-    protected override async Task OnInitializedAsync()
-    {
-        //await PopulateForm();
-
-        if (@Id == 0)
+    #region Methods
+    
+        protected override async Task OnInitializedAsync()
         {
-            User = new UserDTO();
-        }
-        else
-        {
-            // Populate carrier if already exists
-            User = await userService.GetById(Id);
-        }
+            //await PopulateForm();
 
-        UserRoleList = User.UserRoles;
-        PopulateSelectedRoleList();
-        RoleList = await roleService.GetAll();
-    }
-
-    private void PopulateSelectedRoleList()
-    {
-        foreach (UserRoleDTO objUserRoleDTO in UserRoleList)
-        {
-            SelectedRoleList.Add(objUserRoleDTO.RoleId);
-        }
-
-    }
-    public void CheckboxClicked(int selectedRole, EventArgs arg)
-    {
-        if (((ChangeEventArgs)arg as ChangeEventArgs).Value is true)
-        {
-
-            SelectedRoleList.Add(selectedRole);
-        }
-        else
-        {
-            SelectedRoleList.Remove(selectedRole);
-        }
-    }
-
-    private async Task UpsertUser()
-    {
-        customFormValidator.ClearFormErrors();
-
-        var errors = new Dictionary<string, List<string>>();
-
-        try
-        {
-            SaveOperation = false;
-            ProcessingIndicator = true;
-            if (User.Id == 0)
+            if (@Id == 0)
             {
-                var record = await userService.GetByUserName(User.UserName);
-
-                if (record != null)
-                {
-
-                    errors.Add(nameof(User.UserName),
-                    new() { ConstantClass.UserCannotAddRecordUserNameUsed });
-                    customFormValidator.DisplayFormErrors(errors);
-                }
-                else
-                {
-                    // Insert Procedure.
-                    if (User.Id == 0)
-                    {
-                        User.CreatedBy = ConstantClass.SystemUser;
-                        User.CreatedDate = System.DateTime.Now;
-
-                        // Add role of the user
-                        User.UserRoles = new List<UserRoleDTO>();
-
-                        foreach (int roleId in SelectedRoleList)
-                        {
-                            UserRoleDTO objUserRole = new UserRoleDTO();
-                            objUserRole.CreatedDate = System.DateTime.Now;
-                            objUserRole.CreatedBy = ConstantClass.SystemUser;
-                            objUserRole.RoleId = roleId;
-                            User.UserRoles.Add(objUserRole);
-                        }
-                        User = await userService.Create(User);
-                        UserRoleList = User.UserRoles;
-                    }
-                    SaveOperation = true;
-                    await Task.Delay(5000);
-                    ProcessingIndicator = false;
-                }
+                _user = new UserDTO();
             }
             else
             {
-                var record = await userService.GetByUserNameAndNotID(User.UserName, User.Id);
-                if (record != null && record.Any())
+                // Populate carrier if already exists
+                _user = await userService.GetById(Id);
+            }
+
+            _userRoleList = _user?.UserRoles ?? new List<UserRoleDTO>();
+            PopulateSelectedRoleList();
+            _roleList = await roleService.GetAll();
+        }
+
+        private void PopulateSelectedRoleList()
+        {
+            foreach (UserRoleDTO objUserRoleDTO in _userRoleList)
+            {
+                _selectedRoleList.Add(objUserRoleDTO.RoleId);
+            }
+
+        }
+
+        private void CheckboxClicked(int selectedRole, EventArgs arg)
+        {
+            if (((ChangeEventArgs)arg as ChangeEventArgs).Value is true)
+            {
+
+                _selectedRoleList.Add(selectedRole);
+            }
+            else
+            {
+                _selectedRoleList.Remove(selectedRole);
+            }
+        }
+
+        private async Task UpsertUser()
+        {
+            _customFormValidator?.ClearFormErrors();
+
+            var errors = new Dictionary<string, List<string>>();
+
+            try
+            {
+                _saveOperation = false;
+                _processingIndicator = true;
+                if (_user?.Id == 0)
                 {
-                    errors.Add(nameof(User.UserName),
-                    new() { ConstantClass.UserCannotAddRecordUserNameUsed });
-                    customFormValidator.DisplayFormErrors(errors);
+                    var record = await userService.GetByUserName(_user.UserName);
+
+                    if (record != null)
+                    {
+
+                        errors.Add(nameof(_user.UserName),
+                        new() { ConstantClass.UserCannotAddRecordUserNameUsed });
+                        _customFormValidator?.DisplayFormErrors(errors);
+                    }
+                    else
+                    {
+                        // Insert Procedure.
+                        if (_user.Id == 0)
+                        {
+                            _user.CreatedBy = ConstantClass.SystemUser;
+                            _user.CreatedDate = System.DateTime.Now;
+
+                            // Add role of the user
+                            _user.UserRoles = new List<UserRoleDTO>();
+
+                            foreach (int roleId in _selectedRoleList)
+                            {
+                                UserRoleDTO objUserRole = new UserRoleDTO();
+                                objUserRole.CreatedDate = System.DateTime.Now;
+                                objUserRole.CreatedBy = ConstantClass.SystemUser;
+                                objUserRole.RoleId = roleId;
+                                _user.UserRoles.Add(objUserRole);
+                            }
+                            _user = await userService.Create(_user);
+                            _userRoleList = _user?.UserRoles ?? new List<UserRoleDTO>();
+                        }
+                        _saveOperation = true;
+                        await Task.Delay(5000);
+                        _processingIndicator = false;
+                    }
                 }
                 else
                 {
-                    // Update the record
-                    User.ModifiedBy = ConstantClass.SystemUser;
-                    User.ModifiedDate = System.DateTime.Now;
-                    foreach (UserRoleDTO objUserRole in User.UserRoles.ToList())
+                    var record = await userService.GetByUserNameAndNotID(
+                        _user?.UserName == null ? String.Empty:_user.UserName, 
+                        _user?.Id == null ? 0:_user.Id
+                    );
+                    if (record != null && record.Any())
                     {
-                        // Delete the role of the user that is not checked
-                        if (!SelectedRoleList.Where(role => role == objUserRole.RoleId).Any())
-                        {
-                            User.UserRoles.Remove(objUserRole);
-                        }
+                        errors.Add(nameof(_user.UserName),
+                        new() { ConstantClass.UserCannotAddRecordUserNameUsed });
+                        _customFormValidator?.DisplayFormErrors(errors);
                     }
-
-                    foreach (int roleId in SelectedRoleList)
+                    else
                     {
-                        // Add the new role of the user when it is not existing
-                        if (User.UserRoles.Where(role => role.RoleId == roleId).Count() == 0)
+                        // Update the record
+                        (_user = _user ?? new UserDTO()).ModifiedBy = ConstantClass.SystemUser;
+                        _user.ModifiedDate = System.DateTime.Now;
+                    foreach (UserRoleDTO objUserRole in (_user.UserRoles = _user.UserRoles ?? new List<UserRoleDTO>()).ToList())
                         {
-                            UserRoleDTO objUserRole = new UserRoleDTO();
-                            objUserRole.CreatedDate = System.DateTime.Now;
-                            objUserRole.CreatedBy = ConstantClass.SystemUser;
-                            objUserRole.RoleId = roleId;
-                            User.UserRoles.Add(objUserRole);
+                            // Delete the role of the user that is not checked
+                            if (!_selectedRoleList.Where(role => role == objUserRole.RoleId).Any())
+                            {
+                                _user.UserRoles.Remove(objUserRole);
+                            }
                         }
-                    }
-                    await userService.Update(User);
-                    SaveOperation = true;
-                    await Task.Delay(5000);
-                    ProcessingIndicator = false;
 
+                        foreach (int roleId in _selectedRoleList)
+                        {
+                            // Add the new role of the user when it is not existing
+                            if (_user.UserRoles.Where(role => role.RoleId == roleId).Count() == 0)
+                            {
+                                UserRoleDTO objUserRole = new UserRoleDTO();
+                                objUserRole.CreatedDate = System.DateTime.Now;
+                                objUserRole.CreatedBy = ConstantClass.SystemUser;
+                                objUserRole.RoleId = roleId;
+                                _user.UserRoles.Add(objUserRole);
+                            }
+                        }
+                        await userService.Update(_user);
+                        _saveOperation = true;
+                        await Task.Delay(5000);
+                        _processingIndicator = false;
+
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            errors.Add(nameof(User.UserName),
-                    new() { ex.Message });
-            customFormValidator.DisplayFormErrors(errors);
-            SaveOperation = false;
-            ProcessingIndicator = false;
+            catch (Exception ex)
+            {
+                errors.Add(nameof(_user.UserName),
+                        new() { ex.Message });
+                _customFormValidator?.DisplayFormErrors(errors);
+                _saveOperation = false;
+                _processingIndicator = false;
 
+            }
         }
-    }
+
+    #endregion
 }
 
 <style>

@@ -14,8 +14,7 @@ namespace PLD.Blazor.Business.Repositories
             where T : class  
     {
         private readonly ApplicationDBContext _applicationDBContext;
-        //private readonly DbSet<T> _dbSet;
-        internal readonly DbSet<T> _dbSet;
+        private readonly DbSet<T> _dbSet;        
 
         public GenericRepository(ApplicationDBContext applicationDBContext)
         {
@@ -30,7 +29,6 @@ namespace PLD.Blazor.Business.Repositories
         {
             await this._dbSet.AddRangeAsync(entities);
         }
-
         public async Task<T?> Get(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
         {
             IQueryable<T> query = this._dbSet;
@@ -70,6 +68,7 @@ namespace PLD.Blazor.Business.Repositories
                 }
             }
 
+            
             IEnumerable<T> list = await query.ToListAsync();
 
             return list;

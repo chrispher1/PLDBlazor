@@ -23,23 +23,23 @@ else
 
 <div class="container border mt-2 p-4">
 
-    @if (ProductType != null)
+    @if (_productType != null)
     {
-        <EditForm Model="@ProductType" OnValidSubmit="UpsertProductType">
+        <EditForm Model="@_productType" OnValidSubmit="UpsertProductType">
             <DataAnnotationsValidator />
-            <CustomFormValidator @ref="customFormValidator" />
+            <CustomFormValidator @ref="_customFormValidator" />
             <div class="row mb-3">
-                <label for="@nameof(ProductType.Code)" class="col-4 text-end">Code</label>
+                <label for="@nameof(_productType.Code)" class="col-4 text-end">Code</label>
                 <div class="col-8">
-                    <input type="text" @bind-value="ProductType.Code" />
-                    <ValidationMessage For=" ()=> ProductType.Code "></ValidationMessage>
+                    <input type="text" @bind-value="_productType.Code" />
+                    <ValidationMessage For=" ()=> _productType.Code "></ValidationMessage>
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(ProductType.Name)" class="col-4 text-end">Name</label>
+                <label for="@nameof(_productType.Name)" class="col-4 text-end">Name</label>
                 <div class="col-8">
-                    <input type="text" @bind-value="ProductType.Name" />
-                    <ValidationMessage For=" ()=> ProductType.Name" />
+                    <input type="text" @bind-value="_productType.Name" />
+                    <ValidationMessage For=" ()=> _productType.Name" />
                 </div>
             </div>
 
@@ -61,80 +61,97 @@ else
 </div>
 
 @code {
-    [Parameter]
-    public int Id { get; set; }
-    private ProductTypeDTO ProductType { get; set; } = new ProductTypeDTO();
-    private bool SaveOperation = false;
-    protected CustomFormValidator customFormValidator;
-    
-    protected override async Task OnInitializedAsync()
-    {
-        if (@Id == 0)
-        {
-             ProductType = new ProductTypeDTO();
-        }
-        else
-        {
-            // Populate carrier if already exists
-            ProductType = await productTypeService.GetById(Id);            
-        }
-    }
 
-    private async Task UpsertProductType()
-    {
-            customFormValidator.ClearFormErrors();
-            var errors = new Dictionary<string, List<string>>();
-        try
+    #region Parameters
+
+        [Parameter]
+        public int Id { get; set; }
+
+    #endregion
+
+    #region Fields
+
+        private ProductTypeDTO? _productType;
+        private bool SaveOperation = false;
+        private CustomFormValidator? _customFormValidator;
+
+    #endregion
+    
+    #region Methods
+
+        protected override async Task OnInitializedAsync()
         {
-            SaveOperation = false;
-            if (ProductType.Id == 0)
+            if (@Id == 0)
             {
-                var record = await productTypeService.GetByCode(ProductType.Code);
-                if (record != null)
-                {
-                    
-                    errors.Add(nameof(ProductType.Code),
-                    new() { ConstantClass.ProductTypeCannotAddRecordCodeUsed });
-                    customFormValidator.DisplayFormErrors(errors);
-                }
-                else
-                {
-                    // Insert Procedure.
-                    if (ProductType.Id == 0)
-                    {
-                        ProductType.CreatedBy = ConstantClass.SystemUser;
-                        ProductType.CreatedDate = System.DateTime.Now;
-                        ProductType = await productTypeService.Create(ProductType);
-                    }
-                    SaveOperation = true;
-                }
+                _productType = new ProductTypeDTO();
             }
             else
             {
-                var record = await productTypeService.GetByCodeAndNotID(ProductType.Code,ProductType.Id);
-                if (record != null && record.Any())
+                // Populate carrier if already exists
+                _productType = await productTypeService.GetById(Id);
+            }
+        }
+
+        private async Task UpsertProductType()
+        {
+            _customFormValidator?.ClearFormErrors();
+            var errors = new Dictionary<string, List<string>>();
+            try
+            {
+                SaveOperation = false;
+                if (_productType?.Id == 0)
                 {
-                    errors.Add(nameof(ProductType.Code),
-                    new() { ConstantClass.ProductTypeCannotAddRecordCodeUsed });
-                    customFormValidator.DisplayFormErrors(errors);
+                    var record = await productTypeService.GetByCode(_productType.Code);
+                    if (record != null)
+                    {
+
+                        errors.Add(nameof(_productType.Code),
+                        new() { ConstantClass.ProductTypeCannotAddRecordCodeUsed });
+                        _customFormValidator?.DisplayFormErrors(errors);
+                    }
+                    else
+                    {
+                        // Insert Procedure.
+                        if (_productType.Id == 0)
+                        {
+                            _productType.CreatedBy = ConstantClass.SystemUser;
+                            _productType.CreatedDate = System.DateTime.Now;
+                            _productType = await productTypeService.Create(_productType);
+                        }
+                        SaveOperation = true;
+                    }
                 }
                 else
                 {
-                    // Update the record
-                    ProductType.ModifiedBy = ConstantClass.SystemUser;
-                    ProductType.ModifiedDate = System.DateTime.Now;
-                    await productTypeService.Update(ProductType);
-                    SaveOperation = true;
+                    var record = await productTypeService.GetByCodeAndNotID(_productType?.Code == null ? String.Empty : _productType.Code,
+                        _productType?.Id == null ? 0 : _productType.Id);
+                    if (record != null && record.Any())
+                    {
+                        errors.Add(nameof(_productType.Code),
+                        new() { ConstantClass.ProductTypeCannotAddRecordCodeUsed });
+                        _customFormValidator?.DisplayFormErrors(errors);
+                    }
+                    else
+                    {
+                        // Update the record
+                        (_productType = _productType ?? new ProductTypeDTO()).ModifiedBy = ConstantClass.SystemUser;
+                        _productType.ModifiedDate = System.DateTime.Now;
+                        await productTypeService.Update(_productType);
+                        SaveOperation = true;
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                errors.Add(nameof(_productType.Code),
+                        new() { ex.Message });
+                _customFormValidator?.DisplayFormErrors(errors);
+                SaveOperation = false;
+            }
         }
-        catch (Exception ex)
-        {
-            errors.Add(nameof(ProductType.Code),
-                    new() { ex.Message });                    
-                    customFormValidator.DisplayFormErrors(errors);
-            SaveOperation = false;
-        }
-    }
+
+    #endregion
+    
+    
 
 }

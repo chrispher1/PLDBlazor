@@ -35,19 +35,25 @@ namespace PLD.Blazor.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(int id)
         {
-            var record = _mapper.Map<Carrier, CarrierDTO>(await _unitOfWork.Carrier.Get(obj => obj.Id == id));
-            return Ok(record);
+            var record = await _unitOfWork.Carrier.Get(obj => obj.Id == id);
+
+            if (record == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(_mapper.Map<Carrier, CarrierDTO>(record));
         }
 
         [Route("GetByCode/{code}")]
         [HttpGet]
         public async Task<IActionResult> Get(string code)
         {
-            var record = _mapper.Map<Carrier, CarrierDTO>(await _unitOfWork.Carrier.Get(obj => obj.CarrierCode == code));
+            var record = await _unitOfWork.Carrier.Get(obj => obj.CarrierCode == code);
 
             if (record != null)
             {
-                return Ok(record);
+                return Ok(_mapper.Map<Carrier, CarrierDTO>(record));
             }
 
             return BadRequest(
@@ -87,7 +93,7 @@ namespace PLD.Blazor.WebApi.Controllers
                             new ErrorModelDTO()
                                 {
                                     StatusCode = StatusCodes.Status400BadRequest,
-                                    ErrorMessage = ex.InnerException.Message.Substring(0, ex.InnerException.Message.Length - 1)
+                                    ErrorMessage = ex.InnerException?.Message == null ? String.Empty : ex.InnerException.Message[..^1]
                             }
                         );
             }
@@ -125,7 +131,7 @@ namespace PLD.Blazor.WebApi.Controllers
                             new ErrorModelDTO()
                             {
                                 StatusCode = StatusCodes.Status400BadRequest,
-                                ErrorMessage = ex.InnerException.Message.Substring(0, ex.InnerException.Message.Length - 1)
+                                ErrorMessage = ex.InnerException?.Message == null ? String.Empty : ex.InnerException.Message[..^1]
                             }
                        );
             }
@@ -161,7 +167,7 @@ namespace PLD.Blazor.WebApi.Controllers
                             new ErrorModelDTO()
                             {
                                 StatusCode = StatusCodes.Status400BadRequest,
-                                ErrorMessage = ex.InnerException.Message.Substring(0, ex.InnerException.Message.Length - 1 )
+                                ErrorMessage = ex.InnerException?.Message == null ? String.Empty : ex.InnerException.Message[..^1]
                             }
                        );
             }            

@@ -3,8 +3,15 @@
 @inject IUserService userService
 
 @code {
-    protected override async Task OnInitializedAsync()
-    {
-        await userService.Logout();
-    }
+
+    #region Methods
+
+        protected override async Task OnInitializedAsync()
+        {
+            await userService.Logout();
+        }
+
+    #endregion
+
+    
 }

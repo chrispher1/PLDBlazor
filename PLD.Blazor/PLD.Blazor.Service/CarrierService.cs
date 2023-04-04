@@ -13,7 +13,7 @@ namespace PLD.Blazor.Service
         {
             _httpClient = httpClient;
         }
-        public async Task<CarrierDTO> Create(CarrierDTO carrier)
+        public async Task<CarrierDTO?> Create(CarrierDTO carrier)
         {
             var content = JsonConvert.SerializeObject(carrier);
             var bodyContent = new StringContent(content, Encoding.UTF8, "application/json");
@@ -27,10 +27,9 @@ namespace PLD.Blazor.Service
             else
             {
                 var errorModel = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(errorModel.ErrorMessage);
+                throw new Exception(errorModel?.ErrorMessage);
             }
         }
-
         public async Task Update(CarrierDTO carrier)
         {
             var content = JsonConvert.SerializeObject(carrier);
@@ -41,10 +40,9 @@ namespace PLD.Blazor.Service
             if( !response.IsSuccessStatusCode)
             {
                 var errorModel = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(errorModel.ErrorMessage);
+                throw new Exception(errorModel?.ErrorMessage);
             }
         }
-
         public async Task<IEnumerable<CarrierDTO>> GetAll()
         {
             var response = await _httpClient.GetAsync("/api/Carrier");
@@ -55,40 +53,36 @@ namespace PLD.Blazor.Service
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var result = JsonConvert.DeserializeObject<IEnumerable<CarrierDTO>>(responseContent);
 
-                return result;
+                return result ?? emptyList;
             }
 
             return emptyList;
         }
 
-        public async Task<CarrierDTO> GetByCode(string code)
+        public async Task<CarrierDTO?> GetByCode(string code)
         {            
             var response = await _httpClient.GetAsync("/api/Carrier/GetByCode/" + code);            
             var responseContent = await response.Content.ReadAsStringAsync();
-            if (response.IsSuccessStatusCode)
-            {
-                
-                var result = JsonConvert.DeserializeObject<CarrierDTO>(responseContent);
 
+            if (response.IsSuccessStatusCode)
+            {                
+                var result = JsonConvert.DeserializeObject<CarrierDTO>(responseContent);
                 return result;
             }
             else
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                if (result.ErrorMessage == ConstantClass.NoRecordFound)
+                if (result?.ErrorMessage == ConstantClass.NoRecordFound)
                 {
                     return null;
                 }
                 else
                 {
-                    throw new Exception(result.ErrorMessage);
+                    throw new Exception(result?.ErrorMessage);
                 }
-            }
-
-            return null;
-        }
-        
-        public async Task<IEnumerable<CarrierDTO>> GetByCodeAndNotID(string code, int id)
+            }            
+        }        
+        public async Task<IEnumerable<CarrierDTO>?> GetByCodeAndNotID(string code, int id)
         {
             var response = await _httpClient.GetAsync("/api/Carrier/GetByCodeAndNotID/" + code +"/" + id);
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -96,26 +90,21 @@ namespace PLD.Blazor.Service
             {
 
                 var result = JsonConvert.DeserializeObject<IEnumerable<CarrierDTO>>(responseContent);
-
                 return result;
             }
             return null;
         }
-
-        public async Task<CarrierDTO> GetById(int id)
+        public async Task<CarrierDTO?> GetById(int id)
         {
             var response = await _httpClient.GetAsync("/api/Carrier/" + id);
             var responseContent = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
             {
-
                 var result = JsonConvert.DeserializeObject<CarrierDTO>(responseContent);
-
                 return result;
             }
             return null;
         }
-
         public async Task Delete(int id)
         {
             var response = await _httpClient.DeleteAsync("/api/Carrier/" + id);
@@ -124,7 +113,7 @@ namespace PLD.Blazor.Service
             if (!response.IsSuccessStatusCode)
             {
                 var errorModel = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(errorModel.ErrorMessage);
+                throw new Exception(errorModel?.ErrorMessage);
             }
         }
     }

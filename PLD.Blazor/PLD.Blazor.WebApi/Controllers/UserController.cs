@@ -63,7 +63,7 @@ namespace PLD.Blazor.WebApi.Controllers
                             new ErrorModelDTO()
                             {
                                 StatusCode = StatusCodes.Status400BadRequest,
-                                ErrorMessage = ex.InnerException.Message.Substring(0, ex.InnerException.Message.Length - 1)
+                                ErrorMessage = ex.InnerException?.Message == null ? String.Empty : ex.InnerException.Message[..^1]
                             }
                         );
             }
@@ -101,7 +101,7 @@ namespace PLD.Blazor.WebApi.Controllers
                             new ErrorModelDTO()
                             {
                                 StatusCode = StatusCodes.Status400BadRequest,
-                                ErrorMessage = ex.InnerException.Message.Substring(0, ex.InnerException.Message.Length - 1)
+                                ErrorMessage = ex.InnerException?.Message == null ? String.Empty : ex.InnerException.Message[..^1]
                             }
                         );
             }
@@ -137,7 +137,7 @@ namespace PLD.Blazor.WebApi.Controllers
                             new ErrorModelDTO()
                             {
                                 StatusCode = StatusCodes.Status400BadRequest,
-                                ErrorMessage = ex.InnerException.Message.Substring(0, ex.InnerException.Message.Length - 1)
+                                ErrorMessage = ex.InnerException?.Message == null ? String.Empty : ex.InnerException.Message[..^1]
                             }
                        );
             }
@@ -156,7 +156,7 @@ namespace PLD.Blazor.WebApi.Controllers
                 string d = sectionAPISettings2.GetValue<string>("ValidAudience23");
                 
                 // binding the configuration values to an instance of an object
-                APISettings objectAPISettings = new APISettings();
+                APISettings objectAPISettings = new();
                 _configuration.GetSection("APISettings").Bind(objectAPISettings);
 
                 APISettings APISettings2 = _configuration.GetSection("APISettings2").Get<APISettings>();
@@ -186,7 +186,7 @@ namespace PLD.Blazor.WebApi.Controllers
                             new ErrorModelDTO()
                             {
                                 StatusCode = StatusCodes.Status400BadRequest,
-                                ErrorMessage = ex.InnerException.Message.Substring(0, ex.InnerException.Message.Length - 1)
+                                ErrorMessage = ex.InnerException?.Message == null ? String.Empty : ex.InnerException.Message[..^1]
                             }
                         );
             }
@@ -205,13 +205,13 @@ namespace PLD.Blazor.WebApi.Controllers
         {
             try
             {
-                var record = _mapper.Map<User, UserDTO>(await _unitOfWork.User.Get(obj => obj.Id == id, includeProperties: "UserRoles"));
+                var record = await _unitOfWork.User.Get(obj => obj.Id == id, includeProperties: "UserRoles");
 
                 if (record == null)
                 {
                     return NotFound();
                 }
-                return Ok(record);
+                return Ok(_mapper.Map<User, UserDTO>(record));
             }
             catch (Exception ex)
             {
@@ -226,11 +226,11 @@ namespace PLD.Blazor.WebApi.Controllers
         {
             try
             {
-                var record = _mapper.Map<User, UserDTO>(await _unitOfWork.User.Get(obj => obj.UserName == userName, includeProperties: "UserRoles"));
+                var record = await _unitOfWork.User.Get(obj => obj.UserName == userName, includeProperties: "UserRoles");
 
                 if (record != null)
                 {
-                    return Ok(record);
+                    return Ok(_mapper.Map<User, UserDTO>(record));
                 }
 
                 return NotFound(
@@ -293,7 +293,7 @@ namespace PLD.Blazor.WebApi.Controllers
                             new ErrorModelDTO()
                             {
                                 StatusCode = StatusCodes.Status400BadRequest,
-                                ErrorMessage = ex.InnerException.Message.Substring(0, ex.InnerException.Message.Length - 1)
+                                ErrorMessage = ex.InnerException?.Message == null ? String.Empty : ex.InnerException.Message[..^1]
                             }
                        );
             }
@@ -308,7 +308,7 @@ namespace PLD.Blazor.WebApi.Controllers
                 new Claim("WorkPlace", "Seven Seven Global")
             };
 
-            List<Role> roles = new List<Role>();
+            List<Role> roles = new();
 
             foreach(var userRole in user.UserRoles)
             {

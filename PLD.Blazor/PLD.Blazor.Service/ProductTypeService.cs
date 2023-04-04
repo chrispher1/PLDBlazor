@@ -18,7 +18,7 @@ namespace PLD.Blazor.Service
             _httpClient = httpClient;
         }
 
-        public async Task<ProductTypeDTO> Create(ProductTypeDTO productType)
+        public async Task<ProductTypeDTO?> Create(ProductTypeDTO productType)
         {
             var content = JsonConvert.SerializeObject(productType);
             var bodyContent = new StringContent(content,Encoding.UTF8, "application/json");
@@ -33,7 +33,7 @@ namespace PLD.Blazor.Service
             else
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
         public async Task Delete(int id)
@@ -44,7 +44,7 @@ namespace PLD.Blazor.Service
             if (!response.IsSuccessStatusCode)
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
 
@@ -58,12 +58,12 @@ namespace PLD.Blazor.Service
                 var respoonseContent = await response.Content.ReadAsStringAsync();
                 var result = JsonConvert.DeserializeObject<IEnumerable<ProductTypeDTO>>(respoonseContent);
 
-                return result;
+                return result ?? emptyList;
             }
             return emptyList;
         }
 
-        public async Task<ProductTypeDTO> GetByCode(string code)
+        public async Task<ProductTypeDTO?> GetByCode(string code)
         {
             var response = await _httpClient.GetAsync("/api/ProductType/GetByCode/" + code);
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -76,19 +76,18 @@ namespace PLD.Blazor.Service
             else
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                if (result.ErrorMessage == ConstantClass.NoRecordFound)
+                if (result?.ErrorMessage == ConstantClass.NoRecordFound)
                 {
                     return null;
                 }
                 else
                 {
-                    throw new Exception(result.ErrorMessage);
+                    throw new Exception(result?.ErrorMessage);
                 }
-            }
-            return null;
+            }            
         }
 
-        public async Task<IEnumerable<ProductTypeDTO>> GetByCodeAndNotID(string code, int id)
+        public async Task<IEnumerable<ProductTypeDTO>?> GetByCodeAndNotID(string code, int id)
         {
             var response = await _httpClient.GetAsync("/api/ProductType/GetByCodeAndNotID/" + code + "/" + id);
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -101,7 +100,7 @@ namespace PLD.Blazor.Service
             return null;
         }
 
-        public async Task<ProductTypeDTO> GetById(int id)
+        public async Task<ProductTypeDTO?> GetById(int id)
         {
             var response = await _httpClient.GetAsync("/api/Producttype/" + id);
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -115,16 +114,15 @@ namespace PLD.Blazor.Service
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
 
-                if (result.ErrorMessage == ConstantClass.NoRecordFound)
+                if (result?.ErrorMessage == ConstantClass.NoRecordFound)
                 {
                     return null;
                 }
                 else
                 {
-                    throw new Exception(result.ErrorMessage);
+                    throw new Exception(result?.ErrorMessage);
                 }
-            }
-            return null;
+            }            
         }
 
         public async Task Update(ProductTypeDTO productType)
@@ -137,7 +135,7 @@ namespace PLD.Blazor.Service
             if (!response.IsSuccessStatusCode)
             {
                 var errorModel = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(errorModel.ErrorMessage);
+                throw new Exception(errorModel?.ErrorMessage);
             }
         }
     }

@@ -261,7 +261,280 @@ namespace PLD.Blazor.Service
                 };
                 
                 await _unitOfWork.Product.Add(products);
-                await _unitOfWork.Save();                
+                
+                IEnumerable<StateCode> stateCodes = new List<StateCode>()
+                {
+                    new StateCode()
+                    {
+                        Code = "AA",
+                        Name = "Armed Forces - America",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "AK",
+                        Name = "Alaska",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "AL",
+                        Name = "Alabama",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "AP",
+                        Name = "Military Address Designation",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "AR",
+                        Name = "Arkansas",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "AZ",
+                        Name = "Arizona",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "CA",
+                        Name = "California",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "CO",
+                        Name = "Colorado",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "CT",
+                        Name = "Connecticut",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "DC",
+                        Name = "District of Columbia",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "DE",
+                        Name = "Delaware",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "FL",
+                        Name = "Florida",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "GA",
+                        Name = "Georgia",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "GU",
+                        Name = "Guam",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "HI",
+                        Name = "Hawaii",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "IA",
+                        Name = "Iowa",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "ID",
+                        Name = "Idaho",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "IL",
+                        Name = "Illinois",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "IN",
+                        Name = "Indiana",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "KS",
+                        Name = "Kansas",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "KY",
+                        Name = "Kentucky",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new StateCode()
+                    {
+                        Code = "LA",
+                        Name = "Louisiana",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                };
+
+                await _unitOfWork.StateCode.Add(stateCodes);
+
+                //Seed the activities
+                var activities = new List<Activity>()
+                {
+                    new Activity()
+                    {
+                        Code = "T",
+                        Description = "Target",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new Activity()
+                    {
+                        Code = "E",
+                        Description = "Excess",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new Activity()
+                    {
+                        Code = "R",
+                        Description = "Renewal",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new Activity()
+                    {
+                        Code = "A",
+                        Description = "Adjustment",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    }
+                };
+                await _unitOfWork.Activity.Add(activities);
+
+                //Seed premium mode
+                var premiumModes = new List<PremiumMode>()
+                {
+                    new PremiumMode()
+                    {
+                        Code = "AB",
+                        Description = "Annual - Bank Draft",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new PremiumMode()
+                    {
+                        Code = "AN",
+                        Description = "Annual",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new PremiumMode()
+                    {
+                        Code = "MB",
+                        Description = "Semiannual - Bank Draft",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new PremiumMode()
+                    {
+                        Code = "MN",
+                        Description = "Monthly",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new PremiumMode()
+                    {
+                        Code = "N/A",
+                        Description = "N/A",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new PremiumMode()
+                    {
+                        Code = "OT",
+                        Description = "Other",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new PremiumMode()
+                    {
+                        Code = "QT",
+                        Description = "Quarterly",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new PremiumMode()
+                    {
+                        Code = "SA",
+                        Description = "Semiannual",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new PremiumMode()
+                    {
+                        Code = "SB",
+                        Description = "Monthly - Bank Draft",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new PremiumMode()
+                    {
+                        Code = "SP",
+                        Description = "Singple Payment/Lump Sum",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    }
+                };
+
+                await _unitOfWork.PremiumMode.Add(premiumModes);
+                //todo Seed Transaction Type
+
+                await _unitOfWork.Save();
             }
             catch (Exception ex)
             {

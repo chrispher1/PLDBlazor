@@ -43,32 +43,32 @@ namespace PLD.Blazor.WebApi.Controllers
         {
             try
             {
-                var record = _mapper.Map<Role, RoleDTO>(await _unitOfWork.Role.Get(obj => obj.Id == id, includeProperties: "UserRoles"));
+                var record = await _unitOfWork.Role.Get(obj => obj.Id == id, includeProperties: "UserRoles");
 
                 if (record == null)
                 {
                     return NotFound();
                 }
-                return Ok(record);
+                return Ok(_mapper.Map<Role, RoleDTO> (record));
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
-        
 
+        [AllowAnonymous]
         [Route("GetByName/{name}")]
         [HttpGet]
         public async Task<IActionResult> Get(string name)
         {
             try
             {
-                var record = _mapper.Map<Role, RoleDTO>(await _unitOfWork.Role.Get(obj => obj.Name == name, includeProperties: "UserRoles"));
+                var record = await _unitOfWork.Role.Get(obj => obj.Name == name, includeProperties: "UserRoles");
 
                 if (record != null)
                 {
-                    return Ok(record);
+                    return Ok(_mapper.Map<Role, RoleDTO>(record));
                 }
 
                 return NotFound(
@@ -118,7 +118,7 @@ namespace PLD.Blazor.WebApi.Controllers
                             new ErrorModelDTO()
                             {
                                 StatusCode = StatusCodes.Status400BadRequest,
-                                ErrorMessage = ex.InnerException.Message.Substring(0, ex.InnerException.Message.Length - 1)
+                                ErrorMessage = ex.InnerException?.Message == null ? String.Empty :  ex.InnerException.Message[..^1]
                             }
                         );
             }
@@ -154,7 +154,7 @@ namespace PLD.Blazor.WebApi.Controllers
                             new ErrorModelDTO()
                             {
                                 StatusCode = StatusCodes.Status400BadRequest,
-                                ErrorMessage = ex.InnerException.Message.Substring(0, ex.InnerException.Message.Length - 1)
+                                ErrorMessage = ex.InnerException?.Message == null ? String.Empty:ex.InnerException.Message[..^1]
                             }
                        );
             }
@@ -191,7 +191,7 @@ namespace PLD.Blazor.WebApi.Controllers
                             new ErrorModelDTO()
                             {
                                 StatusCode = StatusCodes.Status400BadRequest,
-                                ErrorMessage = ex.InnerException.Message.Substring(0, ex.InnerException.Message.Length - 1)
+                                ErrorMessage = ex.InnerException?.Message == null ? String.Empty : ex.InnerException.Message[..^1]
                             }
                        );
             }
