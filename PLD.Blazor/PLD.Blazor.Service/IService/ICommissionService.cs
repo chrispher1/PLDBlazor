@@ -9,6 +9,6 @@ namespace PLD.Blazor.Service.IService
 {
     public interface ICommissionService
     {
-        Task<IEnumerable<CommissionDTO>> GetAll();
+        Task<IEnumerable<CommissionDTO>?> GetAll();
     }
 }

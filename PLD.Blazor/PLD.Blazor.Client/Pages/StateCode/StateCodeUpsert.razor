@@ -1,28 +1,28 @@
-﻿@page "/activity/activityUpdate/{Action}/{Code}"
-@page "/activity/activityInsert/{Action}"
+﻿@page "/stateCode/stateCodeUpdate/{Action}/{Code}"
+@page "/stateCode/stateCodeInsert/{Action}"
 @using Microsoft.AspNetCore.Authorization;
 @attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
-@inject IActivityService activityService
+@inject IStateCodeService _stateCodeService
 
 @if (Action == ConstantClass.AddAction)
 {
-    <h3>New Transaction Type</h3>
+    <h3>New State Code</h3>
 }
 else if (Action == ConstantClass.EditAction)
 {
-    <h3>Update Transaction Type</h3>
+    <h3>Update State Code</h3>
 }
 
 @if (_saveOperation == true)
 {
-    <span>Transaction Type successfully saved</span>
+    <span>State Code successfully saved</span>
     <br />
 }
 
 <div class="container border mt-2 p-4">
-    @if (_activity != null)
+    @if (_stateCode != null)
     {
-        <EditForm Model="@(_activity = _activity ?? new ActivityDTO() )" OnValidSubmit="@UpsertActivity">
+        <EditForm Model="@_stateCode" OnValidSubmit="UpsertStateCode">
             <DataAnnotationsValidator />
             <CustomFormValidator @ref="_customFormValidator" />
             <div class="row mb-3">
@@ -31,17 +31,17 @@ else if (Action == ConstantClass.EditAction)
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(_activity.Code)" class="col-2 col-form-label text-end">Code</label>
-                <div class="col-2">
-                    <input type="text" @bind-value="_activity.Code" class="form-control" />
-                </div>
-                <label for="@nameof(_activity.Description)" class="col-5 col-form-label text-end">Descrption</label>
+                <label for="@nameof(_stateCode.Code)" class="col-2 col-form-label text-end">Code</label>
                 <div class="col-3">
-                    <input type="text" @bind-value="_activity.Description" class="form-control" />
+                    <input type="text" @bind="_stateCode.Code" class="form-control" />
+                </div>
+                <label for="@nameof(_stateCode.Name)" class="col-4 col-form-label text-end">Description</label>
+                <div class="col-3">
+                    <input type="text" @bind="_stateCode.Name" class="form-control" />
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="offset-4 col-8">
+                <div class="offset-5 col-7">
                     <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy" Context="authorizedContext">
                         <Authorized>
                             <button class="btn btn-primary">Save</button>
@@ -50,72 +50,74 @@ else if (Action == ConstantClass.EditAction)
                             <button class="btn btn-primary" disabled>Save</button>
                         </NotAuthorized>
                     </AuthorizeView>
-                    <NavLink class="btn btn-secondary" href="activity">Back</NavLink>
+                    <NavLink class="btn btn-secondary" href="stateCode">Back</NavLink>
                 </div>
             </div>
         </EditForm>
     }
+
 </div>
+
 @code {
+
     #region Parameters
+    
+    [Parameter]
+    public string? Code { get; set; }
+    [Parameter]
+    public string? Action { get; set; }
 
-        [Parameter]
-        public string Code { get; set; } = String.Empty;
-        [Parameter]
-        public string Action { get; set; } = String.Empty;
-
-    #endregion
+    #endregion    
 
     #region Fields
 
-        private ActivityDTO? _activity { get; set; }
+        private StateCodeDTO? _stateCode;
         private bool _saveOperation = false;
-        private CustomFormValidator? _customFormValidator;
+        protected CustomFormValidator? _customFormValidator;
 
     #endregion
-
+    
     #region Methods
 
     protected override async Task OnInitializedAsync()
     {
+
         if (String.IsNullOrEmpty(@Code))
         {
-            _activity = new ActivityDTO();
+            _stateCode = new StateCodeDTO();
         }
         else
         {
-            // Populate activity if already exists
-            _activity = await activityService.GetByCode(Code);
+            // Populate _stateCode if already exists
+            _stateCode = await _stateCodeService.GetByCode(Code);
         }
 
         await base.OnInitializedAsync();
     }
 
-    private async Task UpsertActivity()
+    private async Task UpsertStateCode()
     {
         _customFormValidator?.ClearFormErrors();
         var errors = new Dictionary<string, List<string>>();
         try
         {
             _saveOperation = false;
-            var record = await activityService.GetByCode(_activity?.Code == null ? String.Empty :
-            _activity.Code);
+            var record = await _stateCodeService.GetByCode(_stateCode?.Code ?? "");
 
             if (Action == ConstantClass.EditAction)
             {
                 if (record != null)
                 {
-
                     // Update the record
-                    (_activity = _activity ?? new ActivityDTO()).ModifiedBy = ConstantClass.SystemUser;
-                    _activity.ModifiedDate = System.DateTime.Now;
-                    await activityService.Update(_activity);
+                    (_stateCode = _stateCode ?? new StateCodeDTO()).ModifiedBy = ConstantClass.SystemUser;
+                    _stateCode.ModifiedDate = System.DateTime.Now;
+                    await _stateCodeService.Update(_stateCode);
                     _saveOperation = true;
                 }
                 else
                 {
-                    errors.Add(nameof(_activity.Code),
-                    new() { ConstantClass.ActivityCannotUpdateRecordCodeNotExists });
+                    errors.Add(nameof(_stateCode.Code),
+                    new() { ConstantClass.StateCodeCannotUpdateRecordCodeNotExists });
                     _customFormValidator?.DisplayFormErrors(errors);
                 }
             }
@@ -123,15 +125,15 @@ else if (Action == ConstantClass.EditAction)
             {
                 if (record != null)
                 {
-                    errors.Add(nameof(_activity.Code),
-                    new() { ConstantClass.ActivityCannotAddRecordCodeUsed });
+                    errors.Add(nameof(_stateCode.Code),
+                    new() { ConstantClass.StateCodeCannotAddRecordCodeUsed });
                     _customFormValidator?.DisplayFormErrors(errors);
                 }
                 else
                 {
-                    (_activity = _activity ?? new ActivityDTO()).CreatedBy = ConstantClass.SystemUser;
-                    _activity.CreatedDate = System.DateTime.Now;
-                    _activity = await activityService.Create(_activity);
+                    (_stateCode = _stateCode ?? new StateCodeDTO()).CreatedBy = ConstantClass.SystemUser;
+                    _stateCode.CreatedDate = System.DateTime.Now;
+                    _stateCode = await _stateCodeService.Create(_stateCode);
                     _saveOperation = true;
                     Action = ConstantClass.EditAction;
                 }
@@ -139,14 +141,11 @@ else if (Action == ConstantClass.EditAction)
         }
         catch (Exception ex)
         {
-            errors.Add(nameof(_activity.Code),
+            errors.Add(nameof(_stateCode.Code),
                     new() { ex.Message });
             _customFormValidator?.DisplayFormErrors(errors);
             _saveOperation = false;
         }
     }
-
     #endregion
-
-
 }

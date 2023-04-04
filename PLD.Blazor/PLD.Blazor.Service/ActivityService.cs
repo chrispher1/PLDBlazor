@@ -12,13 +12,13 @@ namespace PLD.Blazor.Service
 {
     public class ActivityService : IActivityService
     {
-        private HttpClient _httpClient;
+        private readonly HttpClient _httpClient;
 
         public ActivityService(HttpClient httpClient) {
             _httpClient = httpClient;
         }
 
-        public async Task<ActivityDTO> Create(ActivityDTO activity)
+        public async Task<ActivityDTO?> Create(ActivityDTO activity)
         {
             var content = JsonConvert.SerializeObject(activity);
             var bodyContent = new StringContent(content, Encoding.UTF8,"application/json");
@@ -33,7 +33,7 @@ namespace PLD.Blazor.Service
             else
             {
                 var errorModel = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(errorModel.ErrorMessage);
+                throw new Exception(errorModel?.ErrorMessage);
             }
         }
 
@@ -45,7 +45,7 @@ namespace PLD.Blazor.Service
             if (!response.IsSuccessStatusCode)
             {
                 var errorModel = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(errorModel.ErrorMessage);
+                throw new Exception(errorModel?.ErrorMessage);
             }
         }
 
@@ -59,7 +59,7 @@ namespace PLD.Blazor.Service
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var list = JsonConvert.DeserializeObject<IEnumerable<ActivityDTO>>(responseContent);
 
-                return list;
+                return list ?? emptyList;
             }
             else
             {
@@ -67,10 +67,9 @@ namespace PLD.Blazor.Service
             }
         }
 
-        public async Task<ActivityDTO> GetByCode(string code)
+        public async Task<ActivityDTO?> GetByCode(string code)
         {
-            var response = await _httpClient.GetAsync("/api/Activity/"+ code);
-            var emptyList = new List<ActivityDTO>();
+            var response = await _httpClient.GetAsync("/api/Activity/"+ code);            
             var responseContent = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
@@ -90,7 +89,7 @@ namespace PLD.Blazor.Service
             if (!response.IsSuccessStatusCode)
             {
                 var errorModel = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(errorModel.ErrorMessage);
+                throw new Exception(errorModel?.ErrorMessage);
             }
         }
             

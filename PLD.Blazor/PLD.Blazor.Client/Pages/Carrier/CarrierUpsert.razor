@@ -15,7 +15,7 @@ else
         <h3>Update Carrier</h3>
 }
 
-@if (SaveOperation == true)
+@if (_saveOperation == true)
 {
         <span>Carrier successfully saved</span>
         <br/>
@@ -23,23 +23,23 @@ else
 
 <div class="container border mt-2 p-4">
 
-    @if (Carrier != null)
+    @if (_carrier != null)
     {
-            <EditForm Model="@Carrier" OnValidSubmit="@UpsertCarrier">
+            <EditForm Model="@_carrier" OnValidSubmit="@UpsertCarrier">
                 <DataAnnotationsValidator />
-                <CustomFormValidator @ref="customFormValidator" />
+                <CustomFormValidator @ref="_customFormValidator" />
                 <div class="row mb-3">
-                    <label for="@nameof(Carrier.CarrierCode)" class="col-4 text-end">Code</label>
+                    <label for="@nameof(_carrier.CarrierCode)" class="col-4 text-end">Code</label>
                     <div class="col-8">
-                        <input type="text" @bind-value="Carrier.CarrierCode" />
-                        <ValidationMessage For=" ()=> Carrier.CarrierCode "></ValidationMessage>
+                        <input type="text" @bind-value="_carrier.CarrierCode" />
+                        <ValidationMessage For=" ()=> _carrier.CarrierCode "></ValidationMessage>
                     </div>
                 </div>
                 <div class="row mb-3">
-                    <label for="@nameof(Carrier.Name)" class="col-4 text-end">Name</label>
+                    <label for="@nameof(_carrier.Name)" class="col-4 text-end">Name</label>
                     <div class="col-8">
-                        <input type="text" @bind-value="Carrier.Name" />
-                        <ValidationMessage For=" ()=> Carrier.Name" />
+                        <input type="text" @bind-value="_carrier.Name" />
+                        <ValidationMessage For=" ()=> _carrier.Name" />
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -62,80 +62,93 @@ else
 
 @code {
 
-    [Parameter]
-    public int Id { get; set; }
-    private CarrierDTO Carrier { get; set; } = new CarrierDTO();
-    private bool SaveOperation = false;
-    protected CustomFormValidator customFormValidator;
+    #region Parameters
+
+        [Parameter]
+        public int Id { get; set; }
+
+    #endregion
+    
+    #region Fields
+
+        private CarrierDTO? _carrier ;
+        private bool _saveOperation = false;
+        protected CustomFormValidator? _customFormValidator;
+
+    #endregion
+
+
+    #region Methods
 
     protected override async Task OnInitializedAsync()
     {
         if (@Id == 0)
         {
-            Carrier = new CarrierDTO();
+            _carrier = new CarrierDTO();
         }
         else
         {
             // Populate carrier if already exists
-            Carrier = await carrierService.GetById(Id);
+            _carrier = await carrierService.GetById(Id);
         }
     }
 
     private async Task UpsertCarrier()
     {
-        customFormValidator.ClearFormErrors();
+        _customFormValidator?.ClearFormErrors();
         var errors = new Dictionary<string, List<string>>();
         try
         {
-            SaveOperation = false;
-            if (Carrier.Id == 0)
+            _saveOperation = false;
+            if (_carrier?.Id == 0)
             {
-                var record = await carrierService.GetByCode(Carrier.CarrierCode);
+                var record = await carrierService.GetByCode( _carrier?.CarrierCode == null ? String.Empty : _carrier.CarrierCode);
                 if (record != null)
                 {
 
-                    errors.Add(nameof(Carrier.CarrierCode),
+                    errors.Add(nameof(_carrier.CarrierCode),
                     new() { ConstantClass.CarrierCannotAddRecordCodeUsed });
-                    customFormValidator.DisplayFormErrors(errors);
+                    _customFormValidator?.DisplayFormErrors(errors);
                 }
                 else
                 {
                     // Insert Procedure.
-                    if (Carrier.Id == 0)
+                    if (_carrier?.Id == 0)
                     {
-                        Carrier.CreatedBy = ConstantClass.SystemUser;
-                        Carrier.CreatedDate = System.DateTime.Now;
-                        Carrier = await carrierService.Create(Carrier);
+                        _carrier.CreatedBy = ConstantClass.SystemUser;
+                        _carrier.CreatedDate = System.DateTime.Now;
+                        _carrier = await carrierService.Create(_carrier);
                     }
-                    SaveOperation = true;
+                    _saveOperation = true;
                 }
             }
             else
             {
-                var record = await carrierService.GetByCodeAndNotID(Carrier.CarrierCode, Carrier.Id);
+                var record = await carrierService.GetByCodeAndNotID( _carrier?.CarrierCode == null ? String.Empty : _carrier.CarrierCode , _carrier?.Id == null ? 0 : _carrier.Id);
                 if (record != null && record.Any())
                 {
-                    errors.Add(nameof(Carrier.CarrierCode),
+                    errors.Add(nameof(_carrier.CarrierCode),
                     new() { ConstantClass.CarrierCannotAddRecordCodeUsed });
-                    customFormValidator.DisplayFormErrors(errors);
+                    _customFormValidator?.DisplayFormErrors(errors);
                 }
                 else
                 {
                     // Update the record
-                    Carrier.ModifiedBy = ConstantClass.SystemUser;
-                    Carrier.ModifiedDate = System.DateTime.Now;
-                    await carrierService.Update(Carrier);
-                    SaveOperation = true;
-
+                    (_carrier = _carrier ?? new CarrierDTO()).ModifiedBy = ConstantClass.SystemUser;
+                    _carrier.ModifiedDate = System.DateTime.Now;
+                    await carrierService.Update(_carrier);
+                    _saveOperation = true;
                 }
             }
         }
         catch (Exception ex)
         {
-            errors.Add(nameof(Carrier.CarrierCode),
+            errors.Add(nameof(_carrier.CarrierCode),
                     new() { ex.Message });
-            customFormValidator.DisplayFormErrors(errors);
-            SaveOperation = false;
+            _customFormValidator?.DisplayFormErrors(errors);
+            _saveOperation = false;
         }
     }
+
+    #endregion
 }

@@ -10,8 +10,8 @@ namespace PLD.Blazor.Service.IService
     public interface IActivityService
     {
         Task<IEnumerable<ActivityDTO>> GetAll();
-        Task<ActivityDTO> Create(ActivityDTO activity);
-        Task<ActivityDTO> GetByCode(string code);
+        Task<ActivityDTO?> Create(ActivityDTO activity);
+        Task<ActivityDTO?> GetByCode(string code);
         Task Update(ActivityDTO activity);
         Task Delete(string code);
     }

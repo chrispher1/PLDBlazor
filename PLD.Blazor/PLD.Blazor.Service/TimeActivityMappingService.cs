@@ -20,7 +20,7 @@ namespace PLD.Blazor.Service
             this._httpClient = httpClient;
         }
 
-        public async Task<TimeActivityMappingDTO> Create(TimeActivityMappingDTO timeActivityMappingDTO)
+        public async Task<TimeActivityMappingDTO?> Create(TimeActivityMappingDTO timeActivityMappingDTO)
         {
             var content = JsonConvert.SerializeObject(timeActivityMappingDTO);
             var bodyContent = new StringContent(content,Encoding.UTF8,"application/json");
@@ -34,7 +34,7 @@ namespace PLD.Blazor.Service
             else
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
 
@@ -46,7 +46,7 @@ namespace PLD.Blazor.Service
             if (!response.IsSuccessStatusCode)
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
         public async Task<IEnumerable<TimeActivityMappingDTO>> GetAll()
@@ -58,15 +58,15 @@ namespace PLD.Blazor.Service
             if (response.IsSuccessStatusCode)
             {
                 var result = JsonConvert.DeserializeObject<IEnumerable<TimeActivityMappingDTO>>(responseContent);
-                return result;
+                return result ?? emptyList;
             }
             return emptyList;
         }
 
-        public async Task<TimeActivityMappingDTO> GetByCarrierIdCarrierTimeCarrierActivityPolicyYearStartPolicyYearEnd(
+        public async Task<TimeActivityMappingDTO?> GetByCarrierIdCarrierTimeCarrierActivityPolicyYearStartPolicyYearEnd(
             int carrierId, string carrierActivity, int policyYearStart, int policyYearEnd, string? carrierTime = null)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             sb.Append("/api/TimeActivityMapping/GetByCarrierIdCarrierTimeCarrierActivityPolicyYearStartPolicyYearEnd");
             sb.Append($"/{carrierId}");
             sb.Append($"/{carrierActivity}");
@@ -86,21 +86,21 @@ namespace PLD.Blazor.Service
             else
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                if (result.ErrorMessage == ConstantClass.NoRecordFound)
+                if (result?.ErrorMessage == ConstantClass.NoRecordFound)
                 {
                     return null;
                 }
                 else
                 {
-                    throw new Exception(result.ErrorMessage);
+                    throw new Exception(result?.ErrorMessage);
                 }
             }            
         }
 
-        public async Task<IEnumerable<TimeActivityMappingDTO>> GetByCarrierIdCarrierTimeCarrierActivityPolicyYearStartPolicyYearEndAndNotById(
+        public async Task<IEnumerable<TimeActivityMappingDTO>?> GetByCarrierIdCarrierTimeCarrierActivityPolicyYearStartPolicyYearEndAndNotById(
             int carrierId, string carrierActivity, int policyYearStart, int policyYearEnd, int id, string? carrierTime = null)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             sb.Append("/api/TimeActivityMapping/GetByCarrierIdCarrierTimeCarrierActivityPolicyYearStartPolicyYearEndAndNotById");
             sb.Append($"/{carrierId}");
             sb.Append($"/{carrierActivity}");
@@ -122,18 +122,18 @@ namespace PLD.Blazor.Service
             else
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                if (result.ErrorMessage == ConstantClass.NoRecordFound)
+                if (result?.ErrorMessage == ConstantClass.NoRecordFound)
                 {
                     return null;
                 }
                 else
                 {
-                    throw new Exception(result.ErrorMessage);
+                    throw new Exception(result?.ErrorMessage);
                 }
             }
         }
 
-        public async Task<TimeActivityMappingDTO> GetById(int id)
+        public async Task<TimeActivityMappingDTO?> GetById(int id)
         {
             var response = await _httpClient.GetAsync($"/api/TimeActivityMapping/{id}");
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -156,7 +156,7 @@ namespace PLD.Blazor.Service
             if (!response.IsSuccessStatusCode)
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
     }

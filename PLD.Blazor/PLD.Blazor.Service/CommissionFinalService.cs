@@ -18,7 +18,7 @@ namespace PLD.Blazor.Service
             _httpClient = httpClient;
         }
 
-        public async Task<CommissionFinalDTO> Create(CommissionFinalDTO commissionFinalDTO)
+        public async Task<CommissionFinalDTO?> Create(CommissionFinalDTO commissionFinalDTO)
         {
             commissionFinalDTO.Activity = null;
             commissionFinalDTO.Carrier = null;
@@ -38,7 +38,7 @@ namespace PLD.Blazor.Service
             else
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
 
         }
@@ -51,7 +51,7 @@ namespace PLD.Blazor.Service
             if (!response.IsSuccessStatusCode)
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
 
@@ -63,12 +63,12 @@ namespace PLD.Blazor.Service
             if (response.IsSuccessStatusCode)
             {
                 var list = JsonConvert.DeserializeObject<IEnumerable<CommissionFinalDTO>>(respnseContent);
-                return list;
+                return list ?? emptyList;
             }
             return emptyList;
         }
 
-        public async Task<CommissionFinalDTO> GetById(int id)
+        public async Task<CommissionFinalDTO?> GetById(int id)
         {
             var response = await _httpClient.GetAsync($"/api/CommissionFinal/{id}");
             var respnseContent = await response.Content.ReadAsStringAsync();
@@ -90,7 +90,7 @@ namespace PLD.Blazor.Service
             if (!response.IsSuccessStatusCode)
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
     }

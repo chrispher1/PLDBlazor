@@ -19,6 +19,7 @@ namespace PLD.Blazor.DataAccess
         public DbSet<CommissionError> CommissionError { get; set; }
         public DbSet<PremiumMode> PremiumMode { get; set; }
         public DbSet<CommissionFinal> CommissionFinal { get; set; }
+        public DbSet<StateCode> StateCode { get; set; }
 
        protected override void OnModelCreating (ModelBuilder modelBuilder)
         {

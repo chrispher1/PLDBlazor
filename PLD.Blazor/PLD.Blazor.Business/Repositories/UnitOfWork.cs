@@ -12,6 +12,8 @@ namespace PLD.Blazor.Business.Repositories
 {
     public sealed class UnitOfWork : IUnitOfWork
     {
+     
+        #region Properties
         public ICarrierRepository<Carrier> Carrier { get; }
         public IProductTypeRepository<ProductType> ProductType { get; }
         public IProductRepository<Product> Product { get; }
@@ -23,10 +25,18 @@ namespace PLD.Blazor.Business.Repositories
         public IPremiumModeRepository<PremiumMode> PremiumMode { get; }
         public ICommissionErrorRepository<CommissionError> CommissionError { get; }
         public ICommissionFinalRepository<CommissionFinal> CommissionFinal { get; }
+        public IStateCodeRepository<StateCode> StateCode { get; }
+        public ICommissionRepository<CommissionDTO> Commission { get; }
 
+        #endregion
+
+        #region Fields
 
         private readonly ApplicationDBContext _applicationDBContext;
 
+        #endregion
+
+        #region Methods
         public UnitOfWork(ApplicationDBContext applicationDBContext)
         {
             _applicationDBContext = applicationDBContext;   
@@ -41,10 +51,16 @@ namespace PLD.Blazor.Business.Repositories
             PremiumMode = new PremiumModeRepository(applicationDBContext);
             CommissionError = new CommissionErrorRepository(applicationDBContext);
             CommissionFinal = new CommissionFinalRepository(applicationDBContext);
+            StateCode = new StateCodeRepository(applicationDBContext);
+            Commission = new CommissionRepository<CommissionDTO,CommissionError, CommissionFinal>(applicationDBContext);
+
         }
         public async Task Save()
         {
             await _applicationDBContext.SaveChangesAsync();
         }
+
+        #endregion 
+
     }
 }

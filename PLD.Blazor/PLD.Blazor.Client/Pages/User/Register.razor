@@ -10,7 +10,7 @@
     <h3>Register</h3>
 }
 
-@if (SaveOperation == true)
+@if (_saveOperation == true)
 {
     <span>User successfully register</span>
     <br/>
@@ -18,11 +18,11 @@
 
 <div class="container border mt-2 p-4">
 
-    @if (UserForRegister != null)
+    @if (_userForRegister != null)
     {
-        <EditForm Model="@UserForRegister" OnValidSubmit="InsertUserForRegister">
+        <EditForm Model="@_userForRegister" OnValidSubmit="InsertUserForRegister">
             <DataAnnotationsValidator />
-            <CustomFormValidator @ref="customFormValidator" />
+            <CustomFormValidator @ref="_customFormValidator" />
 
             <div class="row mb-3 mt-3">
                 <div  class="offset-4 col-auto ps-0">
@@ -30,41 +30,41 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(UserForRegister.UserName)" class="offset-3 col-2 col-form-label text-end">User Name</label>
+                <label for="@nameof(_userForRegister.UserName)" class="offset-3 col-2 col-form-label text-end">User Name</label>
                 <div class="col-auto">    
-                   <InputText type="text" @bind-Value="UserForRegister.UserName" class="form-control" />
+                   <InputText type="text" @bind-Value="_userForRegister.UserName" class="form-control" />
                 </div>
             </div>
             
             <div class="row mb-3">
-                <label for="@nameof(UserForRegister.Password)" class="offset-3 col-2 col-fom-label text-end">Password</label>
+                <label for="@nameof(_userForRegister.Password)" class="offset-3 col-2 col-fom-label text-end">Password</label>
                 <div class="col-auto">
-                   <InputText type="password" @bind-Value="UserForRegister.Password" class="form-control" />                       
+                   <InputText type="password" @bind-Value="_userForRegister.Password" class="form-control" />                       
                 </div>
             </div>          
 
             <div class="row mb-3">
-                <label for="@nameof(UserForRegister.ConfirmPassword)" class="offset-3 col-2 col-fom-label text-end">Confirm Password</label>
+                <label for="@nameof(_userForRegister.ConfirmPassword)" class="offset-3 col-2 col-fom-label text-end">Confirm Password</label>
                 <div class="col-auto">
-                   <InputText type="password" @bind-Value="UserForRegister.ConfirmPassword" class="form-control" />
+                   <InputText type="password" @bind-Value="_userForRegister.ConfirmPassword" class="form-control" />
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(UserForRegister.FirstName)" class="offset-3 col-2 col-fom-label text-end">First Name</label>
+                <label for="@nameof(_userForRegister.FirstName)" class="offset-3 col-2 col-fom-label text-end">First Name</label>
                 <div class="col-auto">
-                   <InputText type="text" @bind-Value="UserForRegister.FirstName" class="form-control" />               
+                   <InputText type="text" @bind-Value="_userForRegister.FirstName" class="form-control" />               
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(UserForRegister.LastName)" class="offset-3 col-2 col-fom-label text-end">Last Name</label>
+                <label for="@nameof(_userForRegister.LastName)" class="offset-3 col-2 col-fom-label text-end">Last Name</label>
                 <div class="col-auto">
-                   <InputText type="text" @bind-Value="UserForRegister.LastName" class="form-control" />                 
+                   <InputText type="text" @bind-Value="_userForRegister.LastName" class="form-control" />                 
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(UserForRegister.BirthDate)" class="offset-3 col-2 col-fom-label text-end">Birth Date</label>
+                <label for="@nameof(_userForRegister.BirthDate)" class="offset-3 col-2 col-fom-label text-end">Birth Date</label>
                 <div class="col-auto">                    
-                    <InputDate @bind-Value="UserForRegister.BirthDate" class="form-control" />             
+                    <InputDate @bind-Value="_userForRegister.BirthDate" class="form-control" />             
                 </div>
             </div>
             <div class="row mb-3">
@@ -79,67 +79,82 @@
 
 @code {
 
-    [Parameter]
-    public int Id { get; set; }
-    private UserForRegisterDTO UserForRegister { get; set; } = new UserForRegisterDTO();    
-    private bool SaveOperation = false;
-    protected CustomFormValidator customFormValidator;
+    #region Parameters
 
-    protected override void OnInitialized()
-    {
-        if (@Id == 0)
+        [Parameter]
+        public int Id { get; set; }
+
+    #endregion
+    
+    #region Fields
+
+        private UserForRegisterDTO? _userForRegister;
+        private CustomFormValidator? _customFormValidator;
+        private bool _saveOperation = false;
+
+    #endregion
+    
+    #region Methods
+
+        protected override void OnInitialized()
         {
-            UserForRegister = new UserForRegisterDTO();
-            UserForRegister.BirthDate = System.DateTime.Now;
+            if (@Id == 0)
+            {
+                _userForRegister = new UserForRegisterDTO();
+                _userForRegister.BirthDate = System.DateTime.Now;
+            }
         }
-    }
 
-    private async Task InsertUserForRegister()
-    {
-        customFormValidator.ClearFormErrors();
-        var errors = new Dictionary<string, List<string>>();
-        try
+        private async Task InsertUserForRegister()
         {
-            SaveOperation = false;
-            var record = await userService.GetByUserName(UserForRegister.UserName);
-            if (record != null)
+            _customFormValidator?.ClearFormErrors();
+            var errors = new Dictionary<string, List<string>>();
+            try
+            {
+                _saveOperation = false;
+                var record = await userService.GetByUserName(_userForRegister?.UserName == null ? String.Empty : _userForRegister.UserName);
+                if (record != null)
                 {
 
-                    errors.Add(nameof(UserForRegister.UserName),
+                    errors.Add(nameof(_userForRegister.UserName),
                     new() { ConstantClass.UserCannotAddRecordUserNameUsed });
-                    customFormValidator.DisplayFormErrors(errors);
+                    _customFormValidator?.DisplayFormErrors(errors);
                 }
                 else
                 {
                     // Insert Procedure.
-                    UserForRegister.CreatedBy = ConstantClass.SystemUser;
-                    UserForRegister.CreatedDate = System.DateTime.Now;
+                    (_userForRegister = _userForRegister ?? new UserForRegisterDTO()).CreatedBy = ConstantClass.SystemUser;
+                    _userForRegister.CreatedDate = System.DateTime.Now;
                     // Add default role
-                    UserForRegister.UserRoles = new List<UserRoleDTO>();
-                    
+                    _userForRegister.UserRoles = new List<UserRoleDTO>();
+
                     UserRoleDTO objUserRoleCommmissionUserRead = new UserRoleDTO();
                     objUserRoleCommmissionUserRead.CreatedDate = System.DateTime.Now;
-                    objUserRoleCommmissionUserRead.CreatedBy =ConstantClass.SystemUser;                   
-                    objUserRoleCommmissionUserRead.RoleId =( await roleService.GetByName(ConstantClass.Role_Commission_User_Read) as RoleDTO).Id;                    
-                    UserForRegister.UserRoles.Add(objUserRoleCommmissionUserRead);
-                    
+                    objUserRoleCommmissionUserRead.CreatedBy = ConstantClass.SystemUser;
+                    objUserRoleCommmissionUserRead.RoleId = (await roleService.GetByName(ConstantClass.Role_Commission_User_Read) ?? new RoleDTO()).Id;
+                    _userForRegister.UserRoles.Add(objUserRoleCommmissionUserRead);
+
                     UserRoleDTO objUserRoleCaseUserRead = new UserRoleDTO();
                     objUserRoleCaseUserRead.CreatedDate = System.DateTime.Now;
-                    objUserRoleCaseUserRead.CreatedBy =ConstantClass.SystemUser;                   
-                    objUserRoleCaseUserRead.RoleId =( await roleService.GetByName(ConstantClass.Role_Case_User_Read) as RoleDTO).Id;                    
-                    UserForRegister.UserRoles.Add(objUserRoleCaseUserRead);
-                    await userService.Register(UserForRegister);
+                    objUserRoleCaseUserRead.CreatedBy = ConstantClass.SystemUser;
+                    objUserRoleCaseUserRead.RoleId = (await roleService.GetByName(ConstantClass.Role_Case_User_Read) ?? new RoleDTO()).Id;
+                    _userForRegister.UserRoles.Add(objUserRoleCaseUserRead);
+                    await userService.Register(_userForRegister);
 
-                    SaveOperation = true;
+                    _saveOperation = true;
                     navigationManager.NavigateTo("registerSuccess");
-                }            
+                }
+            }
+            catch (Exception ex)
+            {
+                errors.Add(nameof(_userForRegister.UserName),
+                        new() { ex.Message });
+                _customFormValidator?.DisplayFormErrors(errors);
+                _saveOperation = false;
+            }
         }
-        catch (Exception ex)
-        {
-            errors.Add(nameof(UserForRegister.UserName),
-                    new() { ex.Message });
-                    customFormValidator.DisplayFormErrors(errors);
-            SaveOperation = false;
-        }
-    }
+
+    #endregion
+
+    
 }

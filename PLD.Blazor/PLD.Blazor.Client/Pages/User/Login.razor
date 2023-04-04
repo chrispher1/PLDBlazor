@@ -5,28 +5,28 @@
 
 <div class="container border mt-2 p-4">
 
-    @if (UserForLogin != null)
+    @if (_userForLogin != null)
     {
-        <EditForm Model="@UserForLogin" OnValidSubmit="UserLogin">      
+        <EditForm Model="@_userForLogin" OnValidSubmit="UserLogin">      
             <DataAnnotationsValidator />
-            <CustomFormValidator @ref="customFormValidator" />
+            <CustomFormValidator @ref="_customFormValidator" />
             <div class="row mb-3 mt-3">
                 <div  class="offset-5 col-auto">
-                <ValidationMessage For="() => UserForLogin.UserName"></ValidationMessage>
-                <ValidationMessage For="() => UserForLogin.Password"></ValidationMessage>
+                <ValidationMessage For="() => _userForLogin.UserName"></ValidationMessage>
+                <ValidationMessage For="() => _userForLogin.Password"></ValidationMessage>
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(UserForLogin.UserName)" class="offset-3 col-2 col-form-label text-end">User Name</label>
+                <label for="@nameof(_userForLogin.UserName)" class="offset-3 col-2 col-form-label text-end">User Name</label>
                 <div class="col-auto">    
-                   <InputText type="text" @bind-Value="UserForLogin.UserName" class="form-control" />
+                   <InputText type="text" @bind-Value="_userForLogin.UserName" class="form-control" />
                 </div>
             </div>
             
             <div class="row mb-3">
-                <label for="@nameof(UserForLogin.Password)" class="offset-3 col-2 col-fom-label text-end">Password</label>
+                <label for="@nameof(_userForLogin.Password)" class="offset-3 col-2 col-fom-label text-end">Password</label>
                 <div class="col-auto">
-                   <InputText type="password" @bind-Value="UserForLogin.Password" class="form-control" />                       
+                   <InputText type="password" @bind-Value="_userForLogin.Password" class="form-control" />                       
                 </div>
             </div>          
 
@@ -42,31 +42,45 @@
 
 @code {
 
-    [Parameter]
-    public int Id { get; set; }
-    private UserForLoginDTO UserForLogin { get; set; } = new UserForLoginDTO();    
-    protected CustomFormValidator customFormValidator;
+    #region Parameters
 
-    protected override void OnInitialized()
-    {
-        UserForLogin = new UserForLoginDTO();
-    }
+        [Parameter]
+        public int Id { get; set; }
 
-    private async Task UserLogin()
-    {
-        customFormValidator.ClearFormErrors();
-        var errors = new Dictionary<string, List<string>>();
-        try
+    #endregion
+
+    #region Fields
+        
+        private UserForLoginDTO? _userForLogin;
+        private CustomFormValidator? _customFormValidator;
+
+    #endregion
+    
+    #region Methods
+
+        protected override void OnInitialized()
         {
+            _userForLogin = new UserForLoginDTO();
+        }
 
-            await userService.Login(UserForLogin);
-            navigationManager.NavigateTo("loginSuccess");
-        }
-        catch (Exception ex)
+        private async Task UserLogin()
         {
-            errors.Add(nameof(UserForLogin.UserName),
-                    new() { ex.Message });
-                    customFormValidator.DisplayFormErrors(errors);
+            _customFormValidator?.ClearFormErrors();
+            var errors = new Dictionary<string, List<string>>();
+            try
+            {
+                await userService.Login(_userForLogin == null ? new UserForLoginDTO() : _userForLogin);
+                navigationManager.NavigateTo("loginSuccess");
+            }
+            catch (Exception ex)
+            {
+                errors.Add(nameof(_userForLogin.UserName),
+                        new() { ex.Message });
+                _customFormValidator?.DisplayFormErrors(errors);
+            }
         }
-    }
+
+    #endregion
+
+    
 }

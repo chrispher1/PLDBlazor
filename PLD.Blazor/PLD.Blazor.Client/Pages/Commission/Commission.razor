@@ -36,18 +36,18 @@
     <br />
 }
 
-<TelerikTabStrip @bind-ActiveTabIndex="@ActiveTabIndex" PersistTabContent="false">
+<TelerikTabStrip @bind-ActiveTabIndex="@_activeTabIndex" PersistTabContent="false">
     <TabStripTab Title="All">
         <AuthorizeView Policy="@ConstantClass.CommissionRolePolicy">
             <Authorized>
-                @if (CommissionList != null)
+                @if (_commissionList != null)
                 {
-                    <TelerikGrid Data="@CommissionList"
+                    <TelerikGrid Data="@_commissionList"
                              Sortable=true
                              Pageable=true
                              @bind-PageSize=@_pageSize
                              FilterMode="@GridFilterMode.FilterRow"
-                             Height="@_height">
+                             Height="@Height">
                         <GridSettings>
                             <GridPagerSettings PageSizes="@_pageSizes" />
                         </GridSettings>
@@ -64,8 +64,8 @@
                                 <Template>
                                     @{
                                         CommissionDTO? record = (datasource as CommissionDTO);
-                                        @(String.Concat(record.Carrier?.Name, " (", record.Carrier?.CarrierCode, ")").ToString())
-                                        ;
+                                        @(String.Concat(record?.Carrier?.Name, " (", record?.Carrier?.CarrierCode, ")").ToString());
+                                        
                                     }
                                 </Template>
                             </GridColumn>
@@ -157,14 +157,14 @@
     <TabStripTab Title="Error">
         <AuthorizeView Policy="@ConstantClass.CommissionRolePolicy">
             <Authorized>
-                @if (CommissionErrorList != null)
+                @if (_commissionErrorList != null)
                 {
-                    <TelerikGrid Data="@CommissionErrorList"
+                    <TelerikGrid Data="@_commissionErrorList"
                              Sortable=true
                              Pageable=true
                              @bind-PageSize=@_pageSize
                              FilterMode="@GridFilterMode.FilterRow"
-                             Height="@_height">
+                             Height="@Height">
                         <GridSettings>
                             <GridPagerSettings PageSizes="@_pageSizes" />
                         </GridSettings>
@@ -181,7 +181,7 @@
                                 <Template>
                                     @{
                                         CommissionErrorDTO? record = (datasource as CommissionErrorDTO);
-                                        @(String.Concat(record.Carrier?.Name, " (", record.Carrier?.CarrierCode, ")").ToString())
+                                        @(String.Concat(record?.Carrier?.Name, " (", record?.Carrier?.CarrierCode, ")").ToString())
                                         ;
                                     }
                                 </Template>
@@ -246,10 +246,10 @@
                                         @{
                                             CommissionErrorDTO? record = (datasource as CommissionErrorDTO);
                                             <NavLink class="btn btn-primary" href="@($"commissionerror/commissionerrorUpdate/{record?.Id}")">Edit</NavLink>
-                                            <NavLink class="btn btn-secondary" @onclick=" (args) => ConfirmDelete(args, record.Id)">Delete</NavLink>
+                                            <NavLink class="btn btn-secondary" @onclick=" (args) => ConfirmDelete(args, (record?.Id == null ? 0 : record.Id) )">Delete</NavLink>
 
                                             <DeleteModal ModalTitle="Commission" BodyText="Are you sure you want to delete this record ?"
-                                                 PrimaryButtonText="Delete" SecondaryButtonText="Cancel" Id=record.Id
+                                                 PrimaryButtonText="Delete" SecondaryButtonText="Cancel" Id=@(record?.Id == null ? 0:record.Id)
                                                  SelectedMethod="DeleteCommissionError">
                                             </DeleteModal>
                                         }
@@ -283,14 +283,14 @@
     <TabStripTab Title="Final">
         <AuthorizeView Policy="@ConstantClass.CommissionRolePolicy">
             <Authorized>
-                @if (CommissionFinalList != null)
+                @if (_commissionFinalList != null)
                 {
-                    <TelerikGrid Data="@CommissionFinalList"
+                    <TelerikGrid Data="@_commissionFinalList"
                              Sortable=true
                              Pageable=true
                              @bind-PageSize=@_pageSize
                              FilterMode="@GridFilterMode.FilterRow"
-                             Height="@_height">
+                             Height="@Height">
                         <GridSettings>
                             <GridPagerSettings PageSizes="@_pageSizes" />
                         </GridSettings>
@@ -307,7 +307,7 @@
                                 <Template>
                                     @{
                                         CommissionFinalDTO? record = (datasource as CommissionFinalDTO);
-                                        @(String.Concat(record.Carrier?.Name, " (", record.Carrier?.CarrierCode, ")").ToString())
+                                        @(String.Concat(record?.Carrier?.Name, " (", record?.Carrier?.CarrierCode, ")").ToString())
                                         ;
                                     }
                                 </Template>
@@ -372,10 +372,10 @@
                                         @{
                                             CommissionFinalDTO? record = (datasource as CommissionFinalDTO);
                                             <NavLink class="btn btn-primary" href="@($"commissionfinal/commissionfinalUpdate/{record?.Id}")">Edit</NavLink>
-                                            <NavLink class="btn btn-secondary" @onclick=" (args) => ConfirmDelete(args, record.Id)">Delete</NavLink>
+                                            <NavLink class="btn btn-secondary" @onclick=" (args) => ConfirmDelete(args, record?.Id == null ? 0: record.Id)">Delete</NavLink>
 
                                             <DeleteModal ModalTitle="Commission" BodyText="Are you sure you want to delete this record ?"
-                                                 PrimaryButtonText="Delete" SecondaryButtonText="Cancel" Id=record.Id
+                                                 PrimaryButtonText="Delete" SecondaryButtonText="Cancel" Id=@(record?.Id == null ? 0 : record.Id )
                                                  SelectedMethod="DeleteCommissionFinal">
                                             </DeleteModal>
                                         }
@@ -401,86 +401,88 @@
 
 @code {
 
-    #region Properties
-
-    private int ActiveTabIndex { get; set; } = 0;
-    private IEnumerable<CommissionErrorDTO>? CommissionErrorList { get; set; }
-    private IEnumerable<CommissionFinalDTO>? CommissionFinalList { get; set; }
-    private IEnumerable<CommissionDTO>? CommissionList { get; set; }
-
-    #endregion
-
     #region Fields
 
-    private List<int?> _pageSizes => new List<int?> { 5, 10, 25, 50, null };
-    private bool _deleteCommissionErrorOperation = false;
-    private bool _deleteCommissionFinalOperation = false;
-    private string? _errorMessage = null;
-    private int _pageSize = 10;
-    private string _height = "400px";
+        private int _activeTabIndex = 0;
+        private IEnumerable<CommissionErrorDTO>? _commissionErrorList;
+        private IEnumerable<CommissionFinalDTO>? _commissionFinalList;
+        private IEnumerable<CommissionDTO>? _commissionList;
+        private List<int?> _pageSizes => new List<int?> { 5, 10, 25, 50, null };
+        private bool _deleteCommissionErrorOperation = false;
+        private bool _deleteCommissionFinalOperation = false;
+        private string? _errorMessage = null;
+        private int _pageSize = 10;
 
     #endregion
 
+    #region Constants
+        
+        private const string Height = "400px";
+        
+    #endregion
 
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-        await GetGridData();
-    }
+    #region Methods
 
-    async Task GetGridData()
-    {
-        CommissionErrorList = await commissionErrorService.GetAll();
-        CommissionFinalList = await commissionFinalService.GetAll();
-        CommissionList = await commissionService.GetAll();
-
-    }
-
-    private async Task ConfirmDelete(MouseEventArgs e, int id)
-    {
-        // modify the function to display modal window
-        await jsRuntime.InvokeVoidAsync("DisplayModal", "DeleteModal_" + id.ToString());
-    }
-
-    private async Task DeleteCommissionError(int id)
-    {
-        try
+        protected override async Task OnInitializedAsync()
         {
-            _deleteCommissionErrorOperation = false;
-            _deleteCommissionFinalOperation = false;
-
-            // Perform delete commission
-            await commissionErrorService.Delete(id);
+            await base.OnInitializedAsync();
             await GetGridData();
-            _deleteCommissionErrorOperation = true;
-            _errorMessage = null;
         }
-        catch (Exception ex)
-        {
-            _deleteCommissionErrorOperation = false;
-            _errorMessage = ex.Message.ToString();
-        }
-    }
 
-    private async Task DeleteCommissionFinal(int id)
-    {
-        try
+        private async Task GetGridData()
         {
-            _deleteCommissionFinalOperation = false;
-            _deleteCommissionErrorOperation = false;
-            // Perform delete commission
-            await commissionFinalService.Delete(id);
-            await GetGridData();
-            _deleteCommissionFinalOperation = true;
-            _errorMessage = null;
+            _commissionErrorList = await commissionErrorService.GetAll();
+            _commissionFinalList = await commissionFinalService.GetAll();
+            _commissionList = await commissionService.GetAll();
+        }
 
-        }
-        catch (Exception ex)
+        private async Task ConfirmDelete(MouseEventArgs e, int id)
         {
-            _deleteCommissionFinalOperation = false;
-            _errorMessage = ex.Message.ToString();
+            // modify the function to display modal window
+            await jsRuntime.InvokeVoidAsync("DisplayModal", "DeleteModal_" + id.ToString());
         }
-    }
+
+        private async Task DeleteCommissionError(int id)
+        {
+            try
+            {
+                _deleteCommissionErrorOperation = false;
+                _deleteCommissionFinalOperation = false;
+
+                // Perform delete commission
+                await commissionErrorService.Delete(id);
+                await GetGridData();
+                _deleteCommissionErrorOperation = true;
+                _errorMessage = null;
+            }
+            catch (Exception ex)
+            {
+                _deleteCommissionErrorOperation = false;
+                _errorMessage = ex.Message.ToString();
+            }
+        }
+
+        private async Task DeleteCommissionFinal(int id)
+        {
+            try
+            {
+                _deleteCommissionFinalOperation = false;
+                _deleteCommissionErrorOperation = false;
+                // Perform delete commission
+                await commissionFinalService.Delete(id);
+                await GetGridData();
+                _deleteCommissionFinalOperation = true;
+                _errorMessage = null;
+
+            }
+            catch (Exception ex)
+            {
+                _deleteCommissionFinalOperation = false;
+                _errorMessage = ex.Message.ToString();
+            }
+        }
+
+    #endregion    
 }
 
 <style>
@@ -490,13 +492,10 @@
     }
 
     .loader-container {
-        text-align: center;
-        //width: 150px;
+        text-align: center;        
         width: 100%;
         display: inline-table;
-        padding-top: 10px;
-        //position: absolute;
-        //position: relative;
+        padding-top: 10px;        
         position: center;
         left: 50%;
         height: 400px;

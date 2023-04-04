@@ -12,11 +12,11 @@ namespace PLD.Blazor.Service
 {
     public class PremiumModeService : IPremiumModeService
     {
-        private HttpClient _httpClient;
+        private readonly HttpClient _httpClient;
         public PremiumModeService(HttpClient httpClient) { 
             _httpClient = httpClient;
         }
-        public async Task<PremiumModeDTO> Create(PremiumModeDTO premiumMode)
+        public async Task<PremiumModeDTO?> Create(PremiumModeDTO premiumMode)
         {
             var content = JsonConvert.SerializeObject(premiumMode);
             var bodyContent = new StringContent(content, Encoding.UTF8, "application/json");
@@ -32,10 +32,9 @@ namespace PLD.Blazor.Service
             else
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
-
         public async Task Delete(string code)
         {
             var response = await _httpClient.DeleteAsync($"/api/PremiumMode/{code}");
@@ -45,7 +44,7 @@ namespace PLD.Blazor.Service
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
 
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
 
@@ -58,15 +57,14 @@ namespace PLD.Blazor.Service
             if (response.IsSuccessStatusCode)
             {
                 var result = JsonConvert.DeserializeObject<IEnumerable<PremiumModeDTO>>(responseContent);
-                return result;
+                return result ?? emptyList;
             }
             else
             {
                 return emptyList;
             }
         }
-
-        public async Task<PremiumModeDTO> GetByCode(string code)
+        public async Task<PremiumModeDTO?> GetByCode(string code)
         {
             var response = await _httpClient.GetAsync($"/api/PremiumMode/{code}");
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -78,7 +76,7 @@ namespace PLD.Blazor.Service
 
             return null;
         }
-        public async Task<IEnumerable<PremiumModeDTO>> GetByDescriptionAndNotByCode(string description, string code)
+        public async Task<IEnumerable<PremiumModeDTO>?> GetByDescriptionAndNotByCode(string description, string code)
         {
             var response = await _httpClient.GetAsync($"/api/PremiumMode/GetByDescriptionAndNotByCode/{description}/{code}");
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -91,13 +89,13 @@ namespace PLD.Blazor.Service
             else
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                if (result.ErrorMessage == ConstantClass.NoRecordFound)
+                if (result?.ErrorMessage == ConstantClass.NoRecordFound)
                 {
                     return null;
                 }
                 else
                 {
-                    throw new Exception(result.ErrorMessage);
+                    throw new Exception(result?.ErrorMessage);
                 }
             }
         }
@@ -112,7 +110,7 @@ namespace PLD.Blazor.Service
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
 
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
     }

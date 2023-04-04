@@ -26,7 +26,7 @@ namespace PLD.Blazor.Service
             _authenticationStateProvider = authenticationStateProvider;
         }
 
-        public async Task<UserDTO> GetByUserName(string userName)
+        public async Task<UserDTO?> GetByUserName(string userName)
         {
             var response = await _httpClient.GetAsync($"/api/User/GetByUserName/{userName}");
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -39,19 +39,18 @@ namespace PLD.Blazor.Service
             else
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                if (result.ErrorMessage == ConstantClass.NoRecordFound)
+                if (result?.ErrorMessage == ConstantClass.NoRecordFound)
                 {
                     return null;
                 }
                 else
                 {
-                    throw new Exception(result.ErrorMessage);
+                    throw new Exception(result?.ErrorMessage);
                 }
-            }
-            return null;
+            }            
         }
 
-        public async Task<IEnumerable<UserDTO>> GetByUserNameAndNotID(string userName, int id)
+        public async Task<IEnumerable<UserDTO>?> GetByUserNameAndNotID(string userName, int id)
         {
             var response = await _httpClient.GetAsync($"/api/User/GetByUserNameAndNotID/{userName}/{id}");
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -64,7 +63,7 @@ namespace PLD.Blazor.Service
             return null;
         }
 
-        public async Task<UserDTO> GetById(int id)
+        public async Task<UserDTO?> GetById(int id)
         {
             var response = await _httpClient.GetAsync($"/api/User/{id}");
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -88,12 +87,12 @@ namespace PLD.Blazor.Service
 
                 var result = JsonConvert.DeserializeObject<IEnumerable<UserDTO>>(responseContent);
 
-                return result;
+                return result ?? emptyList;
             }
             return emptyList;
         }
 
-        public async Task<UserDTO> Login(UserForLoginDTO userForLoginDTO)
+        public async Task<UserDTO?> Login(UserForLoginDTO userForLoginDTO)
         {              
             var response = await _httpClient.GetAsync($"/api/User/login?UserName={userForLoginDTO.UserName}&Password={userForLoginDTO.Password}");
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -103,27 +102,27 @@ namespace PLD.Blazor.Service
                 var result = JsonConvert.DeserializeObject<UserResponseDTO>(responseContent);
 
                 //for token saving
-                await _localStorage.SetItemAsync(ConstantClass.Local_Token, result.Token);
-                await _localStorage.SetItemAsync(ConstantClass.Local_User, result.User);                
-                (_authenticationStateProvider as WebAssemblyAuthenticationStateProvider)?.NotifyUserLoggedIn(result.Token);
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", result.Token);
-                return result.User;
+                await _localStorage.SetItemAsync(ConstantClass.Local_Token, result?.Token);
+                await _localStorage.SetItemAsync(ConstantClass.Local_User, result?.User);                
+                (_authenticationStateProvider as WebAssemblyAuthenticationStateProvider)?.NotifyUserLoggedIn(result?.Token == null ? String.Empty:result.Token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", result?.Token == null ? String.Empty:result.Token);
+                return result?.User;
             }
             else
             {
                 var errorModel = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                if (errorModel.ErrorMessage == ConstantClass.NoRecordFound)
+                if (errorModel?.ErrorMessage == ConstantClass.NoRecordFound)
                 {
                     throw new Exception(ConstantClass.UserNoRecordFound);
                 }
                 else
                 {
-                    throw new Exception(errorModel.ErrorMessage);
+                    throw new Exception(errorModel?.ErrorMessage);
                 }
             }
         }
 
-        public async Task<UserDTO> Register(UserForRegisterDTO userForRegisterDTO)
+        public async Task<UserDTO?> Register(UserForRegisterDTO userForRegisterDTO)
         {
             var content = JsonConvert.SerializeObject(userForRegisterDTO);
             var bodyContent = new StringContent(content, Encoding.UTF8,"application/json");
@@ -134,19 +133,19 @@ namespace PLD.Blazor.Service
             {
                 var result = JsonConvert.DeserializeObject<UserResponseDTO>(responseContent);
                 //for token saving
-                await _localStorage.SetItemAsync(ConstantClass.Local_Token, result.Token);
-                await _localStorage.SetItemAsync(ConstantClass.Local_User, result.User);
-                (_authenticationStateProvider as WebAssemblyAuthenticationStateProvider)?.NotifyUserLoggedIn(result.Token);
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", result.Token);
-                return result.User;
+                await _localStorage.SetItemAsync(ConstantClass.Local_Token, result?.Token);
+                await _localStorage.SetItemAsync(ConstantClass.Local_User, result?.User);
+                (_authenticationStateProvider as WebAssemblyAuthenticationStateProvider)?.NotifyUserLoggedIn(result?.Token == null ? String.Empty : result.Token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", result?.Token == null ? String.Empty : result.Token);
+                return result?.User;
             }
             else
             {
                 var errorModel = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(errorModel.ErrorMessage);
+                throw new Exception(errorModel?.ErrorMessage);
             }
         }
-        public async Task<UserDTO> Create(UserDTO user)
+        public async Task<UserDTO?> Create(UserDTO user)
         {
             var content = JsonConvert.SerializeObject(user);
             var bodyContent = new StringContent(content, Encoding.UTF8, "application/json");
@@ -162,7 +161,7 @@ namespace PLD.Blazor.Service
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
 
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }            
         }
         public async Task Update(UserDTO user)
@@ -175,7 +174,7 @@ namespace PLD.Blazor.Service
             if (!response.IsSuccessStatusCode)
             {
                 var errorModel = JsonConvert.DeserializeObject<ErrorModelDTO>(responseContent);
-                throw new Exception(errorModel.ErrorMessage);
+                throw new Exception(errorModel?.ErrorMessage);
             }
         }
 
@@ -197,7 +196,7 @@ namespace PLD.Blazor.Service
             if (! response.IsSuccessStatusCode)
             {
                 var result = JsonConvert.DeserializeObject<ErrorModelDTO> (responseContent);
-                throw new Exception(result.ErrorMessage);
+                throw new Exception(result?.ErrorMessage);
             }
         }
         
