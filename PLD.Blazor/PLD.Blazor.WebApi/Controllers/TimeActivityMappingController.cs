@@ -129,7 +129,7 @@ namespace PLD.Blazor.WebApi.Controllers
                     )
                 );
 
-                if (record != null)
+                if (record.Count() != 0)
                 {
                     return Ok(record);
                 }

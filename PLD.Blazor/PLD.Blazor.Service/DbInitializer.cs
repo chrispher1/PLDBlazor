@@ -532,6 +532,45 @@ namespace PLD.Blazor.Service
                 };
 
                 await _unitOfWork.PremiumMode.Add(premiumModes);
+
+                // Seed Case Status
+
+                var caseStatuses = new List<CaseStatus>() {
+                    new CaseStatus() {                        
+                        Name = "Draft",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new CaseStatus() {
+                        Name = "Active",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new CaseStatus() {
+                        Name = "Placed",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    }
+                };
+
+                await _unitOfWork.CaseStatus.Add(caseStatuses);
+
+                var caseTypes = new List<CaseType>() { 
+                    new CaseType()
+                    {
+                        Name = "Formal",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    },
+                    new CaseType()
+                    {
+                        Name = "Informal",
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = ConstantClass.SystemUser
+                    }
+                };
+
+                await _unitOfWork.CaseType.Add(caseTypes);
                 //todo Seed Transaction Type
 
                 await _unitOfWork.Save();

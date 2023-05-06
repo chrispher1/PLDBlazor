@@ -13,6 +13,6 @@ namespace PLD.Blazor.Service.IService
         Task<CommissionErrorDTO?> GetById(int id);
         Task<CommissionErrorDTO?> Create(CommissionErrorDTO commissionErrorDTO);
         Task Update(CommissionErrorDTO commissionErrorDTO);
-        Task Delete(int id);
+        Task Delete(int id);        
     }
 }

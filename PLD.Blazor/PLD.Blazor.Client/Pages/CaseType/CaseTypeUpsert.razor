@@ -1,0 +1,157 @@
+﻿@page "/caseType/caseTypeInsert/Add"
+@page "/caseType/caseTypeUpdate/{Id:int}"
+
+@using Blazored.LocalStorage;
+@using Microsoft.AspNetCore.Authorization;
+
+@attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+
+@inject ICaseTypeService caseTypeService;
+@inject ILocalStorageService localStorage;
+
+@if ((_editContext != null) && (_caseType?.Id == 0))
+{
+    <h3>New Case Type</h3>
+}
+else if (_editContext != null)
+{
+    <h3>Update Case Type</h3>
+}
+
+@if (_saveOperation == true)
+{
+    <span>Case Type successfully saved</span>
+    <br />
+}
+
+<div class="container border mt-2 p-4">
+    @if(_caseType != null)
+    {
+        <EditForm EditContext="@_editContext" OnValidSubmit="@UpsertCaseType">
+            <DataAnnotationsValidator />
+            <CustomFormValidator @ref="_customFormValidator" />
+            <div class="row row mb-3">
+                <div class="col">
+                    <ValidationSummary />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(_caseType.Name)" class="col-2 col-form-label text-end">Name</label>
+                <div class="col-2">
+                    <InputText @bind-Value="_caseType.Name" class="form-control" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="offset-5 col-7">
+                    <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy" Context="authorizedContext">
+                        <Authorized>
+                            <button class="btn btn-primary">Save</button>
+                        </Authorized>
+                        <NotAuthorized>
+                            <button class="btn btn-primary" disabled>Save</button>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                    <NavLink class="btn btn-secondary" href="caseType">Back</NavLink>
+                </div>
+            </div>
+        </EditForm>
+    }
+</div>
+
+@code {
+
+    #region Parameters
+
+    [Parameter]
+    public int Id { get; set; }
+
+    #endregion
+
+
+    #region Fields
+
+    private EditContext? _editContext;
+    private CaseTypeDTO? _caseType = null;
+    private CustomFormValidator? _customFormValidator;
+    private bool _saveOperation = false;
+
+    #endregion
+
+    #region Methods
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id == 0)
+        {
+            _caseType = new CaseTypeDTO();
+        }
+        else
+        {
+            _caseType = await caseTypeService.GetById(Id);
+        }
+
+        _editContext = new EditContext((_caseType = _caseType ?? new CaseTypeDTO()));
+    }
+
+    private async Task UpsertCaseType()
+    {
+        _customFormValidator?.ClearFormErrors();
+        var errors = new Dictionary<string, List<string>>();
+
+        try
+        {
+            _saveOperation = false;
+            if (_caseType?.Id == 0)
+            {
+                //Check for uniqueness of the Name
+                CaseTypeDTO? caseType = await caseTypeService.GetByName(_caseType.Name);
+
+                if (caseType != null)
+                {
+                    throw new Exception(ConstantClass.CaseTypeCannotAddRecordNameUsed);
+
+                }
+                else
+                {
+                    _caseType.CreatedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
+                    _caseType.CreatedDate = System.DateTime.Now;
+                    _caseType = await caseTypeService.Create(_caseType);
+                    _saveOperation = true;
+                }
+            }
+            else
+            {
+
+                //Check for uniqueness of the Name
+
+                IEnumerable<CaseTypeDTO>? caseTypeList = await caseTypeService.GetByNameAndNotById(_caseType.Name, _caseType.Id);
+
+                if (caseTypeList != null)
+                {
+                    throw new Exception(ConstantClass.CaseTypeCannotUpdateRecordNameUsed);
+                }
+                else
+                {
+                    // Update the record
+                    (_caseType = _caseType ?? new CaseTypeDTO()).ModifiedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
+                    _caseType.ModifiedDate = System.DateTime.Now;
+                    await caseTypeService.Update(_caseType);
+                    _saveOperation = true;
+                }
+
+            }
+            _editContext = new(_caseType = _caseType ?? new CaseTypeDTO());
+        }
+        catch (Exception ex)
+        {
+            errors.Add(nameof(_caseType.Name),
+                    new() { ex.Message });
+            _customFormValidator?.DisplayFormErrors(errors);
+            _saveOperation = false;
+        }
+
+    }
+
+
+    #endregion
+}

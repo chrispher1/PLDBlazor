@@ -1,5 +1,5 @@
-﻿@page "/_premiumMode/_premiumModeInsert/{Action}"
-@page "/_premiumMode/_premiumModeUpdate/{Action}/{Code}"
+﻿@page "/premiumMode/premiumModeInsert/{Action}"
+@page "/premiumMode/premiumModeUpdate/{Action}/{Code}"
 @using Microsoft.AspNetCore.Authorization;
 @attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
 @inject IPremiumModeService premiumModeService
@@ -22,7 +22,7 @@ else if (Action == ConstantClass.EditAction)
 <div class="container border mt-2 p-4">
     @if(_premiumMode != null)
     {
-        <EditForm Model="@_premiumMode" OnValidSubmit="Upsert_premiumMode">
+        <EditForm Model="@_premiumMode" OnValidSubmit="UpsertPremiumMode">
             <DataAnnotationsValidator/>
             <CustomFormValidator @ref="_customFormValidator" />
             <div class="row mb-3">
@@ -94,7 +94,7 @@ else if (Action == ConstantClass.EditAction)
             await base.OnInitializedAsync();
         }
 
-        private async Task Upsert_premiumMode()
+        private async Task UpsertPremiumMode()
         {
             _customFormValidator?.ClearFormErrors();
             var errors = new Dictionary<string, List<string>>();

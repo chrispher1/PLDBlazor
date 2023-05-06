@@ -103,6 +103,210 @@ namespace PLD.Blazor.DataAccess.Migrations
                     b.ToTable("DMT_CARR");
                 });
 
+            modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Case", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Case_Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<decimal?>("AnnualizedPremium")
+                        .HasColumnType("numeric(16,2)")
+                        .HasColumnName("Annualized_Premium");
+
+                    b.Property<DateTime?>("AppReceiptDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("App_Receipt_Date");
+
+                    b.Property<int?>("CarrierId")
+                        .HasColumnType("int")
+                        .HasColumnName("Carr_Id");
+
+                    b.Property<string>("CaseType")
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)")
+                        .HasColumnName("Case_Type");
+
+                    b.Property<string>("ClientFirstName")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("Prim_Ins_FirstName");
+
+                    b.Property<string>("ClientLastName")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("Prim_Ins_LastName");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Crt_By");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("Crt_Dt");
+
+                    b.Property<DateTime?>("EffectiveDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("Policy_Eff_Date");
+
+                    b.Property<decimal?>("ExcessPremium")
+                        .HasColumnType("numeric(16,2)")
+                        .HasColumnName("Excess_Premium");
+
+                    b.Property<decimal?>("FaceAmount")
+                        .HasColumnType("numeric(16,2)")
+                        .HasColumnName("Face_Amt");
+
+                    b.Property<int?>("IssueAge")
+                        .HasColumnType("int")
+                        .HasColumnName("Issue_Age");
+
+                    b.Property<DateTime?>("IssueDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("Issue_Date");
+
+                    b.Property<string>("IssueState")
+                        .HasMaxLength(2)
+                        .HasColumnType("nvarchar(2)")
+                        .HasColumnName("Issue_State");
+
+                    b.Property<decimal?>("ModalPremium")
+                        .HasColumnType("numeric(16,2)")
+                        .HasColumnName("Modal_Premium");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Mod_By");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("Mod_Dt");
+
+                    b.Property<DateTime?>("PlacementDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("Policy_Placed_Date");
+
+                    b.Property<string>("Policy")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("Policy_Number");
+
+                    b.Property<string>("PremiumMode")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("Premium_Mode");
+
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int")
+                        .HasColumnName("Prod_Id");
+
+                    b.Property<int?>("ProductTypeId")
+                        .HasColumnType("int")
+                        .HasColumnName("Prod_Typ_Id");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("Status");
+
+                    b.Property<decimal?>("TargetPremium")
+                        .HasColumnType("numeric(16,2)")
+                        .HasColumnName("Target_Prem_Amt");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CarrierId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductTypeId");
+
+                    b.ToTable("DMT_CASE");
+                });
+
+            modelBuilder.Entity("PLD.Blazor.DataAccess.Model.CaseStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Status_Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Crt_By");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("Crt_Dt");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Mod_By");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("Mod_Dt");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DMT_CASE_STATUS");
+                });
+
+            modelBuilder.Entity("PLD.Blazor.DataAccess.Model.CaseType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Type_Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Crt_By");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("Crt_Dt");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Mod_By");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("Mod_Dt");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DMT_CASE_TYPE");
+                });
+
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.CommissionError", b =>
                 {
                     b.Property<int>("Id")
@@ -693,6 +897,30 @@ namespace PLD.Blazor.DataAccess.Migrations
                     b.ToTable("DMT_USER_ROLE");
                 });
 
+            modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Case", b =>
+                {
+                    b.HasOne("PLD.Blazor.DataAccess.Model.Carrier", "Carrier")
+                        .WithMany("Cases")
+                        .HasForeignKey("CarrierId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("PLD.Blazor.DataAccess.Model.Product", "Product")
+                        .WithMany("Cases")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("PLD.Blazor.DataAccess.Model.ProductType", "ProductType")
+                        .WithMany("Cases")
+                        .HasForeignKey("ProductTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Carrier");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("ProductType");
+                });
+
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.CommissionError", b =>
                 {
                     b.HasOne("PLD.Blazor.DataAccess.Model.Carrier", "Carrier")
@@ -823,6 +1051,8 @@ namespace PLD.Blazor.DataAccess.Migrations
 
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Carrier", b =>
                 {
+                    b.Navigation("Cases");
+
                     b.Navigation("CommissionErrors");
 
                     b.Navigation("CommissionFinals");
@@ -841,6 +1071,8 @@ namespace PLD.Blazor.DataAccess.Migrations
 
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Product", b =>
                 {
+                    b.Navigation("Cases");
+
                     b.Navigation("CommissionErrors");
 
                     b.Navigation("CommissionFinals");
@@ -848,6 +1080,8 @@ namespace PLD.Blazor.DataAccess.Migrations
 
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.ProductType", b =>
                 {
+                    b.Navigation("Cases");
+
                     b.Navigation("Products");
                 });
 

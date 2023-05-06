@@ -1,0 +1,195 @@
+﻿@page "/case/caseInsert"
+
+@using Microsoft.AspNetCore.Authorization;
+
+@inject ICarrierService carrierService;
+@inject IProductService productService;
+
+@attribute [Authorize(Policy = ConstantClass.CaseRolePolicy)]
+
+@if ((_editContext != null) && (_case?.Id == 0))
+{
+    <h3>New Case</h3>
+}
+else if (_editContext != null)
+{
+    <h3>Update Case</h3>
+}
+
+<div class="container border mt-2 p-4">
+    @if(_editContext != null)
+    {
+        <EditForm OnValidSubmit="@UpsertCase" EditContext="@_editContext">
+            <DataAnnotationsValidator />
+            <CustomFormValidator @ref="_customFormValidator" />
+            <div class="row mb-3">
+                <div class="col">
+                    <ValidationSummary />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(_case.Carrier.Name)" class="col-2 col-form-label text-end">Carrier</label>
+                <div class="col-3">
+                    <InputSelect class="form-select"
+                             Value="@((_case = _case ?? new CaseDTO() ).CarrierId)"
+                             ValueExpression="@(()=> _case.CarrierId)"
+                             ValueChanged="@((int value) => ChangeSelectedCarrier(value) )">
+                        <option value="0" disabled="disabled" selected>--Select Carrier--</option>
+                        @foreach (var carrier in _carrierList)
+                        {
+                            <option value="@carrier.Id">@carrier.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+                <label for="@nameof(_case.Policy)" class="col-4 col-form-label text-end">Policy</label>
+                <div class="col-3">
+                    <InputText @bind-Value="_case.Policy" class="form-control"></InputText>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(_case.Status)" class="col-2 col-form-label text-end">Status</label>
+                <div class="col-3">
+                    <InputSelect @bind-Value="_case.Status" class="form-select">
+                        <option value="0">--Select Status--</option>
+                        <option value="Draft">Draft</option>
+                        <option value="Active">Active</option>
+                        <option value="Placed">Placed</option>
+                    </InputSelect>                    
+                </div>
+                <label for="@nameof(_case.Product.Name)" class="col-4 col-form-label text-end">Product</label>
+                <div class="col-3">
+                    <InputSelect class="form-select"
+                             @bind-Value="_case.ProductId"
+                    >
+                        <option value=-1 disabled="disabled" selected>--Select Product--</option>
+                        @foreach (var product in (_productList = _productList ?? new List<ProductDTO>()))
+                        {
+                            <option value="@product.Id">@product.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(_case.Product.ProductType.Name)" class="col-2 col-form-label text-end">Product Type</label>
+                <div class="col-3">
+                    <label class="col-form-label">@(_productType?.Name?.ToString())</label>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(_case.FaceAmount)" class="col-2 col-form-label text-end">Face Amount</label>
+                <div class="col-3">
+                    <InputNumber @bind-Value="_case.FaceAmount" class="form-control" step="any" />
+                </div>
+                <label for="@nameof(_case.AnnualizedPremium)" class="col-4 col-form-label text-end">Annualized Premium Amount</label>
+                <div class="col-3">
+                    <InputNumber @bind-Value="_case.AnnualizedPremium" class="form-control" step="any" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(_case.TargetPremium)" class="col-2 col-form-label text-end">Target Premium Amount</label>
+                <div class="col-3">
+                    <InputNumber @bind-Value="_case.TargetPremium" class="form-control" step="any" />
+                </div>
+                <label for="@nameof(_case.ModalPremium)" class="col-4 col-form-label text-end">Modal Premium Amount</label>
+                <div class="col-3">
+                    <InputNumber @bind-Value="_case.ModalPremium" class="form-control" step="any" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(_case.PlacementDate)" class="col-2 col-form-label text-end">Placement Date</label>
+                <div class="col-3">
+                    <InputDate @bind-Value="_case.PlacementDate" class="form-control" />
+                </div>
+                <label for="@nameof(_case.CaseType)" class="col-4 col-form-label text-end">Case Type</label>
+                <div class="col-3">
+                    <InputSelect class="form-select"
+                             @bind-Value="_case.CaseType">
+                        <option value="0" disabled="disabled" selected>--Select Case Type--</option>
+                        <option value="1">Formal</option>
+                        <option value="2">Informal</option>
+                    </InputSelect>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(_case.ClientFirstName)" class="col-2 col-form-label text-end">Client First Name</label>
+                <div class="col-3">
+                    <InputText type="text" @bind-Value="_case.ClientFirstName" class="form-control" />
+                </div>
+                <label for="@nameof(_case.ClientLastName)" class="col-4 col-form-label text-end">Client Last Name</label>
+                <div class="col-3">
+                    <InputText type="text" @bind-Value="_case.ClientLastName" class="form-control" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="offset-5 col-7">
+                    <AuthorizeView Policy="@ConstantClass.CaseUpsertRolePolicy" Context="authorizedContext">
+                        <Authorized>
+                            <button class="btn btn-primary">Save</button>                            
+                        </Authorized>
+                        <NotAuthorized>
+                            <button class="btn btn-primary" disabled>Save</button>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                    <NavLink class="btn btn-secondary" href="case">Back</NavLink>
+                </div>
+            </div>
+        </EditForm>
+    }
+    
+</div>
+
+@code {
+
+    #region Fields
+
+        private EditContext? _editContext;
+        private CaseDTO? _case;
+        private ProductTypeDTO _productType = new ProductTypeDTO();
+        private IEnumerable<CarrierDTO> _carrierList = new List<CarrierDTO>();
+        private IEnumerable<ProductDTO>? _productList = new List<ProductDTO>();
+        private CustomFormValidator? _customFormValidator;
+
+    #endregion
+
+    #region Constants
+
+        private const int ProductIdDefaultValue = -1;
+
+    #endregion
+
+    #region Methods
+
+    protected override async Task OnInitializedAsync()
+    {
+        await PopulateForm();         
+        _case = new CaseDTO();
+        _case.ProductId = ProductIdDefaultValue;
+        _editContext = new(_case = _case ?? new CaseDTO());
+    }
+
+    private async Task PopulateForm()
+    {
+        _carrierList = await carrierService.GetAll();
+    }
+
+    private async Task ChangeSelectedCarrier(int carrierId)
+    {
+        (_case = _case ?? new CaseDTO()).CarrierId = carrierId;
+        await PopulateProductListByCarrierId(carrierId);
+        (_case = _case ?? new CaseDTO()).ProductId = ProductIdDefaultValue;
+    }
+
+    private async Task PopulateProductListByCarrierId(int carrierId)
+    {
+        //Populate the Product dropdownlist based on selected carrier
+        _productList = await productService.GetByCarrierId(carrierId);
+    }
+
+    private Task UpsertCase() {
+
+      return  Task.CompletedTask;
+    }
+
+    #endregion
+
+}

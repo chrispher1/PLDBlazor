@@ -1,0 +1,189 @@
+﻿@page "/case"
+
+@using Microsoft.AspNetCore.Authorization;
+
+@inject ICaseService caseService;
+
+
+@attribute [Authorize(Policy = ConstantClass.CaseRolePolicy)]
+<h3>Case</h3>
+
+<TelerikTabStrip @bind-ActiveTabIndex="@_activeTabIndex" PersistTabContent="false">
+   <TabStripTab Title="All Case">
+        <AuthorizeView Policy="@ConstantClass.CaseRolePolicy">
+            <Authorized>
+                @if (@_caseList != null)
+                {
+                    <TelerikGrid Data="@_caseList"
+                             Sortable=true
+                             Pageable=true
+                             @bind-PageSize=@_pageSize
+                             FilterMode="@GridFilterMode.FilterRow"
+                             Height="@Height"
+                             ScrollMode="@GridScrollMode.Scrollable"
+                             Width="100%">
+                        <GridSettings>
+                            <GridPagerSettings PageSizes="@_pageSizes" />
+                        </GridSettings>
+                        <GridColumns>
+                            <GridColumn Field="Carrier.CarrierCode" Width="75px">
+                                <HeaderTemplate>
+                                    Carrier
+                                    <br />
+                                    Code
+                                </HeaderTemplate>
+                            </GridColumn>
+                            <GridColumn Field="Policy" Title="Policy" Width="100px" />
+                            <GridColumn Field="Status" Title="Status" Width="100px" />
+                            <GridColumn Field="" Title="Product Type" Width="150px" />
+                            <GridColumn Field="FaceAmount" Width="150px" Context="datasource">
+                                <HeaderTemplate>
+                                    Face
+                                    <br />
+                                    Amount
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        <div class="text-end">
+                                            @(String.Format("{0:C2}", record?.FaceAmount))
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="AnnualizedPremium" Width="150px" Context="datasource">
+                                <HeaderTemplate>
+                                    Annualized Premium
+                                    <br />
+                                    Amount
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        <div class="text-end">
+                                            @(String.Format("{0:C2}", record?.AnnualizedPremium))
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="TargetPremium" Width="150px" Context="datasource">
+                                <HeaderTemplate>
+                                    Target Premium
+                                    <br />
+                                    Amount
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        <div class="text-end">
+                                            @(String.Format("{0:C2}", record?.TargetPremium))
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="ModalPremium" Width="150px" Context="datasource">
+                                <HeaderTemplate>
+                                    Modal Premium
+                                    <br />
+                                    Amount
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        <div class="text-end">
+                                            @(String.Format("{0:C2}", record?.ModalPremium))
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="PlacementDate" Title="Placement Date" Width="150px" Context="datasource">
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        @(record?.PlacementDate?.ToString("MM/dd/yyyy"))
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CaseType" Title="Case Type" Width="100px" />
+                            <GridColumn Field="Product.Name" Title="Product" Width="300px" Context="datasource">
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        @(String.Concat(record?.Product?.Name, " (", record?.Product?.Code, ")").ToString())
+                                        ;
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="ClientFirstName" Title="Client First Name" Width="200px" />
+                            <GridColumn Field="ClientLastName" Title="Client Last Name" Width="200px" />
+                        </GridColumns>
+                        <GridToolBar>
+                            <div class="col d-flex justify-content-end">
+                                <div>
+                                    <AuthorizeView Policy="@ConstantClass.CaseRolePolicy" Context="AuthorizeContext">
+                                        <Authorized>
+                                            <NavLink class="btn btn-primary" href="case/caseInsert">New</NavLink>
+                                        </Authorized>
+                                    </AuthorizeView>
+                                </div>
+                            </div>
+                        </GridToolBar>
+                    </TelerikGrid>
+                }
+                else
+                {
+                    <div class="loader-container">
+                        <span class="loader-size-title">Fetching data</span>
+                        <TelerikLoader Class="loader-indicator" Type="@LoaderType.ConvergingSpinner" Size="@(ThemeConstants.Loader.Size.Large)"></TelerikLoader>
+                    </div>
+                }
+            </Authorized>
+        </AuthorizeView>
+   </TabStripTab>
+   <TabStripTab Title="For Approval"></TabStripTab>
+   <TabStripTab Title="Case Complete"></TabStripTab>
+</TelerikTabStrip>
+
+@code {
+
+    #region Fields
+    private int _activeTabIndex = 0;
+    private int _pageSize = 10;
+    private List<int?> _pageSizes => new List<int?> { 5, 10, 25, 50, null };
+    private IEnumerable<CaseDTO>? _caseList;
+    #endregion    
+
+    #region Constants
+    private const string Height = "400px";
+    #endregion
+
+    #region Methods
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await GetGridData();
+    }
+
+    private async Task GetGridData()
+    {
+        _caseList = await caseService.GetAll();
+    }
+    #endregion
+}
+
+<style>
+    .loader-size-title {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .loader-container {
+        text-align: center;
+        width: 100%;
+        display: inline-table;
+        padding-top: 10px;
+        position: center;
+        left: 50%;
+        height: 400px;
+    }
+</style>
