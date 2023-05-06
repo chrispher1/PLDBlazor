@@ -27,6 +27,9 @@ namespace PLD.Blazor.Business.Repositories
         public ICommissionFinalRepository<CommissionFinal> CommissionFinal { get; }
         public IStateCodeRepository<StateCode> StateCode { get; }
         public ICommissionRepository<CommissionDTO> Commission { get; }
+        public ICaseRepository<Case> Case { get; }
+        public ICaseStatusRepository<CaseStatus> CaseStatus { get; }
+        public ICaseTypeRepository<CaseType> CaseType { get; }
 
         #endregion
 
@@ -53,7 +56,9 @@ namespace PLD.Blazor.Business.Repositories
             CommissionFinal = new CommissionFinalRepository(applicationDBContext);
             StateCode = new StateCodeRepository(applicationDBContext);
             Commission = new CommissionRepository<CommissionDTO,CommissionError, CommissionFinal>(applicationDBContext);
-
+            Case = new CaseRepository(applicationDBContext);
+            CaseStatus = new CaseStatusRepository(applicationDBContext);
+            CaseType = new CaseTypeRepository(applicationDBContext);
         }
         public async Task Save()
         {

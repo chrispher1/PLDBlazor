@@ -42,5 +42,6 @@ namespace PLD.Blazor.DataAccess.Model
         public string? ModifiedBy { get; set; }
 
         public virtual ICollection<Product> Products { get; set; }
+        public ICollection<Case>? Cases { get; set; }
     }
 }

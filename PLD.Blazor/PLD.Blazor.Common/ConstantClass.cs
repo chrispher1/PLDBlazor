@@ -21,6 +21,10 @@
         public const string StateCodeCannotAddRecordCodeUsed = "Cannot add a record. Code already used.";
         public const string TimeActivityMappingCannotAddRecordCombinationUsed = "Cannot add a record. Carrier, Carrier Time, Carrier Activity, Policy Year Start, Policy Year End already used.";
         public const string TimeActivityMappingCannotUpdateRecordCombinationUsed = "Cannot update record. Carrier, Carrier Time, Carrier Activity, Policy Year Start, Policy Year End already used.";
+        public const string CaseStatusCannotUpdateRecordNameUsed = "Cannot update record. Name used by other record.";
+        public const string CaseStatusCannotAddRecordNameUsed = "Cannot add record. Name used by other record.";
+        public const string CaseTypeCannotAddRecordNameUsed = "Cannot add record. Name used by other record.";
+        public const string CaseTypeCannotUpdateRecordNameUsed = "Cannot update record. Name used by other record.";
 
         // List of roles
         public const string Role_Commission_User = "Commission_User";
@@ -48,6 +52,7 @@
 
         // List of Policies
         public const string CaseRolePolicy = "CaseRolePolicy";
+        public const string CaseUpsertRolePolicy = "CaseUpsertRolePolicy";
         public const string CommissionRolePolicy = "CommissionRolePolicy";
         public const string CommissionUpsertRolePolicy = "CommissionUpsertRolePolicy";
         public const string PaymentRolePolicy = "PaymentRolePolicy";

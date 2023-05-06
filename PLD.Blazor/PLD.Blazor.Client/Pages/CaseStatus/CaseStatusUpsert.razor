@@ -1,0 +1,156 @@
+﻿@page "/casestatus/caseStatusUpdate/{id:int}"
+@page "/casestatus/caseStatusInsert/Add"
+
+@using Microsoft.AspNetCore.Authorization;
+@using Blazored.LocalStorage;
+
+@attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+
+@inject ICaseStatusService caseStatusService;
+@inject ILocalStorageService localStorage;
+
+@if ((_editContext != null) && (_caseStatus?.Id == 0))
+{
+    <h3>New Case Status</h3>
+}
+else if (_editContext != null)
+{
+    <h3>Update Case Status</h3>
+}
+
+@if (_saveOperation == true)
+{
+    <span>Case Status successfully saved</span>
+    <br />
+}
+
+<div class="container border mt-2 p-4">
+    @if (_caseStatus != null)
+    {
+        <EditForm EditContext="@_editContext" OnValidSubmit="@UpsertCaseStatus">
+            <DataAnnotationsValidator />
+            <CustomFormValidator @ref="_customFormValidator" />
+            <div class="row mb-3">
+                <div class="col">
+                    <ValidationSummary />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(_caseStatus.Name)" class="col-2 col-form-label text-end">Name</label>
+                <div class="col-2">
+                    <InputText @bind-Value="_caseStatus.Name" class="form-control" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="offset-5 col-7">
+                    <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy" Context="authorizedContext">
+                        <Authorized>
+                            <button class="btn btn-primary">Save</button>                           
+                        </Authorized>
+                        <NotAuthorized>
+                            <button class="btn btn-primary" disabled>Save</button>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                    <NavLink class="btn btn-secondary" href="casestatus">Back</NavLink>
+                </div>
+            </div>
+        </EditForm>
+    }    
+</div>
+
+@code {
+
+    #region Parameters
+
+    [Parameter]
+    public int Id { get; set; }
+
+    #endregion
+
+    #region Fields
+
+    private EditContext? _editContext;
+    private CaseStatusDTO? _caseStatus = null; 
+    private CustomFormValidator? _customFormValidator;
+    private bool _saveOperation = false;
+
+    #endregion
+
+    #region Methods
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id == 0)
+        {
+            _caseStatus = new CaseStatusDTO();
+        }
+        else
+        {
+            _caseStatus = await caseStatusService.GetById(Id);
+        }
+
+        _editContext = new EditContext((_caseStatus = _caseStatus ?? new CaseStatusDTO()));
+
+    }
+
+    private async Task UpsertCaseStatus()
+    {
+        _customFormValidator?.ClearFormErrors();
+        var errors = new Dictionary<string, List<string>>();
+
+        try
+        {
+            _saveOperation = false;
+            if (_caseStatus?.Id == 0)
+            {
+                //Check for uniqueness of the Name
+                CaseStatusDTO? caseStatus = await caseStatusService.GetByName(_caseStatus.Name);
+
+                if (caseStatus != null)
+                {
+                    throw new Exception(ConstantClass.CaseStatusCannotAddRecordNameUsed);
+
+                }
+                else
+                {
+                    _caseStatus.CreatedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
+                    _caseStatus.CreatedDate = System.DateTime.Now;
+                    _caseStatus = await caseStatusService.Create(_caseStatus);
+                    _saveOperation = true;
+                }                
+            }
+            else
+            {
+
+                //Check for uniqueness of the Name
+
+                IEnumerable<CaseStatusDTO> ? caseStatusList = await caseStatusService.GetByNameAndNotById(_caseStatus.Name, _caseStatus.Id);
+
+                if (caseStatusList != null)
+                {
+                    throw new Exception(ConstantClass.CaseStatusCannotUpdateRecordNameUsed);
+                }
+                else
+                {
+                    // Update the record
+                    (_caseStatus = _caseStatus ?? new CaseStatusDTO()).ModifiedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
+                    _caseStatus.ModifiedDate = System.DateTime.Now;
+                    await caseStatusService.Update(_caseStatus);
+                    _saveOperation = true;
+                }
+                
+            }
+            _editContext = new(_caseStatus = _caseStatus ?? new CaseStatusDTO());
+        }
+        catch( Exception ex)
+        {
+            errors.Add(nameof(_caseStatus.Name),
+                    new() { ex.Message });
+            _customFormValidator?.DisplayFormErrors(errors);
+            _saveOperation = false;
+        }
+
+    }
+    #endregion
+
+ }

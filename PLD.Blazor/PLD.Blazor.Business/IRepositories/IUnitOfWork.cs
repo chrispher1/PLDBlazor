@@ -24,6 +24,9 @@ namespace PLD.Blazor.Business.IRepositories
         ICommissionFinalRepository<CommissionFinal> CommissionFinal { get; }
         IStateCodeRepository<StateCode> StateCode { get; }
         ICommissionRepository<CommissionDTO> Commission { get; }
+        ICaseRepository<Case> Case { get; }
+        ICaseStatusRepository<CaseStatus> CaseStatus { get; }
+        ICaseTypeRepository<CaseType> CaseType { get; } 
         Task Save();
     }
 }

@@ -20,7 +20,9 @@ namespace PLD.Blazor.DataAccess
         public DbSet<PremiumMode> PremiumMode { get; set; }
         public DbSet<CommissionFinal> CommissionFinal { get; set; }
         public DbSet<StateCode> StateCode { get; set; }
-
+        public DbSet<Case> Case { get; set; }
+        public DbSet<CaseStatus> CaseStatus { get; set; }
+        public DbSet<CaseType> CaseType { get; set; }
        protected override void OnModelCreating (ModelBuilder modelBuilder)
         {
             // Product
@@ -75,6 +77,20 @@ namespace PLD.Blazor.DataAccess
                 .IsRequired(false);
             modelBuilder.Entity<CommissionFinal>().HasOne(p => p.PremiumMode).WithMany(premiumMode => premiumMode.CommissionFinals).
                 HasForeignKey(commissionFinal => commissionFinal.CommPremiumMode)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            // Case
+            modelBuilder.Entity<Case>().HasOne(c => c.Carrier).WithMany(carrier => carrier.Cases).
+                HasForeignKey(pldCase => pldCase.CarrierId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+            modelBuilder.Entity<Case>().HasOne( c => c.Product).WithMany( product => product.Cases).
+                HasForeignKey( pldCase => pldCase.ProductId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+            modelBuilder.Entity<Case>().HasOne(pt => pt.ProductType).WithMany(productType => productType.Cases).
+                HasForeignKey(pldCase => pldCase.ProductTypeId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired(false);
         }

@@ -28,6 +28,9 @@ namespace PLD.Blazor.Business.Mapper
             CreateMap<CommissionErrorDTO, CommissionFinalDTO>().ReverseMap();
             CreateMap<CommissionError, CommissionDTO>();
             CreateMap<StateCode,StateCodeDTO>().ReverseMap();
+            CreateMap<Case, CaseDTO>().ReverseMap();
+            CreateMap<CaseStatus, CaseStatusDTO>().ReverseMap();
+            CreateMap<CaseType, CaseTypeDTO>().ReverseMap();
         }
     }
 }

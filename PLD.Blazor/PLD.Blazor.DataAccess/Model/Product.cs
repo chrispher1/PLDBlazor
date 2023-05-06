@@ -65,5 +65,6 @@ namespace PLD.Blazor.DataAccess.Model
         public string? ModifiedBy { get; set; }
         public ICollection<CommissionError>? CommissionErrors { get; set; }
         public ICollection<CommissionFinal>? CommissionFinals { get; set; }
+        public ICollection<Case>? Cases { get; set; }
     }
 }

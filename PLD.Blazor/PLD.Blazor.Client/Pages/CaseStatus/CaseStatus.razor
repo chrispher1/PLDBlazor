@@ -1,0 +1,131 @@
+﻿@page "/caseStatus"
+@using Microsoft.AspNetCore.Authorization;
+
+@attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+
+@inject ICaseStatusService caseStatusService;
+@inject IJSRuntime jsRuntime
+
+<h3>Case Status</h3>
+
+@if (_caseStatusList != null)
+{
+    <TelerikGrid Data="@_caseStatusList"
+             Sortable=true
+             Pageable=true
+             @bind-PageSize="@_pageSize"
+             FilterMode="@GridFilterMode.FilterRow"
+             Height=@Height>
+        <GridSettings>
+            <GridPagerSettings PageSizes="@_pageSizes" />
+        </GridSettings>
+        <GridColumns>
+            <GridColumn Field="@nameof(CaseStatusDTO.Name)" title="Name" Width="50px"></GridColumn>
+            <GridCommandColumn Width="35px" Context="caseStatusContext">
+                <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy">
+                    <Authorized>
+                        @{
+                            CaseStatusDTO? record = (caseStatusContext as CaseStatusDTO);
+
+                            <NavLink class="btn btn-primary" href=@($"caseStatus/caseStatusUpdate/{record?.Id}")>Edit</NavLink>
+                            <NavLink class="btn btn-secondary" @onclick=" args => ConfirmDelete(args, record?.Id == null ? 0 : record.Id)">Delete</NavLink>
+                            <DeleteModal ModalTitle="Case Status" BodyText="Are you sure you want to delete this case status ?"
+                                 PrimaryButtonText="Delete" SecondaryButtonText="Cancel" Id="@(record?.Id == null ? 0: record.Id)" 
+                                 SelectedMethod="DeleteCaseStatus">
+                            </DeleteModal>
+                        }
+                    </Authorized>
+                </AuthorizeView>
+            </GridCommandColumn>
+        </GridColumns>
+        <GridToolBar>
+            <div class="col d-flex justify-content-end">
+                <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy">
+                    <Authorized>
+                        <div>
+                            <NavLink class="btn btn-primary" href="caseStatus/caseStatusInsert/Add">New</NavLink>
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
+            </div>
+        </GridToolBar>
+    </TelerikGrid>
+}
+else
+{
+    <div class="loader-container">
+        <span class="loader-size-title">Fetching data</span>
+        <TelerikLoader Class="loader-indicator" Type="@LoaderType.ConvergingSpinner" Size="@(ThemeConstants.Loader.Size.Large)"></TelerikLoader>
+    </div>
+}
+@code {
+    #region Fields
+
+        private IEnumerable<CaseStatusDTO> ? _caseStatusList;
+        private int _pageSize = 10;
+        private List<int?> _pageSizes => new List<int?> { 5, 10, 25, 50, null };
+        private bool _deleteOperation = false;
+        private string? _errorMessage = null;
+
+    #endregion
+
+    #region Constants
+
+        private const string Height = "400px";
+
+    #endregion
+
+    #region Methods
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetGridData();
+    }
+
+    private async Task GetGridData()
+    {
+        _caseStatusList = await caseStatusService.GetAll();
+    }
+
+    private async Task ConfirmDelete(MouseEventArgs e, int id)
+    {
+        // modify the function to display modal window
+        await jsRuntime.InvokeVoidAsync("DisplayModal", "DeleteModal_" + id);
+    }
+
+    private async Task DeleteCaseStatus(int id)
+    {
+        try
+        {
+            _deleteOperation = false;
+            // Perform delete activity
+            await caseStatusService.Delete(id);
+            await GetGridData();
+            _deleteOperation = true;
+            _errorMessage = null;
+        }
+        catch (Exception ex)
+        {
+            _deleteOperation = false;
+            _errorMessage = ex.Message.ToString();
+        }
+    }
+
+    #endregion
+}
+
+<style>
+    .loader-size-title {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .loader-container {
+        text-align: center;
+        width: 150px;
+        display: inline-table;
+        padding-top: 10px;
+        position: absolute;
+        left: 50%;
+    }
+</style>

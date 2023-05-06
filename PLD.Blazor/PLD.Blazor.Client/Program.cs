@@ -29,7 +29,9 @@ builder.Services.AddScoped<ICommissionFinalService, CommissionFinalService>();
 builder.Services.AddScoped<ICommissionService, CommissionService>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddScoped<IStateCodeService,StateCodeService>();
-
+builder.Services.AddScoped<ICaseService, CaseService>();
+builder.Services.AddScoped<ICaseStatusService, CaseStatusService>();
+builder.Services.AddScoped<ICaseTypeService, CaseTypeService>();
 
 // register the Telerik services
 builder.Services.AddTelerikBlazor();
@@ -67,6 +69,10 @@ builder.Services.AddAuthorizationCore(options =>
         );
     options.AddPolicy(ConstantClass.CommissionUpsertRolePolicy, policy =>
         policy.RequireRole(defaultRoles.Role_Commission_User_Create, defaultRoles.Role_Commission_User_Edit
+        , defaultRoles.Role_Admin)
+        );
+    options.AddPolicy(ConstantClass.CaseUpsertRolePolicy, policy =>
+        policy.RequireRole(defaultRoles.Role_Case_User_Create, defaultRoles.Role_Case_User_Edit
         , defaultRoles.Role_Admin)
         );
 });
