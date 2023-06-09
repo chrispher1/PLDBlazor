@@ -18,11 +18,11 @@
 @inject ICommissionFinalService commissionFinalService
 @inject NavigationManager navigationManager
 
-@if ((_editContext != null) && (_commissionError?.Id == 0))
+@if (_commissionError?.Id == 0)
 {
     <h3>New Commission</h3>
 }
-else if (_editContext != null)
+else 
 {
     <h3>Update Commission</h3>
 }
@@ -240,8 +240,9 @@ else if (_editContext != null)
 
                 // Delete the record in the error table after inserting in the final table
                 await commissionErrorService.Delete(_commissionError.Id);
+                
+                navigationManager.NavigateTo(CommissionPage);
 
-                navigationManager.NavigateTo(CommissionPage, true);
 
             }
             catch (Exception ex)

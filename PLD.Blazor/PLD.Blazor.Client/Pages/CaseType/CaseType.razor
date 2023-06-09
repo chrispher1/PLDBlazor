@@ -51,7 +51,7 @@
                 </AuthorizeView>
             </GridCommandColumn>
         </GridColumns>
-        <GridToolBar>
+        <GridToolBarTemplate>
             <div class="col d-flex justify-content-end">
                 <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy">
                     <Authorized>
@@ -61,7 +61,7 @@
                     </Authorized>
                 </AuthorizeView>
             </div>
-        </GridToolBar>
+        </GridToolBarTemplate>
     </TelerikGrid>
 }
 else

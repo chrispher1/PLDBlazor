@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PLD.Blazor.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -12,7 +13,7 @@ namespace PLD.Blazor.Business.IRepositories
         Task Add(T entity);
         Task Add(IEnumerable<T> entities);
         Task<T?> Get(Expression<Func<T,bool>>? filter=null, string? includeProperties=null);       
-        Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null, string? includeProperties = null);
+        Task<PagedList<T>> GetAll(Expression<Func<T, bool>>? filter = null, string? includeProperties = null, GridParams? gridParams = null, string? sortParams = null);
         Task Remove(T entity);
         Task Remove(IEnumerable<T> entities);
     }

@@ -14,6 +14,9 @@ using PLD.Blazor.Common;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Reflection;
 using System.Data;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using PLD.Blazor.Common.Utilities.ExtensionMethods;
+
 
 namespace PLD.Blazor.Business.Repositories
 {
@@ -33,7 +36,7 @@ namespace PLD.Blazor.Business.Repositories
             _dbSetCommissionFinal = _applicationDBContext.Set<V>();
         }
 
-        public async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
+        public async Task<PagedList<T>> GetAll(Expression<Func<T, bool>>? filter = null, string? includeProperties = null, GridParams? gridParams = null, string? sortParams = null)
         {            
             IQueryable<U> queryCommissionError = this._dbSetCommissionError;    
             IQueryable<V> queryCommissionFinal = this._dbSetCommissionFinal;
@@ -56,6 +59,8 @@ namespace PLD.Blazor.Business.Repositories
                     {
                         Id = (int)(obj?.GetType().GetProperty("Id")?.GetValue(obj, null) ?? 0),
                         TransDate = (DateTime?)obj?.GetType().GetProperty("TransDate")?.GetValue(obj, null),
+                        CarrierId = (int)(obj?.GetType().GetProperty("CarrierId")?.GetValue(obj, null) ?? 0),
+                        TransType = (string)(obj?.GetType().GetProperty("TransType")?.GetValue(obj, null) ?? 0),
                         Carrier = new CarrierDTO
                         {
                             Id = (obj?.GetType().GetProperty("Carrier")?.GetValue(obj, null) as Carrier ?? new Carrier()).Id,
@@ -69,7 +74,7 @@ namespace PLD.Blazor.Business.Repositories
                         CommOverridePayment = (decimal?)(obj?.GetType().GetProperty("CommOverridePayment")?.GetValue(obj, null) ?? 0),
                         TableName = EnumClass.Commission.Error
                     }
-               );
+               ).AsQueryable();
 
             var secondCommissionResultList = commissionFinalList.Select(
                     obj =>
@@ -77,6 +82,8 @@ namespace PLD.Blazor.Business.Repositories
                     {
                         Id = (int)(obj?.GetType().GetProperty("Id")?.GetValue(obj, null) ?? 0),
                         TransDate = (DateTime?)obj?.GetType().GetProperty("TransDate")?.GetValue(obj, null),
+                        CarrierId = (int)(obj?.GetType().GetProperty("CarrierId")?.GetValue(obj, null) ?? 0),
+                        TransType = (string)(obj?.GetType().GetProperty("TransType")?.GetValue(obj, null) ?? 0),
                         Carrier = new CarrierDTO
                         {
                             Id = (obj?.GetType().GetProperty("Carrier")?.GetValue(obj, null) as Carrier ?? new Carrier()).Id,
@@ -90,14 +97,33 @@ namespace PLD.Blazor.Business.Repositories
                         CommOverridePayment = (decimal?)(obj?.GetType().GetProperty("CommOverridePayment")?.GetValue(obj, null) ?? 0),
                         TableName = EnumClass.Commission.Final
                     }
-               );
+               ).AsQueryable();
 
             if (filter != null)
             {
-                firstCommissionResultList = firstCommissionResultList.AsQueryable().Where(filter);
-                secondCommissionResultList = secondCommissionResultList.AsQueryable().Where(filter);
+                firstCommissionResultList = firstCommissionResultList.Where(filter);
+                secondCommissionResultList = secondCommissionResultList.Where(filter);
             }
-            return firstCommissionResultList.Union(secondCommissionResultList);
-        }
-    }
+
+            PagedList<T> list;
+
+            var unionResultList = firstCommissionResultList.Union(secondCommissionResultList);
+
+            if (sortParams != null)
+            {
+                unionResultList = unionResultList.OrderBy(sortParams);
+            }
+
+            if (gridParams != null)
+            {
+                list =  PagedList<T>.Create(unionResultList, gridParams.PageNumber, gridParams.PageSize);
+            }
+            else
+            {
+                list =  PagedList<T>.Create(unionResultList);                
+            }
+            
+            return list;
+        }        
+    }    
 }

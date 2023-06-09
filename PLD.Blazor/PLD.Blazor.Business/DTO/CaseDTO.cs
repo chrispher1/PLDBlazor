@@ -21,15 +21,13 @@ namespace PLD.Blazor.Business.DTO
         [StringLength(30)]
         public string? Policy { get; set; }
 
-        [Required]
-        [MaxLength(15)]
-        public string? CaseType { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "The Case Type field is required.")]
+        public int TypeId { get; set; }
+        public CaseTypeDTO? CaseType { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = "The Product field is required.")]
         public int ProductId { get; set; }
         public ProductDTO? Product { get; set; }
-
-        [Range(1, int.MaxValue, ErrorMessage = "The Product Type field is required.")]
         public int ProductTypeId { get; set; }
         public ProductTypeDTO? ProductType { get; set; }
 
@@ -39,11 +37,13 @@ namespace PLD.Blazor.Business.DTO
 
         [Column("Prim_Ins_LastName")]
         [StringLength(30)]
-        public string? ClientLastName { get; set; }
+        public string? ClientLastName { get; set; }        
 
-        [Column("Status")]
-        [StringLength(50)]
-        public string? Status { get; set; }
+        [Column("Status_Id")]
+        [Range(1, int.MaxValue, ErrorMessage = "The Case Status field is required.")]
+        public int StatusId { get; set; }
+
+        public CaseStatusDTO? CaseStatus { get; set; }
 
         [Column("Issue_State")]
         [StringLength(2)]

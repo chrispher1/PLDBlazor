@@ -22,12 +22,12 @@ namespace PLD.Blazor.Business.Repositories
             var caseRecord = _applicationDBContext.Case.Where( obj => obj.Id == entity.Id ).Single();
             caseRecord.CarrierId = entity.CarrierId;
             caseRecord.Policy = entity.Policy;
-            caseRecord.CaseType = entity.CaseType;
+            caseRecord.TypeId = entity.TypeId;
             caseRecord.ProductId = entity.ProductId;
             caseRecord.ProductTypeId = entity.ProductTypeId;
             caseRecord.ClientFirstName = entity.ClientFirstName;
             caseRecord.ClientLastName = entity.ClientLastName;
-            caseRecord.Status = entity.Status;
+            caseRecord.StatusId = entity.StatusId;
             caseRecord.IssueState = entity.IssueState;
             caseRecord.IssueAge = entity.IssueAge;
             caseRecord.AppReceiptDate = entity.AppReceiptDate;

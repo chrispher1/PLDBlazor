@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 using System.Linq.Expressions;
 using PLD.Blazor.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using PLD.Blazor.Common;
+using System.Collections;
+using PLD.Blazor.Common.Utilities.ExtensionMethods;
 
 namespace PLD.Blazor.Business.Repositories
 {
@@ -51,7 +54,7 @@ namespace PLD.Blazor.Business.Repositories
             return record;
 
         }
-        public async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
+        public async Task<PagedList<T>> GetAll(Expression<Func<T, bool>>? filter = null, string? includeProperties = null, GridParams? gridParams = null, string? sortParams = null)
         {
             IQueryable<T> query = this._dbSet;
 
@@ -68,8 +71,23 @@ namespace PLD.Blazor.Business.Repositories
                 }
             }
 
-            
-            IEnumerable<T> list = await query.ToListAsync();
+            if (sortParams != null)
+            {
+                query = query.OrderBy(sortParams);
+            }
+
+            PagedList<T> list;
+
+            if (gridParams != null)
+            {
+                list = await PagedList<T>.CreateAsync(query, gridParams.PageNumber, gridParams.PageSize);
+                
+            }
+            else
+            {
+                list = await PagedList<T>.CreateAsync(query);
+                //list = await query.ToListAsync();
+            }
 
             return list;
         }

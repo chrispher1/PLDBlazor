@@ -1,4 +1,5 @@
 ﻿using PLD.Blazor.Business.DTO;
+using PLD.Blazor.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,6 @@ namespace PLD.Blazor.Service.IService
 {
     public interface ICommissionService
     {
-        Task<IEnumerable<CommissionDTO>?> GetAll();
+        Task<PagedList<CommissionDTO>?> GetAll(GridParams gridParams, CommissionAllSearchParams searchParams, string? sortParams = null);
     }
 }

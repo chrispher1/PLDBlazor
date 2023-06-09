@@ -56,6 +56,7 @@ builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddCors(Policy => Policy.AddPolicy("PLD.Blazor", builder => builder.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod()
+
     )
 );
 

@@ -17,14 +17,15 @@
 @inject IMapper mapper
 @inject NavigationManager navigationManager
 
-@if ((_editContext != null) && (_commissionFinal?.Id == 0))
+@if (_commissionFinal?.Id == 0)
 {
     <h3>New Commission</h3>
 }
-else if (_editContext != null)
+else 
 {
     <h3>Update Commission</h3>
 }
+
 
 @if (_saveOperation == true)
 {

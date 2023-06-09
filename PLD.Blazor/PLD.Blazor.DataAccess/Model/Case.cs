@@ -24,10 +24,11 @@ namespace PLD.Blazor.DataAccess.Model
         [Column("Policy_Number")]
         [StringLength(30)]
         public string? Policy { get; set; }
+                
+        [Column("Type_Id")]
+        public int? TypeId { get; set; }
 
-        [Column("Case_Type")]
-        [StringLength(15)]
-        public string? CaseType { get; set; }
+        public CaseType CaseType { get; set; }
 
         [Column("Prod_Id")]
         public int? ProductId { get; set; }
@@ -46,9 +47,10 @@ namespace PLD.Blazor.DataAccess.Model
         [StringLength(30)]
         public string? ClientLastName { get; set; }
 
-        [Column("Status")]
-        [StringLength(50)]
-        public string? Status { get; set; }
+        [Column("Status_Id")]        
+        public int? StatusId { get; set; }
+
+        public CaseStatus CaseStatus { get; set; }
 
         [Column("Issue_State")]
         [StringLength(2)]

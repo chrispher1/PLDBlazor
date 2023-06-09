@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PLD.Blazor.DataAccess;
 
@@ -11,9 +12,10 @@ using PLD.Blazor.DataAccess;
 namespace PLD.Blazor.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230508100932_ModifyCaseTableMay0820230604")]
+    partial class ModifyCaseTableMay0820230604
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -124,6 +126,11 @@ namespace PLD.Blazor.DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("Carr_Id");
 
+                    b.Property<string>("CaseType")
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)")
+                        .HasColumnName("Case_Type");
+
                     b.Property<string>("ClientFirstName")
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)")
@@ -212,10 +219,6 @@ namespace PLD.Blazor.DataAccess.Migrations
                         .HasColumnType("numeric(16,2)")
                         .HasColumnName("Target_Prem_Amt");
 
-                    b.Property<int?>("TypeId")
-                        .HasColumnType("int")
-                        .HasColumnName("Type_Id");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CarrierId");
@@ -225,8 +228,6 @@ namespace PLD.Blazor.DataAccess.Migrations
                     b.HasIndex("ProductTypeId");
 
                     b.HasIndex("StatusId");
-
-                    b.HasIndex("TypeId");
 
                     b.ToTable("DMT_CASE");
                 });
@@ -921,16 +922,9 @@ namespace PLD.Blazor.DataAccess.Migrations
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("PLD.Blazor.DataAccess.Model.CaseType", "CaseType")
-                        .WithMany("Cases")
-                        .HasForeignKey("TypeId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.Navigation("Carrier");
 
                     b.Navigation("CaseStatus");
-
-                    b.Navigation("CaseType");
 
                     b.Navigation("Product");
 
@@ -1079,11 +1073,6 @@ namespace PLD.Blazor.DataAccess.Migrations
                 });
 
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.CaseStatus", b =>
-                {
-                    b.Navigation("Cases");
-                });
-
-            modelBuilder.Entity("PLD.Blazor.DataAccess.Model.CaseType", b =>
                 {
                     b.Navigation("Cases");
                 });

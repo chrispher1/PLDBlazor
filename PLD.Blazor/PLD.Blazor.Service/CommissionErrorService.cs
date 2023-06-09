@@ -1,9 +1,12 @@
 ﻿using Newtonsoft.Json;
 using PLD.Blazor.Business.DTO;
+using PLD.Blazor.Common;
 using PLD.Blazor.Service.IService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -63,15 +66,29 @@ namespace PLD.Blazor.Service
             }
             return null;
         }
-        public async Task<IEnumerable<CommissionErrorDTO>> GetAll()
-        {
-            var response = await _httpClient.GetAsync("/api/CommissionError");
+        public async Task<PagedList<CommissionErrorDTO>> GetAll(GridParams gridParams, CommissionErrorSearchParams searchParams, string? sortParams = null)
+        {   
+            var response = await _httpClient.GetAsync($"/api/CommissionError?PageNumber={gridParams.PageNumber}&PageSize={gridParams.PageSize}" +
+                $"&CarrierId={searchParams.CarrierId}"+
+                $"&Policy={searchParams.Policy}" +
+                $"&TransDate={searchParams.TransDate}"+
+                $"&TransType={searchParams.TransType}"+
+                $"&CommPremium={searchParams.CommPremium}"+
+                $"&CommOverrideRate={searchParams.CommOverrideRate}"+
+                $"&CommOverridePayment={searchParams.CommOverridePayment}"+
+                (sortParams != null ? $"&SortParams={sortParams}" : "")
+                );
+
             var responseContent = await response.Content.ReadAsStringAsync();
-            var emptyList = new List<CommissionErrorDTO>();
+
+            var responseValue = JsonConvert.DeserializeObject<PaginationHeader>(response.Headers.GetValues("Pagination").First());
+            
+            var emptyList =  new PagedList<CommissionErrorDTO>();
             if (response.IsSuccessStatusCode)
             {
-                var result = JsonConvert.DeserializeObject<IEnumerable<CommissionErrorDTO>>(responseContent);
-                return result ?? emptyList;
+                var result =( JsonConvert.DeserializeObject<IEnumerable<CommissionErrorDTO>>(responseContent));
+                var pagedListResult = new PagedList<CommissionErrorDTO>(result?.ToList() == null ? new List<CommissionErrorDTO>() : result.ToList(), responseValue?.TotalItems == null ? 0: responseValue.TotalItems);
+                return pagedListResult ?? emptyList;
             }
             else
             {

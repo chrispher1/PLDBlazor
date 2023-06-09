@@ -1,11 +1,18 @@
 ﻿@page "/case/caseInsert"
+@page "/case/caseUpdate/{Id:int}"
 
 @using Microsoft.AspNetCore.Authorization;
+@using Blazored.LocalStorage;
+
+@attribute [Authorize(Policy = ConstantClass.CaseRolePolicy)]
 
 @inject ICarrierService carrierService;
 @inject IProductService productService;
-
-@attribute [Authorize(Policy = ConstantClass.CaseRolePolicy)]
+@inject ICaseStatusService caseStatusService;
+@inject ICaseTypeService caseTypeService;
+@inject ICaseService caseService;
+@inject IProductTypeService productTypeService;
+@inject ILocalStorageService localStorage;
 
 @if ((_editContext != null) && (_case?.Id == 0))
 {
@@ -14,6 +21,12 @@
 else if (_editContext != null)
 {
     <h3>Update Case</h3>
+}
+
+@if (_saveOperation == true)
+{
+    <span>Case successfully saved</span>
+    <br />
 }
 
 <div class="container border mt-2 p-4">
@@ -47,19 +60,22 @@ else if (_editContext != null)
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(_case.Status)" class="col-2 col-form-label text-end">Status</label>
+                <label for="@nameof(_case.StatusId)" class="col-2 col-form-label text-end">Status</label>
                 <div class="col-3">
-                    <InputSelect @bind-Value="_case.Status" class="form-select">
-                        <option value="0">--Select Status--</option>
-                        <option value="Draft">Draft</option>
-                        <option value="Active">Active</option>
-                        <option value="Placed">Placed</option>
+                    <InputSelect @bind-Value="_case.StatusId" class="form-select">
+                        <option value="0" disabled="disabled" selected>--Select Status--</option>
+                        @foreach (var caseStatus in (_caseStatusList = _caseStatusList ?? new List<CaseStatusDTO>()))
+                        {
+                            <option value="@caseStatus.Id">@caseStatus.Name</option>
+                        }
                     </InputSelect>                    
                 </div>
                 <label for="@nameof(_case.Product.Name)" class="col-4 col-form-label text-end">Product</label>
                 <div class="col-3">
-                    <InputSelect class="form-select"
-                             @bind-Value="_case.ProductId"
+                    <InputSelect class="form-select"                             
+                             Value="@(_case.ProductId)"
+                             ValueExpression="@(()=> _case.ProductId)"
+                             ValueChanged="@((int value) => ChangeSelectedProduct(value) )"
                     >
                         <option value=-1 disabled="disabled" selected>--Select Product--</option>
                         @foreach (var product in (_productList = _productList ?? new List<ProductDTO>()))
@@ -70,7 +86,7 @@ else if (_editContext != null)
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="@nameof(_case.Product.ProductType.Name)" class="col-2 col-form-label text-end">Product Type</label>
+                <label for="@nameof(_case.ProductType.Name)" class="col-2 col-form-label text-end">Product Type</label>
                 <div class="col-3">
                     <label class="col-form-label">@(_productType?.Name?.ToString())</label>
                 </div>
@@ -103,10 +119,11 @@ else if (_editContext != null)
                 <label for="@nameof(_case.CaseType)" class="col-4 col-form-label text-end">Case Type</label>
                 <div class="col-3">
                     <InputSelect class="form-select"
-                             @bind-Value="_case.CaseType">
-                        <option value="0" disabled="disabled" selected>--Select Case Type--</option>
-                        <option value="1">Formal</option>
-                        <option value="2">Informal</option>
+                             @bind-Value="_case.TypeId">
+                        <option value="0" disabled="disabled" selected>--Select Case Type--</option>   
+                        @foreach( var caseType in (_caseTypeList = _caseTypeList ?? new List<CaseTypeDTO>())) {
+                            <option value="@caseType.Id">@caseType.Name</option>
+                        }
                     </InputSelect>
                 </div>
             </div>
@@ -140,20 +157,31 @@ else if (_editContext != null)
 
 @code {
 
+    #region Parameters
+
+    [Parameter]
+    public int Id { get; set; }
+
+    #endregion
+
     #region Fields
 
-        private EditContext? _editContext;
-        private CaseDTO? _case;
-        private ProductTypeDTO _productType = new ProductTypeDTO();
-        private IEnumerable<CarrierDTO> _carrierList = new List<CarrierDTO>();
-        private IEnumerable<ProductDTO>? _productList = new List<ProductDTO>();
-        private CustomFormValidator? _customFormValidator;
+    private EditContext? _editContext;
+    private CaseDTO? _case;
+    private ProductTypeDTO? _productType = new ProductTypeDTO();
+    private IEnumerable<CarrierDTO> _carrierList = new List<CarrierDTO>();
+    private IEnumerable<ProductDTO>? _productList = new List<ProductDTO>();
+    private IEnumerable<CaseStatusDTO>? _caseStatusList = new List<CaseStatusDTO>();
+    private IEnumerable<CaseTypeDTO>? _caseTypeList = new List<CaseTypeDTO>();
+    private CustomFormValidator? _customFormValidator;
+    private bool _saveOperation = false;
 
     #endregion
 
     #region Constants
 
-        private const int ProductIdDefaultValue = -1;
+    private const int ProductIdDefaultValue = -1;
+    private const int ProductTypeIdDefaultValue = 0;
 
     #endregion
 
@@ -161,15 +189,31 @@ else if (_editContext != null)
 
     protected override async Task OnInitializedAsync()
     {
-        await PopulateForm();         
-        _case = new CaseDTO();
-        _case.ProductId = ProductIdDefaultValue;
+        await PopulateForm();
+
+        if(Id ==0) {
+            _case = new CaseDTO();
+            _case.ProductId = ProductIdDefaultValue;
+        }
+        else
+        {
+            _case = await caseService.GetById(Id);
+            await PopulateProductListByCarrierId(_case?.CarrierId == null ? 0 :
+            _case.CarrierId);
+            _productType = await productTypeService.GetById(_case?.ProductTypeId == null ? 0:
+            _case.ProductTypeId);
+
+
+        }
+
         _editContext = new(_case = _case ?? new CaseDTO());
     }
 
     private async Task PopulateForm()
     {
         _carrierList = await carrierService.GetAll();
+        _caseStatusList = await caseStatusService.GetAll();
+        _caseTypeList = await caseTypeService.GetAll();
     }
 
     private async Task ChangeSelectedCarrier(int carrierId)
@@ -177,6 +221,8 @@ else if (_editContext != null)
         (_case = _case ?? new CaseDTO()).CarrierId = carrierId;
         await PopulateProductListByCarrierId(carrierId);
         (_case = _case ?? new CaseDTO()).ProductId = ProductIdDefaultValue;
+        _productType = new ProductTypeDTO();
+        _case.ProductTypeId = ProductTypeIdDefaultValue;
     }
 
     private async Task PopulateProductListByCarrierId(int carrierId)
@@ -185,9 +231,48 @@ else if (_editContext != null)
         _productList = await productService.GetByCarrierId(carrierId);
     }
 
-    private Task UpsertCase() {
+    private async Task ChangeSelectedProduct(int productId) {
 
-      return  Task.CompletedTask;
+        (_case = _case ?? new CaseDTO()).ProductId = productId;
+        ProductDTO? product = await productService.GetById(productId);
+        _productType = product.ProductType ?? new ProductTypeDTO();
+        _case.ProductTypeId = _productType.Id;
+    }
+
+    private async Task UpsertCase() {
+
+        _customFormValidator?.ClearFormErrors();
+        var errors = new Dictionary<string, List<string>>();
+
+        try
+        {
+            _saveOperation = false;
+            if(Id == 0) {
+
+                _case.CreatedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
+                _case.CreatedDate = System.DateTime.Now;
+                _case = await caseService.Create(_case);
+                Id = _case.Id;
+                _saveOperation = true;
+            }
+            else
+            {
+                // Update the record
+                (_case = _case ?? new CaseDTO()).ModifiedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
+                _case.ModifiedDate = System.DateTime.Now;
+                await caseService.Update(_case);
+                _saveOperation = true;
+            }
+            _editContext = new(_case = _case ?? new CaseDTO());
+
+        }
+        catch( Exception ex)
+        {
+            errors.Add(nameof(_case.CarrierId),
+                    new() { ex.Message });
+            _customFormValidator?.DisplayFormErrors(errors);
+            _saveOperation = false;
+        }
     }
 
     #endregion
