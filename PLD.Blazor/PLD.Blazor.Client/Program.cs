@@ -10,6 +10,7 @@ using PLD.Blazor.Common;
 using PLD.Blazor.Business.Mapper;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
+
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
@@ -32,6 +33,7 @@ builder.Services.AddScoped<IStateCodeService,StateCodeService>();
 builder.Services.AddScoped<ICaseService, CaseService>();
 builder.Services.AddScoped<ICaseStatusService, CaseStatusService>();
 builder.Services.AddScoped<ICaseTypeService, CaseTypeService>();
+
 
 // register the Telerik services
 builder.Services.AddTelerikBlazor();
@@ -81,3 +83,4 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, WebAssemblyAuthenticationStateProvider>();
 
 await builder.Build().RunAsync();
+

@@ -24,11 +24,11 @@ namespace PLD.Blazor.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get() 
+        public async Task<IActionResult> Get([FromQuery] GridParams gridParams, [FromQuery] CommissionAllSearchParams searchParams, string? sortParams = null) 
         {
             try
             {
-                var list = _mapper.Map<IEnumerable<Case>, IEnumerable<CaseDTO>>(await _unitOfWork.Case.GetAll(includeProperties: "Carrier,Product"));
+                var list = _mapper.Map<IEnumerable<Case>, IEnumerable<CaseDTO>>(await _unitOfWork.Case.GetAll(includeProperties: "Carrier,Product,CaseStatus,CaseType,ProductType"));
                 return Ok(list);
             }
             catch (Exception ex)
@@ -43,7 +43,7 @@ namespace PLD.Blazor.WebApi.Controllers
         {
             try
             {
-                var record = _mapper.Map<CaseDTO>(await _unitOfWork.Case.Get(obj => obj.Id == id, includeProperties: "Carrier,Product"));
+                var record = _mapper.Map<CaseDTO>(await _unitOfWork.Case.Get(obj => obj.Id == id, includeProperties: "Carrier,Product,CaseStatus,CaseType,ProductType"));
 
                 if (record == null)
                 {
@@ -90,7 +90,7 @@ namespace PLD.Blazor.WebApi.Controllers
             {
                 var caseObject = _mapper.Map<Case>(objectCase);
 
-                var record = _mapper.Map<CaseDTO>(await _unitOfWork.Case.Get(obj => obj.Id == objectCase.Id, includeProperties: "Carrier,Product"));
+                var record = _mapper.Map<CaseDTO>(await _unitOfWork.Case.Get(obj => obj.Id == objectCase.Id, includeProperties: "Carrier,Product,CaseStatus,CaseType,ProductType"));
                 if (record != null)
                 {
                     _unitOfWork.Case.Update(caseObject);

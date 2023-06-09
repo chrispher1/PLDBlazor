@@ -22,7 +22,8 @@ namespace PLD.Blazor.Business.DTO
         public string CreatedBy { get; set; }
         public DateTime? ModifiedDate { get; set; }
         public string? ModifiedBy { get; set; }
-        public ICollection<ProductDTO>? Products { get; set; }
-        public ICollection<TimeActivityMappingDTO>? TimeActivityMappings { get; set; }
+        
+        //public ICollection<ProductDTO>? Products { get; set; }
+        //public ICollection<TimeActivityMappingDTO>? TimeActivityMappings { get; set; }
     }
 }

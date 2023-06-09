@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using PLD.Blazor.Business.DTO;
+using PLD.Blazor.Common;
 using PLD.Blazor.DataAccess.Model;
 using PLD.Blazor.Service.IService;
 using System;
@@ -55,15 +56,31 @@ namespace PLD.Blazor.Service
             }
         }
 
-        public async Task<IEnumerable<CommissionFinalDTO>> GetAll()
+        public async Task<PagedList<CommissionFinalDTO>> GetAll(GridParams gridParams, CommissionFinalSearchParams searchParams, string? sortParams = null)
         {
-            var response = await _httpClient.GetAsync("/api/CommissionFinal");
-            var respnseContent = await response.Content.ReadAsStringAsync();
-            var emptyList = new List<CommissionFinalDTO>();
+            var response = await _httpClient.GetAsync($"/api/CommissionFinal?PageNumber={gridParams.PageNumber}&PageSize={gridParams.PageSize}" +
+                $"&CarrierId={searchParams.CarrierId}" +
+                $"&Policy={searchParams.Policy}" +
+                $"&TransDate={searchParams.TransDate}" +
+                $"&TransType={searchParams.TransType}" +
+                $"&CommPremium={searchParams.CommPremium}" +
+                $"&CommOverrideRate={searchParams.CommOverrideRate}" +
+                $"&CommOverridePayment={searchParams.CommOverridePayment}"+
+                (sortParams != null ? $"&SortParams={sortParams}" : "")
+                );
+            
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            var responseValue = JsonConvert.DeserializeObject<PaginationHeader>(response.Headers.GetValues("Pagination").First());
+                        
+            var emptyList = new PagedList<CommissionFinalDTO>();
+
             if (response.IsSuccessStatusCode)
             {
-                var list = JsonConvert.DeserializeObject<IEnumerable<CommissionFinalDTO>>(respnseContent);
-                return list ?? emptyList;
+                var result = (JsonConvert.DeserializeObject<IEnumerable<CommissionFinalDTO>>(responseContent));
+                var pagedListResult = new PagedList<CommissionFinalDTO>(result?.ToList() == null ? new List<CommissionFinalDTO>() : result.ToList(), responseValue?.TotalItems == null ? 0 : responseValue.TotalItems);
+                return pagedListResult ?? emptyList;
+
             }
             return emptyList;
         }

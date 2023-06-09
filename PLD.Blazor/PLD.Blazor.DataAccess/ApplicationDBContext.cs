@@ -93,6 +93,14 @@ namespace PLD.Blazor.DataAccess
                 HasForeignKey(pldCase => pldCase.ProductTypeId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired(false);
+            modelBuilder.Entity<Case>().HasOne( cs => cs.CaseStatus).WithMany( caseStatus => caseStatus.Cases).
+                HasForeignKey( pldCase => pldCase.StatusId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+            modelBuilder.Entity<Case>().HasOne(ct => ct.CaseType).WithMany(caseType => caseType.Cases).
+                HasForeignKey(pldCase => pldCase.TypeId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
         }
     }
 }

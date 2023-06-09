@@ -1,5 +1,6 @@
 ﻿@page "/carrier"
 @using Telerik.DataSource.Extensions;
+@using Telerik.Blazor.Components;
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
 @inject ICarrierService carrierService
@@ -25,9 +26,9 @@
     <TelerikGrid Data=@_carrierList
              Sortable=true
              Pageable=true
-             @bind-PageSize="@_pageSize"
-             FilterMode="@GridFilterMode.FilterRow"
-             Height=@Height>
+                      
+             Height=@Height
+             FilterMode="GridFilterMode.FilterRow">
         <GridSettings>
             <GridPagerSettings PageSizes="@_pageSizes" />
         </GridSettings>
@@ -54,7 +55,7 @@
                 </AuthorizeView>
             </GridCommandColumn>
         </GridColumns>
-        <GridToolBar>
+        <GridToolBarTemplate>
             <div class="col d-flex justify-content-end">
                 <AuthorizeView Policy="@ConstantClass.MaintenanceRolePolicy">
                     <Authorized>
@@ -64,7 +65,7 @@
                     </Authorized>
                 </AuthorizeView>
             </div>
-        </GridToolBar>
+        </GridToolBarTemplate>
     </TelerikGrid>
 }
 else
@@ -79,7 +80,7 @@ else
 
     #region Fields
         
-        private IEnumerable<CarrierDTO>? _carrierList;
+        private List<CarrierDTO> _carrierList;
         private int _pageSize = 10;
         private List<int?> _pageSizes => new List<int?> { 5, 10, 25, 50, null };
         private bool _deleteOperation = false;
@@ -102,7 +103,9 @@ else
 
         private async Task GetGridData()
         {
-            _carrierList = await carrierService.GetAll();
+            IEnumerable<CarrierDTO> list;
+            list = await carrierService.GetAll();
+            _carrierList = list.ToList();
         }
 
         private async Task ConfirmDelete(MouseEventArgs e, int id)

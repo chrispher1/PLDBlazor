@@ -6,6 +6,9 @@ using PLD.Blazor.Business.DTO;
 using PLD.Blazor.Business.IRepositories;
 using PLD.Blazor.Common;
 using PLD.Blazor.DataAccess.Model;
+using System.Linq.Expressions;
+using PLD.Blazor.Common.Utilities.ExtensionMethods;
+
 
 namespace PLD.Blazor.WebApi.Controllers
 {
@@ -25,12 +28,70 @@ namespace PLD.Blazor.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery] GridParams gridParams, [FromQuery] CommissionAllSearchParams searchParams, string? sortParams = null)
         {
             try
             {
-                var list = _mapper.Map<IEnumerable<CommissionFinalDTO>>(await _unitOfWork.CommissionFinal.GetAll(includeProperties: "Carrier,Product,Activity,PremiumMode"));
+                Expression<Func<CommissionFinal, bool>> commissionExpression = obj => true;
 
+                if (searchParams.TransDate != null)
+                {
+                    commissionExpression = obj => obj.TransDate == searchParams.TransDate;
+                }
+
+                if (searchParams.CarrierId != null)
+                {
+                    Expression<Func<CommissionFinal, bool>> carrierExpression =
+                    c => c.CarrierId == searchParams.CarrierId;
+
+                    commissionExpression = ExpressionExtension<CommissionFinal>.AndAlso(commissionExpression, carrierExpression);
+                }
+
+                if (searchParams.Policy != null)
+                {
+                    Expression<Func<CommissionFinal, bool>> policyExpression =
+                    c => c.Policy == searchParams.Policy;
+
+                    commissionExpression = ExpressionExtension<CommissionFinal>.AndAlso(commissionExpression, policyExpression);
+                }
+
+                if (searchParams.TransType != null)
+                {
+                    Expression<Func<CommissionFinal, bool>> transTypeExpression =
+                    c => c.TransType == searchParams.TransType;
+
+                    commissionExpression = ExpressionExtension<CommissionFinal>.AndAlso(commissionExpression, transTypeExpression);
+                }
+
+                if (searchParams.CommPremium != null)
+                {
+                    Expression<Func<CommissionFinal, bool>> commPremiumExpression =
+                    c => c.CommPremium == searchParams.CommPremium;
+
+                    commissionExpression = ExpressionExtension<CommissionFinal>.AndAlso(commissionExpression, commPremiumExpression);
+                }
+
+                if (searchParams.CommOverrideRate != null)
+                {
+                    Expression<Func<CommissionFinal, bool>> commOverrideRateExpression =
+                    c => c.CommOverrideRate == searchParams.CommOverrideRate;
+
+                    commissionExpression = ExpressionExtension<CommissionFinal>.AndAlso(commissionExpression, commOverrideRateExpression);
+                }
+
+                if (searchParams.CommOverridePayment != null)
+                {
+                    Expression<Func<CommissionFinal, bool>> commOverridePaymentExpression =
+                    c => c.CommOverridePayment == searchParams.CommOverridePayment;
+
+                    commissionExpression = ExpressionExtension<CommissionFinal>.AndAlso(commissionExpression, commOverridePaymentExpression);
+                }
+
+                var pagedList = await _unitOfWork.CommissionFinal.GetAll(filter: commissionExpression, includeProperties: "Carrier,Product,Activity,PremiumMode", gridParams: gridParams, sortParams: sortParams);
+                var list = _mapper.Map<IEnumerable<CommissionFinalDTO>>(pagedList);
+
+                Response.AddPagination(pagedList.TotalCount);
+                
                 return Ok(list);
             }
             catch (Exception ex)

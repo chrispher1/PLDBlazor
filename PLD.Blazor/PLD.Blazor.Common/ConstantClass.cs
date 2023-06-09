@@ -62,6 +62,18 @@
         //List of Actions
         public const string EditAction = "Edit";
         public const string AddAction = "Add";
-        
+
+        //List of SortOrder
+        public const string Ascending = "ASC";
+        public const string Descending = "DESC";
+
+        //List of SortFields
+        public const string CommissionTransactionDate = "TransDate";
+        public const string CommissionCarrierName = "Carrier.Name";
+        public const string CommissionPolicyNumber = "Policy";
+        public const string CommissionTransactionType = "Activity.Description";
+        public const string CommissionPremiumAmount = "CommPremium";
+        public const string CommissionOverrideRate = "CommOverrideRate";
+        public const string CommissionOverridePayment = "CommOverridePayment";
     }
 }
