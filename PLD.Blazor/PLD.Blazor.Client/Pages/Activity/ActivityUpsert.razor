@@ -1,7 +1,10 @@
 ﻿@page "/activity/activityUpdate/{Action}/{Code}"
 @page "/activity/activityInsert/{Action}"
+
 @using Microsoft.AspNetCore.Authorization;
+
 @attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+
 @inject IActivityService activityService
 
 @if (Action == ConstantClass.AddAction)
@@ -64,7 +67,7 @@ else if (Action == ConstantClass.EditAction)
         [Parameter]
         public string Action { get; set; } = String.Empty;
 
-    #endregion
+    #endregion Parameters
 
     #region Fields
 
@@ -72,81 +75,83 @@ else if (Action == ConstantClass.EditAction)
         private bool _saveOperation = false;
         private CustomFormValidator? _customFormValidator;
 
-    #endregion
+    #endregion Fields
 
-    #region Methods
+    #region Events
 
-    protected override async Task OnInitializedAsync()
-    {
-        if (String.IsNullOrEmpty(@Code))
+        protected override async Task OnInitializedAsync()
         {
-            _activity = new ActivityDTO();
-        }
-        else
-        {
-            // Populate activity if already exists
-            _activity = await activityService.GetByCode(Code);
-        }
-
-        await base.OnInitializedAsync();
-    }
-
-    private async Task UpsertActivity()
-    {
-        _customFormValidator?.ClearFormErrors();
-        var errors = new Dictionary<string, List<string>>();
-        try
-        {
-            _saveOperation = false;
-            var record = await activityService.GetByCode(_activity?.Code == null ? String.Empty :
-            _activity.Code);
-
-            if (Action == ConstantClass.EditAction)
+            if (String.IsNullOrEmpty(@Code))
             {
-                if (record != null)
-                {
+                _activity = new ActivityDTO();
+            }
+            else
+            {
+                // Populate activity if already exists
+                _activity = await activityService.GetByCode(Code);
+            }
 
-                    // Update the record
-                    (_activity = _activity ?? new ActivityDTO()).ModifiedBy = ConstantClass.SystemUser;
-                    _activity.ModifiedDate = System.DateTime.Now;
-                    await activityService.Update(_activity);
-                    _saveOperation = true;
-                }
-                else
+            await base.OnInitializedAsync();
+        }
+
+    #endregion Events        
+
+    #region Methods    
+
+        private async Task UpsertActivity()
+        {
+            _customFormValidator?.ClearFormErrors();
+            var errors = new Dictionary<string, List<string>>();
+            try
+            {
+                _saveOperation = false;
+                var record = await activityService.GetByCode(_activity?.Code == null ? String.Empty :
+                _activity.Code);
+
+                if (Action == ConstantClass.EditAction)
                 {
-                    errors.Add(nameof(_activity.Code),
-                    new() { ConstantClass.ActivityCannotUpdateRecordCodeNotExists });
-                    _customFormValidator?.DisplayFormErrors(errors);
+                    if (record != null)
+                    {
+
+                        // Update the record
+                        (_activity = _activity ??= new ActivityDTO()).ModifiedBy = ConstantClass.SystemUser;
+                        _activity.ModifiedDate = System.DateTime.Now;
+                        await activityService.Update(_activity);
+                        _saveOperation = true;
+                    }
+                    else
+                    {
+                        errors.Add(nameof(_activity.Code),
+                        new() { ConstantClass.ActivityCannotUpdateRecordCodeNotExists });
+                        _customFormValidator?.DisplayFormErrors(errors);
+                    }
+                }
+                else if (Action == ConstantClass.AddAction)
+                {
+                    if (record != null)
+                    {
+                        errors.Add(nameof(_activity.Code),
+                        new() { ConstantClass.ActivityCannotAddRecordCodeUsed });
+                        _customFormValidator?.DisplayFormErrors(errors);
+                    }
+                    else
+                    {
+                        (_activity = _activity ??= new ActivityDTO()).CreatedBy = ConstantClass.SystemUser;
+                        _activity.CreatedDate = System.DateTime.Now;
+                        _activity = await activityService.Create(_activity);
+                        _saveOperation = true;
+                        Action = ConstantClass.EditAction;
+                    }
                 }
             }
-            else if (Action == ConstantClass.AddAction)
+            catch (Exception ex)
             {
-                if (record != null)
-                {
-                    errors.Add(nameof(_activity.Code),
-                    new() { ConstantClass.ActivityCannotAddRecordCodeUsed });
-                    _customFormValidator?.DisplayFormErrors(errors);
-                }
-                else
-                {
-                    (_activity = _activity ?? new ActivityDTO()).CreatedBy = ConstantClass.SystemUser;
-                    _activity.CreatedDate = System.DateTime.Now;
-                    _activity = await activityService.Create(_activity);
-                    _saveOperation = true;
-                    Action = ConstantClass.EditAction;
-                }
+                errors.Add(nameof(_activity.Code),
+                        new() { ex.Message });
+                _customFormValidator?.DisplayFormErrors(errors);
+                _saveOperation = false;
             }
         }
-        catch (Exception ex)
-        {
-            errors.Add(nameof(_activity.Code),
-                    new() { ex.Message });
-            _customFormValidator?.DisplayFormErrors(errors);
-            _saveOperation = false;
-        }
-    }
 
-    #endregion
-
-
+    #endregion Methods
 }

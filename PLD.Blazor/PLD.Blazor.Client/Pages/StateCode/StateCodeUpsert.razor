@@ -1,7 +1,10 @@
 ﻿@page "/stateCode/stateCodeUpdate/{Action}/{Code}"
 @page "/stateCode/stateCodeInsert/{Action}"
+
 @using Microsoft.AspNetCore.Authorization;
+
 @attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+
 @inject IStateCodeService _stateCodeService
 
 @if (Action == ConstantClass.AddAction)
@@ -67,7 +70,7 @@ else if (Action == ConstantClass.EditAction)
     [Parameter]
     public string? Action { get; set; }
 
-    #endregion    
+    #endregion Parameters
 
     #region Fields
 
@@ -75,25 +78,29 @@ else if (Action == ConstantClass.EditAction)
         private bool _saveOperation = false;
         protected CustomFormValidator? _customFormValidator;
 
-    #endregion
+    #endregion Fields
+
+    #region Events
+
+        protected override async Task OnInitializedAsync()
+        {
+
+            if (String.IsNullOrEmpty(@Code))
+            {
+                _stateCode = new StateCodeDTO();
+            }
+            else
+            {
+                // Populate _stateCode if already exists
+                _stateCode = await _stateCodeService.GetByCode(Code);
+            }
+
+            await base.OnInitializedAsync();
+        }
+
+    #endregion Events
     
-    #region Methods
-
-    protected override async Task OnInitializedAsync()
-    {
-
-        if (String.IsNullOrEmpty(@Code))
-        {
-            _stateCode = new StateCodeDTO();
-        }
-        else
-        {
-            // Populate _stateCode if already exists
-            _stateCode = await _stateCodeService.GetByCode(Code);
-        }
-
-        await base.OnInitializedAsync();
-    }
+    #region Methods    
 
     private async Task UpsertStateCode()
     {
@@ -147,5 +154,6 @@ else if (Action == ConstantClass.EditAction)
             _saveOperation = false;
         }
     }
-    #endregion
+
+    #endregion Methods
 }

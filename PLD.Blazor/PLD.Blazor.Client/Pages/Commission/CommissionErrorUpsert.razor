@@ -175,7 +175,7 @@ else
         [Parameter]
         public int Id { get; set; }
 
-    #endregion
+    #endregion Parameters
 
     #region Fields
 
@@ -189,7 +189,7 @@ else
         private CustomFormValidator? _customFormValidator;
         private EditContext? _editContext;
 
-    #endregion    
+    #endregion Fields
 
     #region Constants
 
@@ -197,9 +197,9 @@ else
         private const int ProductIdDefaultValue = -1;
         private const string CommissionPage = "commission";
 
-    #endregion
+    #endregion Constants
 
-    #region Methods
+    #region Events
 
     protected override async Task OnInitializedAsync()
     {
@@ -215,12 +215,16 @@ else
         {
             _commissionError = await commissionErrorService.GetById(@Id);
             _productType = await productTypeService.GetById(_commissionError?.Product?.ProductTypeId == null ? 0 :
-            _commissionError.Product.ProductTypeId);
+            _commissionError.Product.ProductTypeId) ?? new ProductTypeDTO();
             await PopulateProductListByCarrierId(_commissionError?.CarrierId == null ? 0 :
             _commissionError.CarrierId);
         }
-        _editContext = new(_commissionError = _commissionError ?? new CommissionErrorDTO());
+        _editContext = new(_commissionError ??= new CommissionErrorDTO());
     }
+
+    #endregion Events
+
+    #region Methods    
 
     private async Task MoveToFinal(MouseEventArgs e, CommissionErrorDTO commissionError)
     {
@@ -231,7 +235,7 @@ else
             try
             {
                 // Update the record
-                (_commissionError = _commissionError ?? new CommissionErrorDTO()).ModifiedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
+                (_commissionError ??= new CommissionErrorDTO()).ModifiedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
                 _commissionError.ModifiedDate = System.DateTime.Now;
                 CommissionFinalDTO commissionFinal = mapper.Map<CommissionFinalDTO>(commissionError);
 
@@ -278,13 +282,12 @@ else
             else
             {
                 // Update the record
-                (_commissionError = _commissionError ?? new CommissionErrorDTO()).ModifiedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
+                (_commissionError ??= new CommissionErrorDTO()).ModifiedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
                 _commissionError.ModifiedDate = System.DateTime.Now;
                 await commissionErrorService.Update(_commissionError);
                 _saveOperation = true;
             }
-            _editContext = new(_commissionError = _commissionError ?? new CommissionErrorDTO());
-
+            _editContext = new(_commissionError ??= new CommissionErrorDTO());
         }
         catch (Exception ex)
         {
@@ -297,9 +300,9 @@ else
 
     private async Task ChangeSelectedCarrier(int carrierId)
     {
-        (_commissionError = _commissionError ?? new CommissionErrorDTO()).CarrierId = carrierId;
+        (_commissionError ??= new CommissionErrorDTO()).CarrierId = carrierId;
         await PopulateProductListByCarrierId(carrierId);
-        (_commissionError = _commissionError ?? new CommissionErrorDTO()).ProductId = ProductIdDefaultValue;
+        (_commissionError ??= new CommissionErrorDTO()).ProductId = ProductIdDefaultValue;
     }
 
     private async Task PopulateProductListByCarrierId(int carrierId)
@@ -308,6 +311,5 @@ else
         _productList = await productService.GetByCarrierId(carrierId);
     }
 
-    #endregion
-    
+    #endregion Methods    
 }

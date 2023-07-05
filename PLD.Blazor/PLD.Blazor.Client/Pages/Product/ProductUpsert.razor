@@ -1,13 +1,14 @@
 ﻿@page "/product/productUpdate/{Id:int}"
 @page "/product/productInsert"
+
 @using PLD.Blazor.Common;
 @using Microsoft.AspNetCore.Authorization;
+
 @attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
 
 @inject IProductService productService
 @inject ICarrierService carrierService
 @inject IProductTypeService productTypeService
-
 
 @if (@Id == 0)
 {
@@ -110,8 +111,8 @@ else
         [Parameter]
         public int Id { get; set; }
 
-    #endregion    
-    
+    #endregion Parameters
+
     #region Fields
 
         private ProductDTO? _product;
@@ -120,24 +121,28 @@ else
         private bool _saveOperation = false;
         private CustomFormValidator? _customFormValidator;
 
-    #endregion
+    #endregion Fields
+
+    #region Events
+
+        protected override async Task OnInitializedAsync()
+        {
+            await PopulateForm();
+
+            if (@Id == 0)
+            {
+                _product = new ProductDTO();
+            }
+            else
+            {
+                // Populate carrier if already exists
+                _product = await productService.GetById(Id);
+            }
+        }
+
+    #endregion Events
     
     #region Methods
-
-    protected override async Task OnInitializedAsync()
-    {
-        await PopulateForm();
-
-        if (@Id == 0)
-        {
-            _product = new ProductDTO();
-        }
-        else
-        {
-            // Populate carrier if already exists
-            _product = await productService.GetById(Id);
-        }
-    }
 
     private async Task PopulateForm()
     {
@@ -188,7 +193,7 @@ else
                 else
                 {
                     // Update the record
-                    (_product = _product ?? new ProductDTO()).ModifiedBy = ConstantClass.SystemUser;
+                    (_product ??= new ProductDTO()).ModifiedBy = ConstantClass.SystemUser;
                     _product.ModifiedDate = System.DateTime.Now;
                     await productService.Update(_product);
                     _saveOperation = true;
@@ -204,5 +209,5 @@ else
         }
     }
 
-    #endregion
+    #endregion Methods
 }

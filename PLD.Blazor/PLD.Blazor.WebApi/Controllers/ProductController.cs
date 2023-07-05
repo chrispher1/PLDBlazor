@@ -27,8 +27,8 @@ namespace PLD.Blazor.WebApi.Controllers
         public async Task<IActionResult> Get()
         {
             try
-            {
-                var list = _mapper.Map<IEnumerable<Product>, IEnumerable<ProductDTO>>(await _unitOfWork.Product.GetAll(includeProperties: "Carrier,ProductType"));
+            {   
+                var list = _mapper.Map<IEnumerable<Product>, IEnumerable<ProductDTO>>(await _unitOfWork.Product.GetAll(includeProperties: ConstantClass.ProductExtendedProperties));
                 return Ok(list);
             }
             catch (Exception ex)
@@ -43,7 +43,7 @@ namespace PLD.Blazor.WebApi.Controllers
         {
             try
             {
-                var record = _mapper.Map<Product, ProductDTO>(await _unitOfWork.Product.Get(obj => obj.Id == id, includeProperties: "Carrier,ProductType"));
+                var record = _mapper.Map<Product, ProductDTO>(await _unitOfWork.Product.Get(obj => obj.Id == id, includeProperties: ConstantClass.ProductExtendedProperties));
                 
                 if (record == null)
                 {
@@ -63,7 +63,7 @@ namespace PLD.Blazor.WebApi.Controllers
         {
             try
             {
-                var record = _mapper.Map<Product, ProductDTO>(await _unitOfWork.Product.Get(obj => obj.Code == code, includeProperties: "Carrier,ProductType"));
+                var record = _mapper.Map<Product, ProductDTO>(await _unitOfWork.Product.Get(obj => obj.Code == code, includeProperties: ConstantClass.ProductExtendedProperties));
 
                 if (record != null)
                 {
@@ -90,7 +90,7 @@ namespace PLD.Blazor.WebApi.Controllers
         {
             try 
             {
-                var record = _mapper.Map<IEnumerable<Product>, IEnumerable<ProductDTO>>(await _unitOfWork.Product.GetAll(obj => obj.Id != id && obj.Code == code, includeProperties: "Carrier,ProductType"));
+                var record = _mapper.Map<IEnumerable<Product>, IEnumerable<ProductDTO>>(await _unitOfWork.Product.GetAll(obj => obj.Id != id && obj.Code == code, includeProperties: ConstantClass.ProductExtendedProperties));
                 return Ok(record);
             }
             catch (Exception ex)
@@ -105,7 +105,7 @@ namespace PLD.Blazor.WebApi.Controllers
         {
             try
             {
-                var record = _mapper.Map<IEnumerable<Product>, IEnumerable<ProductDTO>>(await _unitOfWork.Product.GetAll(obj => obj.CarrierId == carrierId , includeProperties: "Carrier,ProductType"));
+                var record = _mapper.Map<IEnumerable<Product>, IEnumerable<ProductDTO>>(await _unitOfWork.Product.GetAll(obj => obj.CarrierId == carrierId , includeProperties: ConstantClass.ProductExtendedProperties));
                 return Ok(record);
             }
             catch (Exception ex)

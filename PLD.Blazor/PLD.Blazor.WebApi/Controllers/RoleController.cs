@@ -42,8 +42,8 @@ namespace PLD.Blazor.WebApi.Controllers
         public async Task<IActionResult> Get(int id)
         {
             try
-            {
-                var record = await _unitOfWork.Role.Get(obj => obj.Id == id, includeProperties: "UserRoles");
+            {   
+                var record = await _unitOfWork.Role.Get(obj => obj.Id == id, includeProperties: ConstantClass.RoleExtendedProperties);
 
                 if (record == null)
                 {
@@ -64,7 +64,7 @@ namespace PLD.Blazor.WebApi.Controllers
         {
             try
             {
-                var record = await _unitOfWork.Role.Get(obj => obj.Name == name, includeProperties: "UserRoles");
+                var record = await _unitOfWork.Role.Get(obj => obj.Name == name, includeProperties: ConstantClass.RoleExtendedProperties);
 
                 if (record != null)
                 {
@@ -91,7 +91,7 @@ namespace PLD.Blazor.WebApi.Controllers
         {
             try
             {
-                var record = _mapper.Map<IEnumerable<Role>, IEnumerable<RoleDTO>>(await _unitOfWork.Role.GetAll(obj => obj.Id != id && obj.Name == name, includeProperties: "UserRoles"));
+                var record = _mapper.Map<IEnumerable<Role>, IEnumerable<RoleDTO>>(await _unitOfWork.Role.GetAll(obj => obj.Id != id && obj.Name == name, includeProperties: ConstantClass.RoleExtendedProperties));
                 return Ok(record);
             }
             catch (Exception ex)

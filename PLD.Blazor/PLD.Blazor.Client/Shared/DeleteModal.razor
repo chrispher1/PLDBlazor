@@ -42,37 +42,48 @@ else
 
 @code {
 
-    [Parameter]
-    public string ModalTitle{ get; set; }
+    #region Parameters
 
-    [Parameter]
-    public string PrimaryButtonText { get; set; }
+        [Parameter]
+        public string ModalTitle { get; set; }
 
-    [Parameter]
-    public string SecondaryButtonText { get; set; } 
+        [Parameter]
+        public string PrimaryButtonText { get; set; }
 
-    [Parameter]
-    public string BodyText { get; set; } 
+        [Parameter]
+        public string SecondaryButtonText { get; set; }
 
-    [Parameter]
-    public int Id { get; set; }
+        [Parameter]
+        public string BodyText { get; set; }
 
-    [Parameter]
-    public string Code { get; set; }
+        [Parameter]
+        public int Id { get; set; }
 
-    [Parameter]
-    public EventCallback<int> SelectedMethod { get; set; }
+        [Parameter]
+        public string Code { get; set; }
 
-    [Parameter]
-    public EventCallback<string> SelectedMethodForString { get; set; }
+        [Parameter]
+        public EventCallback<int> SelectedMethod { get; set; }
 
-    private async Task PrimaryButtonSelected (MouseEventArgs e, int id)
-    {
-        await SelectedMethod.InvokeAsync(id);
-    }
+        [Parameter]
+        public EventCallback<string> SelectedMethodForString { get; set; }
 
-    private async Task PrimaryButtonSelected(MouseEventArgs e, string code)
-    {
-        await SelectedMethodForString.InvokeAsync(code);
-    }
+    #endregion Parameters
+    
+    #region Methods
+
+        private async Task PrimaryButtonSelected(MouseEventArgs e, int id)
+        {
+            await SelectedMethod.InvokeAsync(id);
+        }
+
+        private async Task PrimaryButtonSelected(MouseEventArgs e, string code)
+        {
+            await SelectedMethodForString.InvokeAsync(code);
+        }
+
+    #endregion Methods
+
+
+    
 }

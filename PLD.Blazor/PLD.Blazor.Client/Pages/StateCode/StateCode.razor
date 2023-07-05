@@ -1,7 +1,10 @@
 ﻿@page "/stateCode"
+
 @using Telerik.DataSource.Extensions;
 @using Microsoft.AspNetCore.Authorization;
+
 @attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+
 @inject IStateCodeService stateCodeService
 @inject IJSRuntime jsRuntime
 
@@ -92,21 +95,25 @@ else
         private bool _deleteOperation = false;
         private string? _errorMessage = null;
 
-    #endregion
+    #endregion Fields
 
     #region Constants
     
         private const string _height = "400px";
 
-    #endregion
+    #endregion Constants
 
-    #region Methods
+    #region Events
 
-    protected override async Task OnInitializedAsync()
-    {
-        await GetGridData();
-        await base.OnInitializedAsync();
-    }
+        protected override async Task OnInitializedAsync()
+        {
+            await GetGridData();
+            await base.OnInitializedAsync();
+        }
+
+    #endregion Events
+
+    #region Methods    
 
     private async Task ConfirmDelete(MouseEventArgs e, string code)
     {
@@ -137,7 +144,7 @@ else
         _stateCodeList = await stateCodeService.GetAll();
     }
 
-    #endregion
+    #endregion Methods
 }
 
 <style>

@@ -65,7 +65,7 @@ else if (_editContext != null)
     [Parameter]
     public int Id { get; set; }
 
-    #endregion
+    #endregion Parameters
 
 
     #region Fields
@@ -75,23 +75,27 @@ else if (_editContext != null)
     private CustomFormValidator? _customFormValidator;
     private bool _saveOperation = false;
 
-    #endregion
+    #endregion Fields
 
-    #region Methods
+    #region Events
 
-    protected override async Task OnInitializedAsync()
-    {
-        if (Id == 0)
+        protected override async Task OnInitializedAsync()
         {
-            _caseType = new CaseTypeDTO();
-        }
-        else
-        {
-            _caseType = await caseTypeService.GetById(Id);
+            if (Id == 0)
+            {
+                _caseType = new CaseTypeDTO();
+            }
+            else
+            {
+                _caseType = await caseTypeService.GetById(Id);
+            }
+
+            _editContext = new EditContext((_caseType ??= new CaseTypeDTO()));
         }
 
-        _editContext = new EditContext((_caseType = _caseType ?? new CaseTypeDTO()));
-    }
+    #endregion Events
+
+    #region Methods    
 
     private async Task UpsertCaseType()
     {
@@ -133,14 +137,14 @@ else if (_editContext != null)
                 else
                 {
                     // Update the record
-                    (_caseType = _caseType ?? new CaseTypeDTO()).ModifiedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
+                    (_caseType ??= new CaseTypeDTO()).ModifiedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
                     _caseType.ModifiedDate = System.DateTime.Now;
                     await caseTypeService.Update(_caseType);
                     _saveOperation = true;
                 }
 
             }
-            _editContext = new(_caseType = _caseType ?? new CaseTypeDTO());
+            _editContext = new(_caseType ??= new CaseTypeDTO());
         }
         catch (Exception ex)
         {
@@ -149,9 +153,7 @@ else if (_editContext != null)
             _customFormValidator?.DisplayFormErrors(errors);
             _saveOperation = false;
         }
-
     }
 
-
-    #endregion
+    #endregion Methods
 }

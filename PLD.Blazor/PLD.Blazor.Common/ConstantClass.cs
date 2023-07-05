@@ -67,7 +67,7 @@
         public const string Ascending = "ASC";
         public const string Descending = "DESC";
 
-        //List of SortFields
+        //List of SortFields for commission grid
         public const string CommissionTransactionDate = "TransDate";
         public const string CommissionCarrierName = "Carrier.Name";
         public const string CommissionPolicyNumber = "Policy";
@@ -75,5 +75,32 @@
         public const string CommissionPremiumAmount = "CommPremium";
         public const string CommissionOverrideRate = "CommOverrideRate";
         public const string CommissionOverridePayment = "CommOverridePayment";
+
+        //List of SortFields for case grid
+        public const string CaseCarrierName = "Carrier.Name";
+        public const string CasePolicyNumber = "Policy";
+        public const string CaseStatus = "CaseStatus.Name";
+        public const string CaseProductType = "ProductType.Name";
+        public const string CaseFaceAmount = "FaceAmount";
+        public const string CaseAnnualizedPremium = "AnnualizedPremium";
+        public const string CaseTargetPremium = "TargetPremium";
+        public const string CaseModalPremium = "ModalPremium";
+        public const string CasePlacementDate = "PlacementDate";
+        public const string CaseType = "CaseType.Name";
+        public const string CaseProduct = "Product.Name";
+        public const string CaseClientFirstName = "ClientFirstName";
+        public const string CaseClientLastName = "ClientLastName";
+
+        // List of extended properties
+        public const string CommissionExtendedProperties = "Carrier,Product,Activity,PremiumMode";
+        public const string CommissionErrorExtendedProperties = "Carrier,Product,Activity,PremiumMode";
+        public const string CommissionFinalExtendedProperties = "Carrier,Product,Activity,PremiumMode";
+        public const string CaseExtendedProperties = "Carrier,Product,CaseStatus,CaseType,ProductType";
+        public const string ProductExtendedProperties = "Carrier,ProductType";
+        public const string RoleExtendedProperties = "UserRoles";
+        public const string TimeActivityMappingExtendedProperties = "Carrier,Activity";
+        public const string UserExtendedProperties = "UserRoles";
+
+
     }
 }

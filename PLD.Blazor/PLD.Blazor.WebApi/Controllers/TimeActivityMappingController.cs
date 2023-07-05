@@ -32,8 +32,8 @@ namespace PLD.Blazor.WebApi.Controllers
         public async Task<IActionResult> Get()
         {
             try
-            {
-                var list = _mapper.Map<IEnumerable<TimeActivityMapping>, IEnumerable<TimeActivityMappingDTO>>( await _unitOfWork.TimeActivityMapping.GetAll( includeProperties: "Carrier,Activity"));
+            {   
+                var list = _mapper.Map<IEnumerable<TimeActivityMapping>, IEnumerable<TimeActivityMappingDTO>>( await _unitOfWork.TimeActivityMapping.GetAll( includeProperties: ConstantClass.TimeActivityMappingExtendedProperties));
                 return Ok(list);
             }
             catch (Exception ex)
@@ -48,7 +48,7 @@ namespace PLD.Blazor.WebApi.Controllers
         {
             try
             {
-                var record = _mapper.Map<TimeActivityMapping, TimeActivityMappingDTO>( await _unitOfWork.TimeActivityMapping.Get(obj => obj.Id == id, includeProperties: "Carrier,Activity"));
+                var record = _mapper.Map<TimeActivityMapping, TimeActivityMappingDTO>( await _unitOfWork.TimeActivityMapping.Get(obj => obj.Id == id, includeProperties: ConstantClass.TimeActivityMappingExtendedProperties));
 
                 if (record == null)
                 {

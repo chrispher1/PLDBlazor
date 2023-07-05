@@ -1,17 +1,17 @@
 ﻿@page "/logout"
+
 @inject NavigationManager navigationManager
 @inject IUserService userService
 
 @code {
 
-    #region Methods
+    #region Events
 
         protected override async Task OnInitializedAsync()
         {
             await userService.Logout();
         }
 
-    #endregion
-
+    #endregion Events
     
 }

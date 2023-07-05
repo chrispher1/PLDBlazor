@@ -1,8 +1,11 @@
 ﻿@page "/carrier"
+
 @using Telerik.DataSource.Extensions;
 @using Telerik.Blazor.Components;
 @using Microsoft.AspNetCore.Authorization
+
 @attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+
 @inject ICarrierService carrierService
 @inject IJSRuntime jsRuntime
 
@@ -79,27 +82,31 @@ else
 @code {
 
     #region Fields
-        
-        private List<CarrierDTO> _carrierList;
-        private int _pageSize = 10;
+
+        private List<CarrierDTO> _carrierList = new List<CarrierDTO>();
+        //private int _pageSize = 10;
         private List<int?> _pageSizes => new List<int?> { 5, 10, 25, 50, null };
         private bool _deleteOperation = false;
         private string? _errorMessage = null;
 
-    #endregion
+    #endregion  Fields
 
     #region Constants
     
         private const string Height = "400px";
 
-    #endregion
+    #endregion Constants
 
-    #region Methods
+    #region Events
 
         protected override async Task OnInitializedAsync()
-        {
+        {            
             await GetGridData();
         }
+
+    #endregion Events
+    
+    #region Methods
 
         private async Task GetGridData()
         {
@@ -132,9 +139,7 @@ else
             }
         }
 
-    #endregion
-    
-    
+    #endregion Methods
 }
 
 <style>

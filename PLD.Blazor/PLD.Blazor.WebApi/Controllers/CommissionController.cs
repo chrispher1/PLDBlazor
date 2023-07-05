@@ -88,8 +88,8 @@ namespace PLD.Blazor.WebApi.Controllers
 
                     commissionExpression = ExpressionExtension<CommissionDTO>.AndAlso(commissionExpression, commOverridePaymentExpression);
                 }
-
-                var pagedList = (await _unitOfWork.Commission.GetAll(filter: commissionExpression, includeProperties: "Carrier,Product,Activity,PremiumMode", gridParams: gridParams,sortParams: sortParams) as PagedList<CommissionDTO>);
+                
+                var pagedList = (await _unitOfWork.Commission.GetAll(filter: commissionExpression, includeProperties: ConstantClass.CommissionExtendedProperties, gridParams: gridParams,sortParams: sortParams) as PagedList<CommissionDTO>);
                 var list = (pagedList as IEnumerable<CommissionDTO>);
 
                 Response.AddPagination(pagedList.TotalCount);
