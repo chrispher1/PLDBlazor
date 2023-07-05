@@ -1,47 +1,82 @@
 ﻿@page "/case"
 
 @using Microsoft.AspNetCore.Authorization;
+@using Telerik.DataSource;
+
 
 @inject ICaseService caseService;
+@inject ICarrierService carrierService;
+@inject ICaseStatusService caseStatusService;
+@inject IProductTypeService productTypeService;
+@inject ICaseTypeService caseTypeService;
+@inject IProductService productService;
 @inject IJSRuntime jsRuntime;
 
 
 @attribute [Authorize(Policy = ConstantClass.CaseRolePolicy)]
 <h3>Case</h3>
 
-<TelerikTabStrip @bind-ActiveTabIndex="@_activeTabIndex" PersistTabContent="false">
-   <TabStripTab Title="All Case">
+<TelerikTabStrip @bind-ActiveTabIndex="@_activeTabIndex" PersistTabContent="true">
+    <TabStripTab Title="All Case">
         <AuthorizeView Policy="@ConstantClass.CaseRolePolicy">
             <Authorized>
-                @if (@_caseList != null)
+                @if (@_caseAllList != null)
                 {
-                    <TelerikGrid Data="@_caseList"
+                    <TelerikGrid TItem="CaseDTO"
+                             OnRead="@OnCaseAllGridRead"
                              Sortable=true
                              Pageable=true
-                             @bind-PageSize=@_pageSize
                              FilterMode="@GridFilterMode.FilterRow"
                              Height="@Height"
                              ScrollMode="@GridScrollMode.Scrollable"
-                             Width="100%">
+                             @ref="_caseAllGrid"
+                             PageSizeChanged="@CaseAllGridPageSizeChangedHandler"
+                             PageSize="@_caseAllPageSize"
+                             @bind-Page="@_caseAllCurrentPage"
+                             SortMode="@SortMode.Multiple">
                         <GridSettings>
                             <GridPagerSettings PageSizes="@_pageSizes" />
                         </GridSettings>
                         <GridColumns>
-                            <GridColumn Field="Carrier.CarrierCode" Width="75px">
-                                <HeaderTemplate>
-                                    Carrier
-                                    <br />
-                                    Code
-                                </HeaderTemplate>
+                            <GridColumn Field="Carrier.Name" Title="Carrier" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikDropDownList Data="@_carrierList" TextField="Name" ValueField="Id" @bind-Value="_allFilterCarrier"
+                                                     Width="25px">
+                                    </TelerikDropDownList>
+                                </FilterCellTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        @(String.Concat(record?.Carrier?.Name, " (", record?.Carrier?.CarrierCode, ")").ToString())
+                                        ;
+                                    }
+                                </Template>
                             </GridColumn>
-                            <GridColumn Field="Policy" Title="Policy" Width="100px" />
-                            <GridColumn Field="CaseStatus.Name" Title="Status" Width="100px" />
-                            <GridColumn Field="ProductType.Name" Title="Product Type" Width="150px" />
-                            <GridColumn Field="FaceAmount" Width="150px" Context="datasource">
+                            <GridColumn Field="@nameof(CaseDTO.Policy)" Title="Policy" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikTextBox @bind-Value="@_allFilterPolicy" Width="200px" />
+                                </FilterCellTemplate>
+                            </GridColumn>
+                            <GridColumn Field="CaseStatus.Name" Title="Status" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikDropDownList Data="@_statusList" TextField="Name" ValueField="Id" @bind-Value="_allFilterStatus"
+                                                     Width="25px">
+                                    </TelerikDropDownList>
+                                </FilterCellTemplate>
+                            </GridColumn>
+                            <GridColumn Field="ProductType.Name" Title="Product Type" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikDropDownList Data="@_productTypeList" TextField="Name" ValueField="Id" @bind-Value="_allFilterProductType"
+                                                     Width="25px">
+                                    </TelerikDropDownList>
+                                </FilterCellTemplate>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(CaseDTO.FaceAmount)" Width="150px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikNumericTextBox @bind-Value="_allFilterFaceAmount" Width="30px" Step="0.01m" Decimals="2" />
+                                </FilterCellTemplate>
                                 <HeaderTemplate>
-                                    Face
-                                    <br />
-                                    Amount
+                                    Face Amount
                                 </HeaderTemplate>
                                 <Template>
                                     @{
@@ -52,11 +87,14 @@
                                     }
                                 </Template>
                             </GridColumn>
-                            <GridColumn Field="AnnualizedPremium" Width="150px" Context="datasource">
+                            <GridColumn Field="@nameof(CaseDTO.AnnualizedPremium)" Width="150px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikNumericTextBox @bind-Value="_allFilterAnnualizedPremium" Width="30px" Step="0.01m" Decimals="2" />
+                                </FilterCellTemplate>
                                 <HeaderTemplate>
-                                    Annualized Premium
+                                    Annualized
                                     <br />
-                                    Amount
+                                    Premium Amount
                                 </HeaderTemplate>
                                 <Template>
                                     @{
@@ -67,11 +105,14 @@
                                     }
                                 </Template>
                             </GridColumn>
-                            <GridColumn Field="TargetPremium" Width="150px" Context="datasource">
+                            <GridColumn Field="@nameof(CaseDTO.TargetPremium)" Width="150px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikNumericTextBox @bind-Value="_allFilterTargetPremium" Width="30px" Step="0.01m" Decimals="2" />
+                                </FilterCellTemplate>
                                 <HeaderTemplate>
-                                    Target Premium
+                                    Target
                                     <br />
-                                    Amount
+                                    Premium Amount
                                 </HeaderTemplate>
                                 <Template>
                                     @{
@@ -82,11 +123,14 @@
                                     }
                                 </Template>
                             </GridColumn>
-                            <GridColumn Field="ModalPremium" Width="150px" Context="datasource">
+                            <GridColumn Field="@nameof(CaseDTO.ModalPremium)" Width="150px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikNumericTextBox @bind-Value="_allFilterModalPremium" Width="30px" Step="0.01m" Decimals="2" />
+                                </FilterCellTemplate>
                                 <HeaderTemplate>
-                                    Modal Premium
+                                    Modal
                                     <br />
-                                    Amount
+                                    Premium Amount
                                 </HeaderTemplate>
                                 <Template>
                                     @{
@@ -97,7 +141,13 @@
                                     }
                                 </Template>
                             </GridColumn>
-                            <GridColumn Field="PlacementDate" Title="Placement Date" Width="150px" Context="datasource">
+                            <GridColumn Field="@nameof(CaseDTO.PlacementDate)" Title="Placement Date" Width="150px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikDatePicker @bind-Value="@_allFilterPlacementDate"
+                                                   ShowWeekNumbers="false"
+                                                   Id="travel-date">
+                                    </TelerikDatePicker>
+                                </FilterCellTemplate>
                                 <Template>
                                     @{
                                         CaseDTO? record = (datasource as CaseDTO);
@@ -105,8 +155,19 @@
                                     }
                                 </Template>
                             </GridColumn>
-                            <GridColumn Field="CaseType.Name" Title="Case Type" Width="100px" />
+                            <GridColumn Field="CaseType.Name" Title="Case Type" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikDropDownList Data="@_caseTypeList" TextField="Name" ValueField="Id" @bind-Value="_allFilterCaseType"
+                                                     Width="25px">
+                                    </TelerikDropDownList>
+                                </FilterCellTemplate>
+                            </GridColumn>
                             <GridColumn Field="Product.Name" Title="Product" Width="300px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikDropDownList Data="@_productList" TextField="Name" ValueField="Id" @bind-Value="_allFilterProduct"
+                                                     Width="25px">
+                                    </TelerikDropDownList>
+                                </FilterCellTemplate>
                                 <Template>
                                     @{
                                         CaseDTO? record = (datasource as CaseDTO);
@@ -115,9 +176,223 @@
                                     }
                                 </Template>
                             </GridColumn>
-                            <GridColumn Field="ClientFirstName" Title="Client First Name" Width="200px" />
-                            <GridColumn Field="ClientLastName" Title="Client Last Name" Width="200px" />
-                            <GridCommandColumn Width="200px" Context="caseContext" >
+                            <GridColumn Field="@nameof(CaseDTO.ClientFirstName)" Title="Client First Name" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikTextBox @bind-Value="@_allFilterClientFirstName" Width="200px" />
+                                </FilterCellTemplate>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(CaseDTO.ClientLastName)" Title="Client Last Name" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikTextBox @bind-Value="@_allFilterClientLastName" Width="200px" />
+                                </FilterCellTemplate>
+                            </GridColumn>
+                            <GridCommandColumn Width="200px" Context="caseContext">
+                                <AuthorizeView Policy="@ConstantClass.CaseRolePolicy" Context="AuthorizeContext">
+                                    <Authorized>
+                                        @{
+                                            CaseDTO? record = (caseContext as CaseDTO);
+                                            <NavLink class="btn btn-primary" href=@($"case/caseUpdate/{record?.Id}")>Edit</NavLink>
+                                            <DeleteModal ModalTitle="Case" BodyText="Are you sure you want to delete this case ?"
+                                                 PrimaryButtonText="Delete" SecondaryButtonText="Cancel" Id="@(record?.Id == null ? 0: record.Id)"
+                                                 SelectedMethod="DeleteCase">
+                                            </DeleteModal>
+                                        }
+                                    </Authorized>
+                                </AuthorizeView>
+                            </GridCommandColumn>
+                        </GridColumns>
+                        <GridToolBarTemplate>
+                            <AuthorizeView Policy="@ConstantClass.CaseRolePolicy" Context="AuthorizeContext">
+                                <Authorized>
+                                    <div class="justify-content-end" id="GridToolBarTemplateCaseAll">
+                                        <NavLink class="btn btn-success button me-1" @onclick="ApplySearchCaseAll">Apply</NavLink>
+                                        <NavLink class="btn btn-warning button me-1" @onclick="ClearCaseAll">Clear</NavLink>
+                                    </div>
+                                </Authorized>
+                            </AuthorizeView>
+                        </GridToolBarTemplate>
+                    </TelerikGrid>
+                }
+                else
+                {
+                    <div class="loader-container">
+                        <span class="loader-size-title">Fetching data</span>
+                        <TelerikLoader Class="loader-indicator" Type="@LoaderType.ConvergingSpinner" Size="@(ThemeConstants.Loader.Size.Large)"></TelerikLoader>
+                    </div>
+                }
+            </Authorized>
+        </AuthorizeView>
+    </TabStripTab>
+    <TabStripTab Title="For Approval">
+        <AuthorizeView Policy="@ConstantClass.CaseRolePolicy">
+            <Authorized>
+                @if (@_caseForApprovalList != null)
+                {
+                    <TelerikGrid TItem="CaseDTO"
+                             OnRead="@OnCaseForApprovalGridRead"
+                             Sortable=true
+                             Pageable=true
+                             FilterMode="@GridFilterMode.FilterRow"
+                             Height="@Height"
+                             ScrollMode="@GridScrollMode.Scrollable"
+                             @ref="_caseForApprovalGrid"
+                             PageSizeChanged="@CaseForApprovalGridPageSizeChangedHandler"
+                             PageSize="@_caseForApprovalPageSize"
+                             @bind-Page="@_caseForApprovalCurrentPage"
+                             SortMode="@SortMode.Multiple">
+                        <GridSettings>
+                            <GridPagerSettings PageSizes="@_pageSizes" />
+                        </GridSettings>
+                        <GridColumns>
+                            <GridColumn Field="Carrier.Name" Title="Carrier" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikDropDownList Data="@_carrierList" TextField="Name" ValueField="Id" @bind-Value="_forApprovalFilterCarrier"
+                                                     Width="25px">
+                                    </TelerikDropDownList>
+                                </FilterCellTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        @(String.Concat(record?.Carrier?.Name, " (", record?.Carrier?.CarrierCode, ")").ToString())
+                                        ;
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(CaseDTO.Policy)" Title="Policy" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikTextBox @bind-Value="@_forApprovalFilterPolicy" Width="200px" />
+                                </FilterCellTemplate>
+                            </GridColumn>
+                            <GridColumn Field="CaseStatus.Name" Title="Status" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikDropDownList Data="@_statusCaseForApprovalList" TextField="Name" ValueField="Id" @bind-Value="_forApprovalFilterStatus"
+                                                     Width="25px">
+                                    </TelerikDropDownList>
+                                </FilterCellTemplate>
+                            </GridColumn>
+                            <GridColumn Field="ProductType.Name" Title="Product Type" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikDropDownList Data="@_productTypeList" TextField="Name" ValueField="Id" @bind-Value="_forApprovalFilterProductType"
+                                                     Width="25px">
+                                    </TelerikDropDownList>
+                                </FilterCellTemplate>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(CaseDTO.FaceAmount)" Width="150px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikNumericTextBox @bind-Value="_forApprovalFilterFaceAmount" Width="30px" Step="0.01m" Decimals="2" />
+                                </FilterCellTemplate>
+                                <HeaderTemplate>
+                                    Face Amount
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        <div class="text-end">
+                                            @(String.Format("{0:C2}", record?.FaceAmount))
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(CaseDTO.AnnualizedPremium)" Width="150px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikNumericTextBox @bind-Value="_forApprovalFilterAnnualizedPremium" Width="30px" Step="0.01m" Decimals="2" />
+                                </FilterCellTemplate>
+                                <HeaderTemplate>
+                                    Annualized
+                                    <br />
+                                    Premium Amount
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        <div class="text-end">
+                                            @(String.Format("{0:C2}", record?.AnnualizedPremium))
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(CaseDTO.TargetPremium)" Width="150px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikNumericTextBox @bind-Value="_forApprovalFilterTargetPremium" Width="30px" Step="0.01m" Decimals="2" />
+                                </FilterCellTemplate>
+                                <HeaderTemplate>
+                                    Target
+                                    <br />
+                                    Premium Amount
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        <div class="text-end">
+                                            @(String.Format("{0:C2}", record?.TargetPremium))
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(CaseDTO.ModalPremium)" Width="150px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikNumericTextBox @bind-Value="_forApprovalFilterModalPremium" Width="30px" Step="0.01m" Decimals="2" />
+                                </FilterCellTemplate>
+                                <HeaderTemplate>
+                                    Modal
+                                    <br />
+                                    Premium Amount
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        <div class="text-end">
+                                            @(String.Format("{0:C2}", record?.ModalPremium))
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(CaseDTO.PlacementDate)" Title="Placement Date" Width="150px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikDatePicker @bind-Value="@_forApprovalFilterPlacementDate"
+                                                   ShowWeekNumbers="false"
+                                                   Id="travel-date">
+                                    </TelerikDatePicker>
+                                </FilterCellTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        @(record?.PlacementDate?.ToString("MM/dd/yyyy"))
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CaseType.Name" Title="Case Type" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikDropDownList Data="@_caseTypeList" TextField="Name" ValueField="Id" @bind-Value="_forApprovalFilterCaseType"
+                                                     Width="25px">
+                                    </TelerikDropDownList>
+                                </FilterCellTemplate>
+                            </GridColumn>
+                            <GridColumn Field="Product.Name" Title="Product" Width="300px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikDropDownList Data="@_productList" TextField="Name" ValueField="Id" @bind-Value="_forApprovalFilterProduct"
+                                                     Width="25px">
+                                    </TelerikDropDownList>
+                                </FilterCellTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        @(String.Concat(record?.Product?.Name, " (", record?.Product?.Code, ")").ToString())
+                                        ;
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(CaseDTO.ClientFirstName)" Title="Client First Name" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikTextBox @bind-Value="@_forApprovalFilterClientFirstName" Width="200px" />
+                                </FilterCellTemplate>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(CaseDTO.ClientLastName)" Title="Client Last Name" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikTextBox @bind-Value="@_forApprovalFilterClientLastName" Width="200px" />
+                                </FilterCellTemplate>
+                            </GridColumn>
+                            <GridCommandColumn Width="200px" Context="caseContext">
                                 <AuthorizeView Policy="@ConstantClass.CaseRolePolicy" Context="AuthorizeContext">
                                     <Authorized>
                                         @{
@@ -134,15 +409,15 @@
                             </GridCommandColumn>
                         </GridColumns>
                         <GridToolBarTemplate>
-                            <div class="col d-flex justify-content-end">
-                                <div>
-                                    <AuthorizeView Policy="@ConstantClass.CaseRolePolicy" Context="AuthorizeContext">
-                                        <Authorized>
-                                            <NavLink class="btn btn-primary" href="case/caseInsert">New</NavLink>
-                                        </Authorized>
-                                    </AuthorizeView>
-                                </div>
-                            </div>
+                            <AuthorizeView Policy="@ConstantClass.CaseRolePolicy" Context="AuthorizeContext">
+                                <Authorized>
+                                    <div class="justify-content-end" id="GridToolBarTemplateCaseAll">
+                                        <NavLink class="btn btn-success button me-1" @onclick="ApplySearchCaseForApproval">Apply</NavLink>
+                                        <NavLink class="btn btn-warning button me-1" @onclick="ClearCaseForApproval">Clear</NavLink>
+                                        <NavLink class="btn btn-primary" href="case/caseInsert">New</NavLink>
+                                    </div>
+                                </Authorized>
+                            </AuthorizeView>
                         </GridToolBarTemplate>
                     </TelerikGrid>
                 }
@@ -155,53 +430,533 @@
                 }
             </Authorized>
         </AuthorizeView>
-   </TabStripTab>
-   <TabStripTab Title="For Approval"></TabStripTab>
-   <TabStripTab Title="Case Complete"></TabStripTab>
+    </TabStripTab>
+    <TabStripTab Title="Case Complete">
+        <AuthorizeView Policy="@ConstantClass.CaseRolePolicy">
+            <Authorized>
+                @if (@_caseCompleteList != null)
+                {
+                    <TelerikGrid TItem="CaseDTO"
+                             OnRead="@OnCaseCompleteGridRead"
+                             Sortable=true
+                             Pageable=true
+                             FilterMode="@GridFilterMode.FilterRow"
+                             Height="@Height"
+                             ScrollMode="@GridScrollMode.Scrollable"
+                             @ref="_caseCompleteGrid"
+                             PageSizeChanged="@CaseCompleteGridPageSizeChangedHandler"
+                             PageSize="@_caseCompletePageSize"
+                             @bind-Page="@_caseCompleteCurrentPage"
+                             SortMode="@SortMode.Multiple">
+                        <GridSettings>
+                            <GridPagerSettings PageSizes="@_pageSizes" />
+                        </GridSettings>
+                        <GridColumns>
+                            <GridColumn Field="Carrier.Name" Title="Carrier" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikDropDownList Data="@_carrierList" TextField="Name" ValueField="Id" @bind-Value="_completeFilterCarrier"
+                                                     Width="25px">
+                                    </TelerikDropDownList>
+                                </FilterCellTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        @(String.Concat(record?.Carrier?.Name, " (", record?.Carrier?.CarrierCode, ")").ToString())
+                                        ;
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(CaseDTO.Policy)" Title="Policy" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikTextBox @bind-Value="@_completeFilterPolicy" Width="200px" />
+                                </FilterCellTemplate>
+                            </GridColumn>
+                            <GridColumn Field="CaseStatus.Name" Title="Status" Width="200px" Context="datasource" Sortable=false>
+                                <FilterCellTemplate>
+                                </FilterCellTemplate>
+                            </GridColumn>
+                            <GridColumn Field="ProductType.Name" Title="Product Type" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikDropDownList Data="@_productTypeList" TextField="Name" ValueField="Id" @bind-Value="_completeFilterProductType"
+                                                     Width="25px">
+                                    </TelerikDropDownList>
+                                </FilterCellTemplate>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(CaseDTO.FaceAmount)" Width="150px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikNumericTextBox @bind-Value="_completeFilterFaceAmount" Width="30px" Step="0.01m" Decimals="2" />
+                                </FilterCellTemplate>
+                                <HeaderTemplate>
+                                    Face Amount
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        <div class="text-end">
+                                            @(String.Format("{0:C2}", record?.FaceAmount))
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(CaseDTO.AnnualizedPremium)" Width="150px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikNumericTextBox @bind-Value="_completeFilterAnnualizedPremium" Width="30px" Step="0.01m" Decimals="2" />
+                                </FilterCellTemplate>
+                                <HeaderTemplate>
+                                    Annualized
+                                    <br />
+                                    Premium Amount
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        <div class="text-end">
+                                            @(String.Format("{0:C2}", record?.AnnualizedPremium))
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(CaseDTO.TargetPremium)" Width="150px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikNumericTextBox @bind-Value="_completeFilterTargetPremium" Width="30px" Step="0.01m" Decimals="2" />
+                                </FilterCellTemplate>
+                                <HeaderTemplate>
+                                    Target
+                                    <br />
+                                    Premium Amount
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        <div class="text-end">
+                                            @(String.Format("{0:C2}", record?.TargetPremium))
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(CaseDTO.ModalPremium)" Width="150px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikNumericTextBox @bind-Value="_completeFilterModalPremium" Width="30px" Step="0.01m" Decimals="2" />
+                                </FilterCellTemplate>
+                                <HeaderTemplate>
+                                    Modal
+                                    <br />
+                                    Premium Amount
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        <div class="text-end">
+                                            @(String.Format("{0:C2}", record?.ModalPremium))
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(CaseDTO.PlacementDate)" Title="Placement Date" Width="150px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikDatePicker @bind-Value="@_completeFilterPlacementDate"
+                                                   ShowWeekNumbers="false"
+                                                   Id="travel-date">
+                                    </TelerikDatePicker>
+                                </FilterCellTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        @(record?.PlacementDate?.ToString("MM/dd/yyyy"))
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="CaseType.Name" Title="Case Type" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikDropDownList Data="@_caseTypeList" TextField="Name" ValueField="Id" @bind-Value="_completeFilterCaseType"
+                                                     Width="25px">
+                                    </TelerikDropDownList>
+                                </FilterCellTemplate>
+                            </GridColumn>
+                            <GridColumn Field="Product.Name" Title="Product" Width="300px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikDropDownList Data="@_productList" TextField="Name" ValueField="Id" @bind-Value="_completeFilterProduct"
+                                                     Width="25px">
+                                    </TelerikDropDownList>
+                                </FilterCellTemplate>
+                                <Template>
+                                    @{
+                                        CaseDTO? record = (datasource as CaseDTO);
+                                        @(String.Concat(record?.Product?.Name, " (", record?.Product?.Code, ")").ToString())
+                                        ;
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(CaseDTO.ClientFirstName)" Title="Client First Name" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikTextBox @bind-Value="@_completeFilterClientFirstName" Width="200px" />
+                                </FilterCellTemplate>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(CaseDTO.ClientLastName)" Title="Client Last Name" Width="200px" Context="datasource">
+                                <FilterCellTemplate>
+                                    <TelerikTextBox @bind-Value="@_completeFilterClientLastName" Width="200px" />
+                                </FilterCellTemplate>
+                            </GridColumn>
+                            <GridCommandColumn Width="200px" Context="caseContext">
+                                <AuthorizeView Policy="@ConstantClass.CaseRolePolicy" Context="AuthorizeContext">
+                                    <Authorized>
+                                        @{
+                                            CaseDTO? record = (caseContext as CaseDTO);
+                                            <NavLink class="btn btn-primary" href=@($"case/caseUpdate/{record?.Id}")>Edit</NavLink>
+                                            <NavLink class="btn btn-secondary" @onclick="args => ConfirmDelete(args, record?.Id == null ? 0 : record.Id)">Delete</NavLink>
+                                            <DeleteModal ModalTitle="Case" BodyText="Are you sure you want to delete this case ?"
+                                                 PrimaryButtonText="Delete" SecondaryButtonText="Cancel" Id="@(record?.Id == null ? 0: record.Id)"
+                                                 SelectedMethod="DeleteCase">
+                                            </DeleteModal>
+                                        }
+                                    </Authorized>
+                                </AuthorizeView>
+                            </GridCommandColumn>
+                        </GridColumns>
+                        <GridToolBarTemplate>
+                            <AuthorizeView Policy="@ConstantClass.CaseRolePolicy" Context="AuthorizeContext">
+                                <Authorized>
+                                    <div class="justify-content-end" id="GridToolBarTemplateCaseAll">
+                                        <NavLink class="btn btn-success button me-1" @onclick="ApplySearchCaseComplete">Apply</NavLink>
+                                        <NavLink class="btn btn-warning button me-1" @onclick="ClearCaseComplete">Clear</NavLink>
+                                    </div>
+                                </Authorized>
+                            </AuthorizeView>
+                        </GridToolBarTemplate>
+                    </TelerikGrid>
+                }
+                else
+                {
+                    <div class="loader-container">
+                        <span class="loader-size-title">Fetching data</span>
+                        <TelerikLoader Class="loader-indicator" Type="@LoaderType.ConvergingSpinner" Size="@(ThemeConstants.Loader.Size.Large)"></TelerikLoader>
+                    </div>
+                }
+            </Authorized>
+        </AuthorizeView>
+    </TabStripTab>
 </TelerikTabStrip>
 
 @code {
 
     #region Fields
+
     private int _activeTabIndex = 0;
-    private int _pageSize = 10;
+    //private int _pageSize = 10;
     private List<int?> _pageSizes => new List<int?> { 5, 10, 25, 50, null };
-    private IEnumerable<CaseDTO>? _caseList;
-    private bool _deleteOperation = false;
     private string? _errorMessage = null;
 
-    #endregion    
+    private bool _deleteCaseOperation = false;
+
+    private PagedList<CaseDTO>? _caseAllList;
+    private PagedList<CaseDTO>? _caseForApprovalList;
+    private PagedList<CaseDTO>? _caseCompleteList;
+
+    private bool _searchCaseAllFlag = false;
+    private CaseAllSearchParams? _caseAllSearchParams;
+    private CaseAllSearchParams? _caseAllSearchCurrentParams = new CaseAllSearchParams();
+    private int _caseAllPageSize = 10;
+    private int _caseAllCurrentPage = 1;
+    private bool _searchCaseAllApplyNewValueFlag = false;
+
+    private bool _searchCaseForApprovalFlag = false;
+    private CaseForApprovalSearchParams? _caseForApprovalSearchParams;
+    private CaseForApprovalSearchParams? _caseForApprovalSearchCurrentParams = new CaseForApprovalSearchParams();
+    private int _caseForApprovalPageSize = 10;
+    private int _caseForApprovalCurrentPage = 1;
+    private bool _searchCaseForApprovalApplyNewValueFlag = false;
+
+    private bool _searchCaseCompleteFlag = false;
+    private CaseCompleteSearchParams? _caseCompleteSearchParams;
+    private CaseCompleteSearchParams? _caseCompleteSearchCurrentParams = new CaseCompleteSearchParams();
+    private int _caseCompletePageSize = 10;
+    private int _caseCompleteCurrentPage = 1;
+    private bool _searchCaseCompleteApplyNewValueFlag = false;
+
+    private TelerikGrid<CaseDTO>? _caseAllGrid;
+    private TelerikGrid<CaseDTO>? _caseForApprovalGrid;
+    private TelerikGrid<CaseDTO>? _caseCompleteGrid;
+
+
+    private IList<CarrierDTO>? _carrierList;
+    private IList<CaseStatusDTO>? _statusList;
+    private IList<CaseStatusDTO>? _statusCaseForApprovalList;
+
+    private IList<ProductTypeDTO>? _productTypeList;
+    private IList<CaseTypeDTO>? _caseTypeList;
+    private IList<ProductDTO>? _productList;
+
+
+    // Filter values for Case All grid
+    private int? _allFilterCarrier = 0;
+    private string? _allFilterPolicy;
+    private int? _allFilterStatus = 0;
+    private int? _allFilterProductType = 0;
+    private decimal? _allFilterFaceAmount;
+    private decimal? _allFilterAnnualizedPremium;
+    private decimal? _allFilterTargetPremium;
+    private decimal? _allFilterModalPremium;
+    private DateTime? _allFilterPlacementDate;
+    private int? _allFilterCaseType = 0;
+    private int? _allFilterProduct = 0;
+    private string? _allFilterClientFirstName;
+    private string? _allFilterClientLastName;
+
+    // Filter values for Case For Approval grid
+    private int? _forApprovalFilterCarrier = 0;
+    private string? _forApprovalFilterPolicy;
+    private int? _forApprovalFilterStatus = 0;
+    private int? _forApprovalFilterProductType = 0;
+    private decimal? _forApprovalFilterFaceAmount;
+    private decimal? _forApprovalFilterAnnualizedPremium;
+    private decimal? _forApprovalFilterTargetPremium;
+    private decimal? _forApprovalFilterModalPremium;
+    private DateTime? _forApprovalFilterPlacementDate;
+    private int? _forApprovalFilterCaseType = 0;
+    private int? _forApprovalFilterProduct = 0;
+    private string? _forApprovalFilterClientFirstName;
+    private string? _forApprovalFilterClientLastName;
+
+    // Filter values for Case Complete grid
+    private int? _completeFilterCarrier = 0;
+    private string? _completeFilterPolicy;
+    private int? _completeFilterStatus = 0;
+    private int? _completeFilterProductType = 0;
+    private decimal? _completeFilterFaceAmount;
+    private decimal? _completeFilterAnnualizedPremium;
+    private decimal? _completeFilterTargetPremium;
+    private decimal? _completeFilterModalPremium;
+    private DateTime? _completeFilterPlacementDate;
+    private int? _completeFilterCaseType = 0;
+    private int? _completeFilterProduct = 0;
+    private string? _completeFilterClientFirstName;
+    private string? _completeFilterClientLastName;
+
+    #endregion Fields
 
     #region Constants
+
     private const string Height = "400px";
-    #endregion
+
+    #endregion Constants
+
+    #region Events
+
+        protected override async Task OnInitializedAsync()
+        {
+            await base.OnInitializedAsync();
+            await PopulateDropDownList();
+            await GetGridData();
+            StateHasChanged();
+        }
+
+    #endregion Events
 
     #region Methods
-    protected override async Task OnInitializedAsync()
+
+    private async Task PopulateDropDownList()
     {
-        await base.OnInitializedAsync();
-        await GetGridData();
+        _carrierList = new List<CarrierDTO>();
+        IEnumerable<CarrierDTO> _carrierEnumerable = await carrierService.GetAll();
+        _carrierList = _carrierEnumerable.ToList();
+
+        _carrierList.Insert(0,
+            new CarrierDTO()
+                {
+                    Id = 0,
+                    Name = "All"
+                }
+        );
+
+        _statusList = new List<CaseStatusDTO>();
+        IEnumerable<CaseStatusDTO>? _statusEnumerable = await caseStatusService.GetAll();
+        _statusList = _statusEnumerable?.ToList();
+
+        _statusList.Insert(0,
+            new CaseStatusDTO()
+                {
+                    Id = 0,
+                    Name = "All"
+                }
+        );
+
+        _statusCaseForApprovalList = new List<CaseStatusDTO>();
+        _statusCaseForApprovalList = _statusEnumerable?.ToList();
+
+        _statusCaseForApprovalList.Insert(0,
+            new CaseStatusDTO()
+                {
+                    Id = 0,
+                    Name = "All"
+                }
+        );
+
+        _statusCaseForApprovalList = _statusCaseForApprovalList.Where(obj => obj.Name != "Placed").ToList();
+
+        _productTypeList = new List<ProductTypeDTO>();
+        IEnumerable<ProductTypeDTO>? _productTypeEnumerable = await productTypeService.GetAll();
+        _productTypeList = _productTypeEnumerable.ToList();
+
+        _productTypeList.Insert(0,
+            new ProductTypeDTO()
+                {
+                    Id = 0,
+                    Name = "All"
+                }
+        );
+
+        _caseTypeList = new List<CaseTypeDTO>();
+        IEnumerable<CaseTypeDTO>? _caseTypeEnumerable = await caseTypeService.GetAll();
+        _caseTypeList = _caseTypeEnumerable?.ToList();
+
+        _caseTypeList.Insert(0,
+            new CaseTypeDTO()
+                {
+                    Id = 0,
+                    Name = "All"
+                }
+        );
+
+        _productList = new List<ProductDTO>();
+
+        IEnumerable<ProductDTO>? _productEnumerable = await productService.GetAll();
+        _productList = _productEnumerable?.ToList();
+
+        _productList.Insert(0,
+            new ProductDTO()
+                {
+                    Id = 0,
+                    Name = "All"
+                }
+        );
     }
 
-    private async Task GetGridData()
+    private void CaseAllGridPageSizeChangedHandler(int newPageSize)
     {
-        _caseList = await caseService.GetAll();
+        _caseAllPageSize = newPageSize;
+        _caseAllCurrentPage = 1;
+    }
+
+    private void CaseForApprovalGridPageSizeChangedHandler(int newPageSize)
+    {
+        _caseForApprovalPageSize = newPageSize;
+        _caseForApprovalCurrentPage = 1;
+    }
+
+    private void CaseCompleteGridPageSizeChangedHandler(int newPageSize)
+    {
+        _caseCompletePageSize = newPageSize;
+        _caseCompleteCurrentPage = 1;
+    }
+
+    private void ApplySearchCaseAll()
+    {
+        _searchCaseAllFlag = true;
+
+        // flag the indicator to apply the new value from the grid
+        _searchCaseAllApplyNewValueFlag = true;
+
+        _caseAllGrid?.Rebind();
+    }
+
+    private void ApplySearchCaseForApproval()
+    {
+        _searchCaseForApprovalFlag = true;
+
+        // flag the indicator to apply the new value from the grid
+        _searchCaseForApprovalApplyNewValueFlag = true;
+
+        _caseForApprovalGrid?.Rebind();
+    }
+
+    private void ApplySearchCaseComplete()
+    {
+        _searchCaseCompleteFlag = true;
+
+        // flag the indicator to apply the new value from the grid
+        _searchCaseCompleteApplyNewValueFlag = true;
+
+        _caseCompleteGrid?.Rebind();
+    }
+
+    private void ClearCaseAll()
+    {
+        _allFilterCarrier = 0;
+        _allFilterPolicy = null;
+        _allFilterStatus = 0;
+        _allFilterProductType = 0;
+        _allFilterFaceAmount = null;
+        _allFilterAnnualizedPremium = null;
+        _allFilterTargetPremium = null;
+        _allFilterModalPremium = null;
+        _allFilterPlacementDate = null;
+        _allFilterCaseType = 0;
+        _allFilterProduct = 0;
+        _allFilterClientFirstName = null;
+        _allFilterClientLastName = null;
+    }
+
+    private void ClearCaseForApproval()
+    {
+        _forApprovalFilterCarrier = 0;
+        _forApprovalFilterPolicy = null;
+        _forApprovalFilterStatus = 0;
+        _forApprovalFilterProductType = 0;
+        _forApprovalFilterFaceAmount = null;
+        _forApprovalFilterAnnualizedPremium = null;
+        _forApprovalFilterTargetPremium = null;
+        _forApprovalFilterModalPremium = null;
+        _forApprovalFilterPlacementDate = null;
+        _forApprovalFilterCaseType = 0;
+        _forApprovalFilterProduct = 0;
+        _forApprovalFilterClientFirstName = null;
+        _forApprovalFilterClientLastName = null;
+    }
+
+    private void ClearCaseComplete()
+    {
+        _completeFilterCarrier = 0;
+        _completeFilterPolicy = null;
+        _completeFilterStatus = 0;
+        _completeFilterProductType = 0;
+        _completeFilterFaceAmount = null;
+        _completeFilterAnnualizedPremium = null;
+        _completeFilterTargetPremium = null;
+        _completeFilterModalPremium = null;
+        _completeFilterPlacementDate = null;
+        _completeFilterCaseType = 0;
+        _completeFilterProduct = 0;
+        _completeFilterClientFirstName = null;
+        _completeFilterClientLastName = null;
+    }
+
+    private Task GetGridData()
+    {
+        _caseAllList = new PagedList<CaseDTO>();
+        _caseForApprovalList = new PagedList<CaseDTO>();
+        _caseCompleteList = new PagedList<CaseDTO>();
+
+        _caseAllGrid?.Rebind();
+        _caseForApprovalGrid?.Rebind();
+        _caseCompleteGrid?.Rebind();
+
+        return Task.CompletedTask;
     }
 
     private async Task DeleteCase(int id)
     {
         try
         {
-            _deleteOperation = false;
+            _deleteCaseOperation = false;
             // Perform delete case
             await caseService.Delete(id);
             await GetGridData();
-            _deleteOperation = true;
+            _deleteCaseOperation = true;
             _errorMessage = null;
         }
         catch (Exception ex)
         {
-            _deleteOperation = false;
+            _deleteCaseOperation = false;
             _errorMessage = ex.Message.ToString();
         }
     }
@@ -212,7 +967,580 @@
         await jsRuntime.InvokeVoidAsync("DisplayModal", "DeleteModal_" + id);
     }
 
-    #endregion
+    protected async Task OnCaseAllGridRead(GridReadEventArgs args)
+    {
+        try
+        {
+            string? sortValue = null;
+            int i = 0;
+
+            foreach (SortDescriptor item in args.Request.Sorts)
+            {
+                if (i != 0 && i < args.Request.Sorts.Count())
+                    sortValue = sortValue + ",";
+
+                switch (item.Member)
+                {
+                    case ConstantClass.CaseCarrierName:
+                        sortValue = sortValue + ConstantClass.CaseCarrierName;
+                        break;
+                    case ConstantClass.CasePolicyNumber:
+                        sortValue = sortValue + ConstantClass.CasePolicyNumber;
+                        break;
+                    case ConstantClass.CaseStatus:
+                        sortValue = sortValue + ConstantClass.CaseStatus;
+                        break;
+                    case ConstantClass.CaseProductType:
+                        sortValue = sortValue + ConstantClass.CaseProductType;
+                        break;
+                    case ConstantClass.CaseFaceAmount:
+                        sortValue = sortValue + ConstantClass.CaseFaceAmount;
+                        break;
+                    case ConstantClass.CaseAnnualizedPremium:
+                        sortValue = sortValue + ConstantClass.CaseAnnualizedPremium;
+                        break;
+                    case ConstantClass.CaseTargetPremium:
+                        sortValue = sortValue + ConstantClass.CaseTargetPremium;
+                        break;
+                    case ConstantClass.CaseModalPremium:
+                        sortValue = sortValue + ConstantClass.CaseModalPremium;
+                        break;
+                    case ConstantClass.CasePlacementDate:
+                        sortValue = sortValue + ConstantClass.CasePlacementDate;
+                        break;
+                    case ConstantClass.CaseType:
+                        sortValue = sortValue + ConstantClass.CaseType;
+                        break;
+                    case ConstantClass.CaseProduct:
+                        sortValue = sortValue + ConstantClass.CaseProduct;
+                        break;
+                    case ConstantClass.CaseClientFirstName:
+                        sortValue = sortValue + ConstantClass.CaseClientFirstName;
+                        break;
+                    case ConstantClass.CaseClientLastName:
+                        sortValue = sortValue + ConstantClass.CaseClientLastName;
+                        break;
+                    default:
+                        break;
+                }
+
+                switch (item.SortDirection)
+                {
+                    case ListSortDirection.Ascending:
+                        sortValue = sortValue + " " + ConstantClass.Ascending;
+                        break;
+                    case ListSortDirection.Descending:
+                        sortValue = sortValue + " " + ConstantClass.Descending;
+                        break;
+                    default:
+                        break;
+                }
+
+                i++;
+            }
+
+            _caseAllSearchParams = new CaseAllSearchParams();
+
+            if (_searchCaseAllApplyNewValueFlag)
+            {
+                // need to use the _commissionAllSearchCurrentParams object to hold the applied filter values on the grid
+                // the values assign only on this object will then be passed on the _commissionAllSearchParams object
+
+                _caseAllSearchCurrentParams = new CaseAllSearchParams();
+
+                //Apply the new filter values
+                //Populate the filter params
+
+                if (_allFilterCarrier != null && _allFilterCarrier != 0)
+                {
+                    _caseAllSearchCurrentParams.CarrierId = _allFilterCarrier;
+                }
+
+                if (!String.IsNullOrEmpty(_allFilterPolicy))
+                {
+                    _caseAllSearchCurrentParams.Policy = _allFilterPolicy;
+                }
+
+                if (_allFilterStatus != null && _allFilterStatus != 0)
+                {
+                    _caseAllSearchCurrentParams.StatusId = _allFilterStatus;
+                }
+
+                if (_allFilterProductType != null && _allFilterProductType != 0)
+                {
+                    _caseAllSearchCurrentParams.ProductTypeId = _allFilterProductType;
+                }
+
+                if (_allFilterFaceAmount != null)
+                {
+                    _caseAllSearchCurrentParams.FaceAmount = _allFilterFaceAmount;
+                }
+
+                if (_allFilterAnnualizedPremium != null)
+                {
+                    _caseAllSearchCurrentParams.AnnualizedPremium = _allFilterAnnualizedPremium;
+                }
+
+                if (_allFilterTargetPremium != null)
+                {
+                    _caseAllSearchCurrentParams.TargetPremium = _allFilterTargetPremium;
+                }
+
+                if (_allFilterModalPremium != null)
+                {
+                    _caseAllSearchCurrentParams.ModalPremium = _allFilterModalPremium;
+                }
+
+                if (_allFilterPlacementDate != null)
+                {
+                    _caseAllSearchCurrentParams.PlacementDate = _allFilterPlacementDate;
+                }
+
+                if (_allFilterCaseType != null && _allFilterCaseType != 0)
+                {
+                    _caseAllSearchCurrentParams.CaseTypeId = _allFilterCaseType;
+                }
+
+                if (_allFilterProduct != null && _allFilterProduct != 0)
+                {
+                    _caseAllSearchCurrentParams.ProductId = _allFilterProduct;
+                }
+
+                if (_allFilterClientFirstName != null)
+                {
+                    _caseAllSearchCurrentParams.ClientFirstName = _allFilterClientFirstName;
+                }
+
+                if (_allFilterClientLastName != null)
+                {
+                    _caseAllSearchCurrentParams.ClientLastName = _allFilterClientLastName;
+                }
+                _searchCaseAllApplyNewValueFlag = !_searchCaseAllApplyNewValueFlag;
+
+            }
+
+            _caseAllSearchParams = _caseAllSearchCurrentParams;
+
+            if (_searchCaseAllFlag)
+            {
+                // when clicking the apply button, set the default page number of the grid to page 1
+                _caseAllList = await caseService.GetAll(
+                        new GridParams()
+                            {
+                                PageNumber = 1,
+                                PageSize = args.Request.PageSize
+                            },
+                        _caseAllSearchParams ??= new CaseAllSearchParams(),
+                        sortValue
+                );
+                _caseAllCurrentPage = 1;
+                _searchCaseAllFlag = !_searchCaseAllFlag;
+            }
+            else
+            {
+                _caseAllList = await caseService.GetAll(
+                        new GridParams()
+                            {
+                                PageNumber = args.Request.Page,
+                                PageSize = args.Request.PageSize
+                            },
+                        _caseAllSearchParams ??= new CaseAllSearchParams(),
+                        sortValue
+                );
+            }
+
+            args.Data = _caseAllList;
+            args.Total = _caseAllList.TotalCount;
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message.ToString();
+        }
+    }
+
+    protected async Task OnCaseForApprovalGridRead(GridReadEventArgs args)
+    {
+        try
+        {
+            string? sortValue = null;
+            int i = 0;
+
+            foreach (SortDescriptor item in args.Request.Sorts)
+            {
+                if (i != 0 && i < args.Request.Sorts.Count())
+                    sortValue = sortValue + ",";
+
+                switch (item.Member)
+                {
+                    case ConstantClass.CaseCarrierName:
+                        sortValue = sortValue + ConstantClass.CaseCarrierName;
+                        break;
+                    case ConstantClass.CasePolicyNumber:
+                        sortValue = sortValue + ConstantClass.CasePolicyNumber;
+                        break;
+                    case ConstantClass.CaseStatus:
+                        sortValue = sortValue + ConstantClass.CaseStatus;
+                        break;
+                    case ConstantClass.CaseProductType:
+                        sortValue = sortValue + ConstantClass.CaseProductType;
+                        break;
+                    case ConstantClass.CaseFaceAmount:
+                        sortValue = sortValue + ConstantClass.CaseFaceAmount;
+                        break;
+                    case ConstantClass.CaseAnnualizedPremium:
+                        sortValue = sortValue + ConstantClass.CaseAnnualizedPremium;
+                        break;
+                    case ConstantClass.CaseTargetPremium:
+                        sortValue = sortValue + ConstantClass.CaseTargetPremium;
+                        break;
+                    case ConstantClass.CaseModalPremium:
+                        sortValue = sortValue + ConstantClass.CaseModalPremium;
+                        break;
+                    case ConstantClass.CasePlacementDate:
+                        sortValue = sortValue + ConstantClass.CasePlacementDate;
+                        break;
+                    case ConstantClass.CaseType:
+                        sortValue = sortValue + ConstantClass.CaseType;
+                        break;
+                    case ConstantClass.CaseProduct:
+                        sortValue = sortValue + ConstantClass.CaseProduct;
+                        break;
+                    case ConstantClass.CaseClientFirstName:
+                        sortValue = sortValue + ConstantClass.CaseClientFirstName;
+                        break;
+                    case ConstantClass.CaseClientLastName:
+                        sortValue = sortValue + ConstantClass.CaseClientLastName;
+                        break;
+                    default:
+                        break;
+                }
+
+                switch (item.SortDirection)
+                {
+                    case ListSortDirection.Ascending:
+                        sortValue = sortValue + " " + ConstantClass.Ascending;
+                        break;
+                    case ListSortDirection.Descending:
+                        sortValue = sortValue + " " + ConstantClass.Descending;
+                        break;
+                    default:
+                        break;
+                }
+
+                i++;
+            }
+
+            _caseForApprovalSearchParams = new CaseForApprovalSearchParams();
+
+            if (_searchCaseForApprovalApplyNewValueFlag)
+            {
+                // need to use the _commissionAllSearchCurrentParams object to hold the applied filter values on the grid
+                // the values assign only on this object will then be passed on the _commissionAllSearchParams object
+
+                _caseForApprovalSearchCurrentParams = new CaseForApprovalSearchParams();
+
+                //Apply the new filter values
+                //Populate the filter params
+
+                if (_forApprovalFilterCarrier != null && _forApprovalFilterCarrier != 0)
+                {
+                    _caseForApprovalSearchCurrentParams.CarrierId = _forApprovalFilterCarrier;
+                }
+
+                if (!String.IsNullOrEmpty(_forApprovalFilterPolicy))
+                {
+                    _caseForApprovalSearchCurrentParams.Policy = _forApprovalFilterPolicy;
+                }
+
+                if (_forApprovalFilterStatus != null && _forApprovalFilterStatus != 0)
+                {
+                    _caseForApprovalSearchCurrentParams.StatusId = _forApprovalFilterStatus;
+                }
+
+                if (_forApprovalFilterProductType != null && _forApprovalFilterProductType != 0)
+                {
+                    _caseForApprovalSearchCurrentParams.ProductTypeId = _forApprovalFilterProductType;
+                }
+
+                if (_forApprovalFilterFaceAmount != null)
+                {
+                    _caseForApprovalSearchCurrentParams.FaceAmount = _forApprovalFilterFaceAmount;
+                }
+
+                if (_forApprovalFilterAnnualizedPremium != null)
+                {
+                    _caseForApprovalSearchCurrentParams.AnnualizedPremium = _forApprovalFilterAnnualizedPremium;
+                }
+
+                if (_forApprovalFilterTargetPremium != null)
+                {
+                    _caseForApprovalSearchCurrentParams.TargetPremium = _forApprovalFilterTargetPremium;
+                }
+
+                if (_forApprovalFilterModalPremium != null)
+                {
+                    _caseForApprovalSearchCurrentParams.ModalPremium = _forApprovalFilterModalPremium;
+                }
+
+                if (_forApprovalFilterPlacementDate != null)
+                {
+                    _caseForApprovalSearchCurrentParams.PlacementDate = _forApprovalFilterPlacementDate;
+                }
+
+                if (_forApprovalFilterCaseType != null && _forApprovalFilterCaseType != 0)
+                {
+                    _caseForApprovalSearchCurrentParams.CaseTypeId = _forApprovalFilterCaseType;
+                }
+
+                if (_forApprovalFilterProduct != null && _forApprovalFilterProduct != 0)
+                {
+                    _caseForApprovalSearchCurrentParams.ProductId = _forApprovalFilterProduct;
+                }
+
+                if (_forApprovalFilterClientFirstName != null)
+                {
+                    _caseForApprovalSearchCurrentParams.ClientFirstName = _forApprovalFilterClientFirstName;
+                }
+
+                if (_forApprovalFilterClientLastName != null)
+                {
+                    _caseForApprovalSearchCurrentParams.ClientLastName = _forApprovalFilterClientLastName;
+                }
+                _searchCaseAllApplyNewValueFlag = !_searchCaseAllApplyNewValueFlag;
+
+            }
+
+            _caseForApprovalSearchParams = _caseForApprovalSearchCurrentParams;
+
+            if (_searchCaseForApprovalFlag)
+            {
+                // when clicking the apply button, set the default page number of the grid to page 1
+                _caseForApprovalList = await caseService.GetForApproval(
+                        new GridParams()
+                            {
+                                PageNumber = 1,
+                                PageSize = args.Request.PageSize
+                            },
+                        _caseForApprovalSearchParams ??= new CaseForApprovalSearchParams(),
+                        sortValue
+                );
+                _caseForApprovalCurrentPage = 1;
+                _searchCaseForApprovalFlag = !_searchCaseForApprovalFlag;
+            }
+            else
+            {
+                _caseForApprovalList = await caseService.GetForApproval(
+                        new GridParams()
+                            {
+                                PageNumber = args.Request.Page,
+                                PageSize = args.Request.PageSize
+                            },
+                        _caseForApprovalSearchParams ??= new CaseForApprovalSearchParams(),
+                        sortValue
+                );
+            }
+
+            args.Data = _caseForApprovalList;
+            args.Total = _caseForApprovalList.TotalCount;
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message.ToString();
+        }
+    }
+
+    protected async Task OnCaseCompleteGridRead(GridReadEventArgs args)
+    {
+        try
+        {
+            string? sortValue = null;
+            int i = 0;
+
+            foreach (SortDescriptor item in args.Request.Sorts)
+            {
+                if (i != 0 && i < args.Request.Sorts.Count())
+                    sortValue = sortValue + ",";
+
+                switch (item.Member)
+                {
+                    case ConstantClass.CaseCarrierName:
+                        sortValue = sortValue + ConstantClass.CaseCarrierName;
+                        break;
+                    case ConstantClass.CasePolicyNumber:
+                        sortValue = sortValue + ConstantClass.CasePolicyNumber;
+                        break;
+                    case ConstantClass.CaseStatus:
+                        sortValue = sortValue + ConstantClass.CaseStatus;
+                        break;
+                    case ConstantClass.CaseProductType:
+                        sortValue = sortValue + ConstantClass.CaseProductType;
+                        break;
+                    case ConstantClass.CaseFaceAmount:
+                        sortValue = sortValue + ConstantClass.CaseFaceAmount;
+                        break;
+                    case ConstantClass.CaseAnnualizedPremium:
+                        sortValue = sortValue + ConstantClass.CaseAnnualizedPremium;
+                        break;
+                    case ConstantClass.CaseTargetPremium:
+                        sortValue = sortValue + ConstantClass.CaseTargetPremium;
+                        break;
+                    case ConstantClass.CaseModalPremium:
+                        sortValue = sortValue + ConstantClass.CaseModalPremium;
+                        break;
+                    case ConstantClass.CasePlacementDate:
+                        sortValue = sortValue + ConstantClass.CasePlacementDate;
+                        break;
+                    case ConstantClass.CaseType:
+                        sortValue = sortValue + ConstantClass.CaseType;
+                        break;
+                    case ConstantClass.CaseProduct:
+                        sortValue = sortValue + ConstantClass.CaseProduct;
+                        break;
+                    case ConstantClass.CaseClientFirstName:
+                        sortValue = sortValue + ConstantClass.CaseClientFirstName;
+                        break;
+                    case ConstantClass.CaseClientLastName:
+                        sortValue = sortValue + ConstantClass.CaseClientLastName;
+                        break;
+                    default:
+                        break;
+                }
+
+                switch (item.SortDirection)
+                {
+                    case ListSortDirection.Ascending:
+                        sortValue = sortValue + " " + ConstantClass.Ascending;
+                        break;
+                    case ListSortDirection.Descending:
+                        sortValue = sortValue + " " + ConstantClass.Descending;
+                        break;
+                    default:
+                        break;
+                }
+
+                i++;
+            }
+
+            _caseCompleteSearchParams = new CaseCompleteSearchParams();
+
+            if (_searchCaseCompleteApplyNewValueFlag)
+            {
+                // need to use the _commissionAllSearchCurrentParams object to hold the applied filter values on the grid
+                // the values assign only on this object will then be passed on the _commissionAllSearchParams object
+
+                _caseCompleteSearchCurrentParams = new CaseCompleteSearchParams();
+
+                //Apply the new filter values
+                //Populate the filter params
+
+                if (_completeFilterCarrier != null && _completeFilterCarrier != 0)
+                {
+                    _caseCompleteSearchCurrentParams.CarrierId = _completeFilterCarrier;
+                }
+
+                if (!String.IsNullOrEmpty(_completeFilterPolicy))
+                {
+                    _caseCompleteSearchCurrentParams.Policy = _completeFilterPolicy;
+                }
+
+                if (_completeFilterStatus != null && _completeFilterStatus != 0)
+                {
+                    _caseCompleteSearchCurrentParams.StatusId = _completeFilterStatus;
+                }
+
+                if (_completeFilterProductType != null && _completeFilterProductType != 0)
+                {
+                    _caseCompleteSearchCurrentParams.ProductTypeId = _completeFilterProductType;
+                }
+
+                if (_completeFilterFaceAmount != null)
+                {
+                    _caseCompleteSearchCurrentParams.FaceAmount = _completeFilterFaceAmount;
+                }
+
+                if (_completeFilterAnnualizedPremium != null)
+                {
+                    _caseCompleteSearchCurrentParams.AnnualizedPremium = _completeFilterAnnualizedPremium;
+                }
+
+                if (_completeFilterTargetPremium != null)
+                {
+                    _caseCompleteSearchCurrentParams.TargetPremium = _completeFilterTargetPremium;
+                }
+
+                if (_completeFilterModalPremium != null)
+                {
+                    _caseCompleteSearchCurrentParams.ModalPremium = _completeFilterModalPremium;
+                }
+
+                if (_completeFilterPlacementDate != null)
+                {
+                    _caseCompleteSearchCurrentParams.PlacementDate = _completeFilterPlacementDate;
+                }
+
+                if (_completeFilterCaseType != null && _completeFilterCaseType != 0)
+                {
+                    _caseCompleteSearchCurrentParams.CaseTypeId = _completeFilterCaseType;
+                }
+
+                if (_completeFilterProduct != null && _completeFilterProduct != 0)
+                {
+                    _caseCompleteSearchCurrentParams.ProductId = _completeFilterProduct;
+                }
+
+                if (_completeFilterClientFirstName != null)
+                {
+                    _caseCompleteSearchCurrentParams.ClientFirstName = _completeFilterClientFirstName;
+                }
+
+                if (_completeFilterClientLastName != null)
+                {
+                    _caseCompleteSearchCurrentParams.ClientLastName = _completeFilterClientLastName;
+                }
+                _searchCaseAllApplyNewValueFlag = !_searchCaseAllApplyNewValueFlag;
+
+            }
+
+            _caseCompleteSearchParams = _caseCompleteSearchCurrentParams;
+
+            if (_searchCaseCompleteFlag)
+            {
+                // when clicking the apply button, set the default page number of the grid to page 1
+                _caseCompleteList = await caseService.GetComplete(
+                        new GridParams()
+                            {
+                                PageNumber = 1,
+                                PageSize = args.Request.PageSize
+                            },
+                        _caseCompleteSearchParams ??= new CaseCompleteSearchParams(),
+                        sortValue
+                );
+                _caseCompleteCurrentPage = 1;
+                _searchCaseCompleteFlag = !_searchCaseCompleteFlag;
+            }
+            else
+            {
+                _caseCompleteList = await caseService.GetComplete(
+                        new GridParams()
+                            {
+                                PageNumber = args.Request.Page,
+                                PageSize = args.Request.PageSize
+                            },
+                        _caseCompleteSearchParams ??= new CaseCompleteSearchParams(),
+                        sortValue
+                );
+            }
+
+            args.Data = _caseCompleteList;
+            args.Total = _caseCompleteList.TotalCount;
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message.ToString();
+        }
+    }
+
+    #endregion Methods
 }
 
 <style>
@@ -229,5 +1557,9 @@
         position: center;
         left: 50%;
         height: 400px;
+    }
+
+    #GridToolBarTemplateCaseError, #GridToolBarTemplateCaseAll, #GridToolBarTemplateCaseFinal {
+        width: 100%;
     }
 </style>

@@ -197,7 +197,7 @@
                                     <AuthorizeView Policy="@ConstantClass.CommissionRolePolicy" Context="AuthorizeContext">
                                         <Authorized>
                                                     <div class="justify-content-end" id="GridToolBarTemplateCommissionError">
-                                                        <NavLink class="btn btn-success button me-1" @onclick="SearchCommissionAll">Search</NavLink>
+                                                        <NavLink class="btn btn-success button me-1" @onclick="ApplySearchCommissionAll">Apply</NavLink>
                                                         <NavLink class="btn btn-warning button me-1" @onclick="ClearCommissionAll">Clear</NavLink> 
                                                     </div>                                                                                            
                                         </Authorized>
@@ -361,7 +361,7 @@
                                     <AuthorizeView Policy="@ConstantClass.CommissionRolePolicy" Context="AuthorizeContext">
                                         <Authorized>
                                                     <div class="justify-content-end" id="GridToolBarTemplateCommissionError">
-                                                        <NavLink class="btn btn-success button me-1" @onclick="SearchCommissionError">Search</NavLink>
+                                                        <NavLink class="btn btn-success button me-1" @onclick="ApplySearchCommissionError">Apply</NavLink>
                                                         <NavLink class="btn btn-warning button me-1" @onclick="ClearCommissionError">Clear</NavLink> 
                                                         <NavLink class="btn btn-primary button" href="commissionError/commissionErrorInsert">New</NavLink>
                                                     </div>                                                                                            
@@ -525,7 +525,7 @@
                                     <AuthorizeView Policy="@ConstantClass.CommissionRolePolicy" Context="AuthorizeContext">
                                         <Authorized>
                                             <div class="justify-content-end" id="GridToolBarTemplateCommissionFinal">
-                                                <NavLink class="btn btn-success button me-1" @onclick="SearchCommissionFinal">Search</NavLink>
+                                                <NavLink class="btn btn-success button me-1" @onclick="ApplySearchCommissionFinal">Apply</NavLink>
                                                 <NavLink class="btn btn-warning button me-1" @onclick="ClearCommissionFinal">Clear</NavLink>
                                             </div>
                                         </Authorized>
@@ -553,16 +553,17 @@
 
     //MarkupString ConsoleSim { get; set; } // to showcase what you get
 
-    private int _activeTabIndex = 0;
+    private int _activeTabIndex = 0;    
+    private List<int?> _pageSizes => new List<int?> { 5, 10, 25, 50, null };
+    private string? _errorMessage = null;
+
+    private bool _deleteCommissionErrorOperation = false;
+    private bool _deleteCommissionFinalOperation = false;
+    
+
     private PagedList<CommissionErrorDTO>? _commissionErrorList;
     private PagedList<CommissionFinalDTO>? _commissionFinalList;
     private PagedList<CommissionDTO>? _commissionAllList;
-    private List<int?> _pageSizes => new List<int?> { 5, 10, 25, 50, null };
-    private bool _deleteCommissionErrorOperation = false;
-    private bool _deleteCommissionFinalOperation = false;
-    private string? _errorMessage = null;
-
-    //private int _pageSize = 10; // this will deleted later
 
     private TelerikGrid<CommissionErrorDTO>? _commissionErrorGrid;
     private TelerikGrid<CommissionDTO>? _commissionAllGrid;
@@ -570,7 +571,6 @@
 
     private IList<CarrierDTO>? _carrierList;
     private IList<ActivityDTO>? _activityList;
-
 
     // Filter values for Commission Error grid
     private int? _errorFilterCarrier = 0;
@@ -601,39 +601,48 @@
 
     private bool _searchCommissionAllFlag = false;
     private CommissionAllSearchParams? _commissionAllSearchParams;
+    private CommissionAllSearchParams? _commissionAllSearchCurrentParams = new CommissionAllSearchParams();
     private int _commissionAllPageSize = 10;
     private int _commissionAllCurrentPage = 1;
+    private bool _searchCommissionAllApplyNewValueFlag = false;
+
 
     private bool _searchCommissionErrorFlag = false;
     private CommissionErrorSearchParams? _commissionErrorSearchParams;
+    private CommissionErrorSearchParams? _commissionErrorSearchCurrentParams = new CommissionErrorSearchParams();
     private int _commissionErrorPageSize = 10;
     private int _commissionErrorCurrentPage = 1;
+    private bool _searchCommissionErrorApplyNewValueFlag = false;
+
 
     private bool _searchCommissionFinalFlag = false;
     private CommissionFinalSearchParams? _commissionFinalSearchParams;
+    private CommissionFinalSearchParams? _commissionFinalSearchCurrentParams = new CommissionFinalSearchParams();
     private int _commissionFinalPageSize = 10;
     private int _commissionFinalCurrentPage = 1;
+    private bool _searchCommissionFinalApplyNewValueFlag = false;
 
-    #endregion
+    #endregion Fields
 
     #region Constants
 
     private const string Height = "400px";
 
-    #endregion
+    #endregion Constants
 
-    #region Methods
+    #region Events
 
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-        await PopulateDropDownList();
-        await GetGridData();
-        StateHasChanged();
-        _commissionErrorSearchParams = new CommissionErrorSearchParams();
-        _commissionAllSearchParams = new CommissionAllSearchParams();
-        _commissionFinalSearchParams = new CommissionFinalSearchParams();
-    }
+        protected override async Task OnInitializedAsync()
+        {
+            await base.OnInitializedAsync();
+            await PopulateDropDownList();
+            await GetGridData();
+            StateHasChanged();
+        }
+
+    #endregion Events
+
+    #region Methods    
 
     private async Task PopulateDropDownList()
     {
@@ -662,7 +671,7 @@
         );
     }
 
-    private async Task GetGridData()
+    private Task GetGridData()
     {
         _commissionAllList = new PagedList<CommissionDTO>();
         _commissionErrorList = new PagedList<CommissionErrorDTO>();
@@ -671,26 +680,37 @@
         _commissionAllGrid?.Rebind();
         _commissionErrorGrid?.Rebind();
         _commissionFinalGrid?.Rebind();
+
+        return Task.CompletedTask;
     }
 
-    private void SearchCommissionError()
-    {
-        _commissionErrorSearchParams = new CommissionErrorSearchParams(); 
+    private void ApplySearchCommissionError()
+    {        
         _searchCommissionErrorFlag = true;
+
+        // flag the indicator to apply the new value from the grid
+        _searchCommissionErrorApplyNewValueFlag = true;
+
         _commissionErrorGrid?.Rebind();        
     }
 
-    private void SearchCommissionAll()
-    {
-        _commissionAllSearchParams = new CommissionAllSearchParams(); 
+    private void ApplySearchCommissionAll()
+    {   
         _searchCommissionAllFlag = true;
+
+        // flag the indicator to apply the new value from the grid
+        _searchCommissionAllApplyNewValueFlag = true;
+
         _commissionAllGrid?.Rebind();        
     }
 
-    private void SearchCommissionFinal()
-    {
-        _commissionFinalSearchParams = new CommissionFinalSearchParams(); 
+    private void ApplySearchCommissionFinal()
+    {        
         _searchCommissionFinalFlag = true;
+
+        // flag the indicator to apply the new value from the grid
+        _searchCommissionFinalApplyNewValueFlag = true;
+
         _commissionFinalGrid?.Rebind();        
     }
 
@@ -775,15 +795,12 @@
     protected async Task OnCommissionAllGridRead(GridReadEventArgs args)
     {
         try
-        {       
-            //string output = string.Empty;
-            //output += "SORTS:<br />";
+        {                   
             string? sortValue = null;
             int i = 0;
 
             foreach (SortDescriptor item in args.Request.Sorts)
-            {
-                //output += $"field: {item.Member}, direction: {item.SortDirection} <br />";
+            {   
 
                 if (i != 0 && i < args.Request.Sorts.Count())
                     sortValue = sortValue + ",";
@@ -829,54 +846,71 @@
 
                 i++;                
             }
+
             //output += $"Current page: {args.Request.Page}, page size: {args.Request.PageSize}";
 
             // show that data in the UI for a visual aid
             //ConsoleSim = new MarkupString(output);
+            _commissionAllSearchParams = new CommissionAllSearchParams();
 
-            if (_searchCommissionAllFlag) {
+            if (_searchCommissionAllApplyNewValueFlag)
+            {
+                // need to use the _commissionAllSearchCurrentParams object to hold the applied filter values on the grid
+                // the values assign only on this object will then be passed on the _commissionAllSearchParams object  
+
+                _commissionAllSearchCurrentParams = new CommissionAllSearchParams();
+
+                //Apply the new filter values
+                // Populate the search params object
 
                 if (_allFilterTransDate != null)
-                {   
-                    _commissionAllSearchParams.TransDate = _allFilterTransDate;
+                {
+                    _commissionAllSearchCurrentParams.TransDate = _allFilterTransDate;
                 }
 
                 if (_allFilterCarrier != null && _allFilterCarrier != 0)
-                {                    
-                    _commissionAllSearchParams.CarrierId = _allFilterCarrier;
+                {
+                    _commissionAllSearchCurrentParams.CarrierId = _allFilterCarrier;
                 }
 
                 if (!String.IsNullOrEmpty(_allFilterPolicy))
-                {                    
-                    _commissionAllSearchParams.Policy = _allFilterPolicy;
+                {
+                    _commissionAllSearchCurrentParams.Policy = _allFilterPolicy;
                 }
 
                 if (_allFilterTransType != null)
-                {                    
-                    _commissionAllSearchParams.TransType = _allFilterTransType;
+                {
+                    _commissionAllSearchCurrentParams.TransType = _allFilterTransType;
                 }
 
                 if (_allFilterCommPremium != null)
-                {                    
-                    _commissionAllSearchParams.CommPremium = _allFilterCommPremium;
+                {
+                    _commissionAllSearchCurrentParams.CommPremium = _allFilterCommPremium;
                 }
 
                 if (_allFilterCommOverrideRate != null)
-                {                    
-                    _commissionAllSearchParams.CommOverrideRate = _allFilterCommOverrideRate / 100;
+                {
+                    _commissionAllSearchCurrentParams.CommOverrideRate = _allFilterCommOverrideRate / 100;
                 }
 
                 if (_allFilterCommOverridePayment != null)
-                {                    
-                    _commissionAllSearchParams.CommOverridePayment = _allFilterCommOverridePayment;
+                {
+                    _commissionAllSearchCurrentParams.CommOverridePayment = _allFilterCommOverridePayment;
                 }
 
+                _searchCommissionAllApplyNewValueFlag = !_searchCommissionAllApplyNewValueFlag;
+            }
+
+            _commissionAllSearchParams = _commissionAllSearchCurrentParams;
+
+            if (_searchCommissionAllFlag) {                
+                // when clicking the apply button, set the default page number of the grid to page 1
                 _commissionAllList = await commissionService.GetAll(new GridParams()
                     {
                         PageNumber = 1,
                         PageSize = args.Request.PageSize
                     },
-                    _commissionAllSearchParams,
+                    _commissionAllSearchParams ??= new CommissionAllSearchParams(),
                     sortValue
                 );
                 _commissionAllCurrentPage = 1;
@@ -889,13 +923,13 @@
                             PageNumber = args.Request.Page,
                             PageSize = args.Request.PageSize
                         },
-                        _commissionAllSearchParams ?? new CommissionAllSearchParams(),
+                        _commissionAllSearchParams ??= new CommissionAllSearchParams(),
                         sortValue
                 );
             }
 
             args.Data = _commissionAllList;
-            args.Total = _commissionAllList.TotalCount;
+            args.Total = (_commissionAllList ??= new PagedList<CommissionDTO>()).TotalCount;
         }
         catch (Exception ex)
         {
@@ -957,49 +991,65 @@
                 i++;
             }
 
-            if (_searchCommissionErrorFlag) {
+            _commissionErrorSearchParams = new CommissionErrorSearchParams();
 
+            if (_searchCommissionErrorApplyNewValueFlag)
+            {
+                // need to use the _commissionErrorSearchCurrentParams object to hold the applied filter values on the grid
+                // the values assign only on this object will then be passed on the _searchCommissionErrorFlag object
+
+                _commissionErrorSearchCurrentParams = new CommissionErrorSearchParams();
+
+                // Populate the search params object
                 if (_errorFilterTransDate != null)
-                {   
-                    _commissionErrorSearchParams.TransDate = _errorFilterTransDate;
+                {
+                    _commissionErrorSearchCurrentParams.TransDate = _errorFilterTransDate;
                 }
 
                 if (_errorFilterCarrier != null && _errorFilterCarrier != 0)
-                {                    
-                    _commissionErrorSearchParams.CarrierId = _errorFilterCarrier;
+                {
+                    _commissionErrorSearchCurrentParams.CarrierId = _errorFilterCarrier;
                 }
 
                 if (!String.IsNullOrEmpty(_errorFilterPolicy))
-                {                    
-                    _commissionErrorSearchParams.Policy = _errorFilterPolicy;
+                {
+                    _commissionErrorSearchCurrentParams.Policy = _errorFilterPolicy;
                 }
 
                 if (_errorFilterTransType != null)
-                {                    
-                    _commissionErrorSearchParams.TransType = _errorFilterTransType;
+                {
+                    _commissionErrorSearchCurrentParams.TransType = _errorFilterTransType;
                 }
 
                 if (_errorFilterCommPremium != null)
-                {                    
-                    _commissionErrorSearchParams.CommPremium = _errorFilterCommPremium;
+                {
+                    _commissionErrorSearchCurrentParams.CommPremium = _errorFilterCommPremium;
                 }
 
                 if (_errorFilterCommOverrideRate != null)
-                {                    
-                    _commissionErrorSearchParams.CommOverrideRate = _errorFilterCommOverrideRate / 100;
+                {
+                    _commissionErrorSearchCurrentParams.CommOverrideRate = _errorFilterCommOverrideRate / 100;
                 }
 
                 if (_errorFilterCommOverridePayment != null)
-                {                    
-                    _commissionErrorSearchParams.CommOverridePayment = _errorFilterCommOverridePayment;
+                {
+                    _commissionErrorSearchCurrentParams.CommOverridePayment = _errorFilterCommOverridePayment;
                 }
 
+                _searchCommissionErrorApplyNewValueFlag = !_searchCommissionErrorApplyNewValueFlag;
+
+            }
+
+            _commissionErrorSearchParams = _commissionErrorSearchCurrentParams;
+
+            if (_searchCommissionErrorFlag) {                
+                // when clicking the apply button, set the default page number of the grid to page 1
                 _commissionErrorList = await commissionErrorService.GetAll(new GridParams()
                     {
                         PageNumber = 1,
                         PageSize = args.Request.PageSize
                     },
-                    _commissionErrorSearchParams,
+                    _commissionErrorSearchParams ??= new CommissionErrorSearchParams(),
                     sortValue
                 );
                 _commissionErrorCurrentPage = 1;
@@ -1012,7 +1062,7 @@
                             PageNumber = args.Request.Page,
                             PageSize = args.Request.PageSize
                         },
-                        _commissionErrorSearchParams ?? new CommissionErrorSearchParams(),
+                        _commissionErrorSearchParams ??= new CommissionErrorSearchParams(),
                         sortValue
                 );
             }
@@ -1080,49 +1130,66 @@
                 i++;
             }
 
-            if (_searchCommissionFinalFlag)
+            _commissionFinalSearchParams = new CommissionFinalSearchParams();
+
+            if (_searchCommissionFinalApplyNewValueFlag)
             {
+                // need to use the _commissionErrorSearchCurrentParams object to hold the applied filter values on the grid
+                // the values assign only on this object will then be passed on the _searchCommissionErrorFlag object
+
+                _commissionFinalSearchCurrentParams = new CommissionFinalSearchParams();
+
+                // Populate the search params object
                 if (_finalFilterTransDate != null)
                 {
-                    _commissionFinalSearchParams.TransDate = _finalFilterTransDate;
+                    _commissionFinalSearchCurrentParams.TransDate = _finalFilterTransDate;
                 }
 
                 if (_finalFilterCarrier != null && _finalFilterCarrier != 0)
                 {
-                    _commissionFinalSearchParams.CarrierId = _finalFilterCarrier;
+                    _commissionFinalSearchCurrentParams.CarrierId = _finalFilterCarrier;
                 }
 
                 if (!String.IsNullOrEmpty(_finalFilterPolicy))
                 {
-                    _commissionFinalSearchParams.Policy = _finalFilterPolicy;
+                    _commissionFinalSearchCurrentParams.Policy = _finalFilterPolicy;
                 }
 
                 if (_finalFilterTransType != null)
                 {
-                    _commissionFinalSearchParams.TransType = _finalFilterTransType;
+                    _commissionFinalSearchCurrentParams.TransType = _finalFilterTransType;
                 }
 
                 if (_finalFilterCommPremium != null)
                 {
-                    _commissionFinalSearchParams.CommPremium = _finalFilterCommPremium;
+                    _commissionFinalSearchCurrentParams.CommPremium = _finalFilterCommPremium;
                 }
 
                 if (_finalFilterCommOverrideRate != null)
                 {
-                    _commissionFinalSearchParams.CommOverrideRate = _finalFilterCommOverrideRate / 100;
+                    _commissionFinalSearchCurrentParams.CommOverrideRate = _finalFilterCommOverrideRate / 100;
                 }
 
                 if (_finalFilterCommOverridePayment != null)
                 {
-                    _commissionFinalSearchParams.CommOverridePayment = _finalFilterCommOverridePayment;
+                    _commissionFinalSearchCurrentParams.CommOverridePayment = _finalFilterCommOverridePayment;
                 }
+                _searchCommissionFinalApplyNewValueFlag = !_searchCommissionFinalApplyNewValueFlag;
 
+            }
+
+            _commissionFinalSearchParams = _commissionFinalSearchCurrentParams;
+
+
+            if (_searchCommissionFinalFlag)
+            {
+                // when clicking the apply button, set the default page number of the grid to page 1
                 _commissionFinalList = await commissionFinalService.GetAll(new GridParams()
                     {
                         PageNumber = 1,
                         PageSize = args.Request.PageSize
                     },
-                    _commissionFinalSearchParams,
+                    _commissionFinalSearchParams ??= new CommissionFinalSearchParams(),
                     sortValue
                 );
                 _commissionFinalCurrentPage = 1;
@@ -1135,7 +1202,7 @@
                         PageNumber = args.Request.Page,
                         PageSize = args.Request.PageSize
                     },
-                    _commissionFinalSearchParams ?? new CommissionFinalSearchParams(),
+                    _commissionFinalSearchParams ??=  new CommissionFinalSearchParams(),
                     sortValue
                 );
             }
@@ -1167,7 +1234,7 @@
         _commissionFinalCurrentPage = 1;
     }
 
-    #endregion
+    #endregion  Methods
 }
 
 

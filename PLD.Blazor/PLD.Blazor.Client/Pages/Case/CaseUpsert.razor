@@ -162,7 +162,7 @@ else if (_editContext != null)
     [Parameter]
     public int Id { get; set; }
 
-    #endregion
+    #endregion Parameters
 
     #region Fields
 
@@ -176,38 +176,43 @@ else if (_editContext != null)
     private CustomFormValidator? _customFormValidator;
     private bool _saveOperation = false;
 
-    #endregion
+    #endregion Fields
 
     #region Constants
 
     private const int ProductIdDefaultValue = -1;
     private const int ProductTypeIdDefaultValue = 0;
 
-    #endregion
+    #endregion Constants
 
-    #region Methods
+    #region Events
 
-    protected override async Task OnInitializedAsync()
-    {
-        await PopulateForm();
-
-        if(Id ==0) {
-            _case = new CaseDTO();
-            _case.ProductId = ProductIdDefaultValue;
-        }
-        else
+        protected override async Task OnInitializedAsync()
         {
-            _case = await caseService.GetById(Id);
-            await PopulateProductListByCarrierId(_case?.CarrierId == null ? 0 :
-            _case.CarrierId);
-            _productType = await productTypeService.GetById(_case?.ProductTypeId == null ? 0:
-            _case.ProductTypeId);
+            await PopulateForm();
+
+            if (Id == 0)
+            {
+                _case = new CaseDTO();
+                _case.ProductId = ProductIdDefaultValue;
+            }
+            else
+            {
+                _case = await caseService.GetById(Id);
+                await PopulateProductListByCarrierId(_case?.CarrierId == null ? 0 :
+                _case.CarrierId);
+                _productType = await productTypeService.GetById(_case?.ProductTypeId == null ? 0 :
+                _case.ProductTypeId);
 
 
+            }
+
+            _editContext = new(_case = _case ?? new CaseDTO());
         }
 
-        _editContext = new(_case = _case ?? new CaseDTO());
-    }
+    #endregion Events
+
+    #region Methods    
 
     private async Task PopulateForm()
     {
@@ -220,7 +225,7 @@ else if (_editContext != null)
     {
         (_case = _case ?? new CaseDTO()).CarrierId = carrierId;
         await PopulateProductListByCarrierId(carrierId);
-        (_case = _case ?? new CaseDTO()).ProductId = ProductIdDefaultValue;
+        (_case ??= new CaseDTO()).ProductId = ProductIdDefaultValue;
         _productType = new ProductTypeDTO();
         _case.ProductTypeId = ProductTypeIdDefaultValue;
     }
@@ -263,7 +268,7 @@ else if (_editContext != null)
                 await caseService.Update(_case);
                 _saveOperation = true;
             }
-            _editContext = new(_case = _case ?? new CaseDTO());
+            _editContext = new(_case ??= new CaseDTO());
 
         }
         catch( Exception ex)
@@ -275,6 +280,5 @@ else if (_editContext != null)
         }
     }
 
-    #endregion
-
+    #endregion Nethods
 }

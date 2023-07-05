@@ -65,7 +65,7 @@ else if (_editContext != null)
     [Parameter]
     public int Id { get; set; }
 
-    #endregion
+    #endregion Parameters
 
     #region Fields
 
@@ -74,24 +74,27 @@ else if (_editContext != null)
     private CustomFormValidator? _customFormValidator;
     private bool _saveOperation = false;
 
-    #endregion
+    #endregion Fields
 
-    #region Methods
+    #region Events
 
-    protected override async Task OnInitializedAsync()
-    {
-        if (Id == 0)
+        protected override async Task OnInitializedAsync()
         {
-            _caseStatus = new CaseStatusDTO();
-        }
-        else
-        {
-            _caseStatus = await caseStatusService.GetById(Id);
+            if (Id == 0)
+            {
+                _caseStatus = new CaseStatusDTO();
+            }
+            else
+            {
+                _caseStatus = await caseStatusService.GetById(Id);
+            }
+
+            _editContext = new EditContext((_caseStatus ??= new CaseStatusDTO()));
         }
 
-        _editContext = new EditContext((_caseStatus = _caseStatus ?? new CaseStatusDTO()));
-
-    }
+    #endregion Events
+    
+    #region Methods   
 
     private async Task UpsertCaseStatus()
     {
@@ -140,7 +143,7 @@ else if (_editContext != null)
                 }
                 
             }
-            _editContext = new(_caseStatus = _caseStatus ?? new CaseStatusDTO());
+            _editContext = new(_caseStatus ??= new CaseStatusDTO());
         }
         catch( Exception ex)
         {
@@ -149,8 +152,7 @@ else if (_editContext != null)
             _customFormValidator?.DisplayFormErrors(errors);
             _saveOperation = false;
         }
-
     }
-    #endregion
 
- }
+    #endregion Methods
+}

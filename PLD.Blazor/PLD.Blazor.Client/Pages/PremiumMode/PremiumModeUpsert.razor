@@ -1,7 +1,10 @@
 ﻿@page "/premiumMode/premiumModeInsert/{Action}"
 @page "/premiumMode/premiumModeUpdate/{Action}/{Code}"
+
 @using Microsoft.AspNetCore.Authorization;
+
 @attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+
 @inject IPremiumModeService premiumModeService
 
 @if (Action == ConstantClass.AddAction)
@@ -66,7 +69,7 @@ else if (Action == ConstantClass.EditAction)
         [Parameter]
         public string Action { get; set; } = String.Empty;
 
-    #endregion    
+    #endregion Parameters
 
     #region Fields
 
@@ -74,9 +77,9 @@ else if (Action == ConstantClass.EditAction)
         private bool _saveOperation = false;
         protected CustomFormValidator? _customFormValidator;
 
-    #endregion
+    #endregion Fields
 
-    #region Methods
+    #region Events
 
         protected override async Task OnInitializedAsync()
         {
@@ -94,6 +97,10 @@ else if (Action == ConstantClass.EditAction)
             await base.OnInitializedAsync();
         }
 
+    #endregion Events
+
+    #region Methods        
+
         private async Task UpsertPremiumMode()
         {
             _customFormValidator?.ClearFormErrors();
@@ -108,7 +115,7 @@ else if (Action == ConstantClass.EditAction)
                     if (record != null)
                     {
                         // Update the record
-                        (_premiumMode = _premiumMode ?? new PremiumModeDTO()).ModifiedBy = ConstantClass.SystemUser;
+                        (_premiumMode ??= new PremiumModeDTO()).ModifiedBy = ConstantClass.SystemUser;
                         _premiumMode.ModifiedDate = System.DateTime.Now;
                         await premiumModeService.Update(_premiumMode);
                         _saveOperation = true;
@@ -130,7 +137,7 @@ else if (Action == ConstantClass.EditAction)
                     }
                     else
                     {
-                        (_premiumMode = _premiumMode ?? new PremiumModeDTO()).CreatedBy = ConstantClass.SystemUser;
+                        (_premiumMode ??= new PremiumModeDTO()).CreatedBy = ConstantClass.SystemUser;
                         _premiumMode.CreatedDate = System.DateTime.Now;
                         _premiumMode = await premiumModeService.Create(_premiumMode);
                         _saveOperation = true;
@@ -147,5 +154,5 @@ else if (Action == ConstantClass.EditAction)
             }
         }
 
-    #endregion    
+    #endregion Methods
 }

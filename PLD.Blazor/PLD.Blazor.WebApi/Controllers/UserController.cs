@@ -194,8 +194,8 @@ namespace PLD.Blazor.WebApi.Controllers
 
         [HttpGet]
         public async Task<IActionResult> Get()
-        {
-            var list = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(await _unitOfWork.User.GetAll(includeProperties: "UserRoles"));
+        {   
+            var list = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(await _unitOfWork.User.GetAll(includeProperties: ConstantClass.UserExtendedProperties));
             return Ok(list);
         }
 
@@ -205,7 +205,7 @@ namespace PLD.Blazor.WebApi.Controllers
         {
             try
             {
-                var record = await _unitOfWork.User.Get(obj => obj.Id == id, includeProperties: "UserRoles");
+                var record = await _unitOfWork.User.Get(obj => obj.Id == id, includeProperties: ConstantClass.UserExtendedProperties);
 
                 if (record == null)
                 {
@@ -226,7 +226,7 @@ namespace PLD.Blazor.WebApi.Controllers
         {
             try
             {
-                var record = await _unitOfWork.User.Get(obj => obj.UserName == userName, includeProperties: "UserRoles");
+                var record = await _unitOfWork.User.Get(obj => obj.UserName == userName, includeProperties: ConstantClass.UserExtendedProperties);
 
                 if (record != null)
                 {
@@ -253,7 +253,7 @@ namespace PLD.Blazor.WebApi.Controllers
         {
             try
             {
-                var record = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(await _unitOfWork.User.GetAll(obj => obj.Id != id && obj.UserName == userName, includeProperties: "UserRoles"));
+                var record = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(await _unitOfWork.User.GetAll(obj => obj.Id != id && obj.UserName == userName, includeProperties: ConstantClass.UserExtendedProperties));
                 return Ok(record);
             }
             catch (Exception ex)

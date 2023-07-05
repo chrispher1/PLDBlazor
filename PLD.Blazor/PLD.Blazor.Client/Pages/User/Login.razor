@@ -1,5 +1,7 @@
 ﻿@page "/login"
+
 @using PLD.Blazor.Common
+
 @inject IUserService userService
 @inject NavigationManager navigationManager
 
@@ -47,21 +49,24 @@
         [Parameter]
         public int Id { get; set; }
 
-    #endregion
+    #endregion Parameters
 
     #region Fields
         
         private UserForLoginDTO? _userForLogin;
         private CustomFormValidator? _customFormValidator;
 
-    #endregion
-    
-    #region Methods
+    #endregion Fields
+
+    #region Events
 
         protected override void OnInitialized()
         {
             _userForLogin = new UserForLoginDTO();
         }
+    #endregion Events
+    
+    #region Methods
 
         private async Task UserLogin()
         {
@@ -80,7 +85,6 @@
             }
         }
 
-    #endregion
-
+    #endregion Methods
     
 }

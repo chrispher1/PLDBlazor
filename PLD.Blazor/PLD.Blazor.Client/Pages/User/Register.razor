@@ -1,6 +1,8 @@
 ﻿@page "/register/registerUpdate/{Id:int}"
 @page "/register"
+
 @using PLD.Blazor.Common
+
 @inject IUserService userService
 @inject IRoleService roleService
 @inject NavigationManager navigationManager
@@ -84,7 +86,7 @@
         [Parameter]
         public int Id { get; set; }
 
-    #endregion
+    #endregion Parameters
     
     #region Fields
 
@@ -92,9 +94,9 @@
         private CustomFormValidator? _customFormValidator;
         private bool _saveOperation = false;
 
-    #endregion
-    
-    #region Methods
+    #endregion Fields
+
+    #region Events
 
         protected override void OnInitialized()
         {
@@ -104,6 +106,10 @@
                 _userForRegister.BirthDate = System.DateTime.Now;
             }
         }
+
+    #endregion Events
+    
+    #region Methods
 
         private async Task InsertUserForRegister()
         {
@@ -123,7 +129,7 @@
                 else
                 {
                     // Insert Procedure.
-                    (_userForRegister = _userForRegister ?? new UserForRegisterDTO()).CreatedBy = ConstantClass.SystemUser;
+                    (_userForRegister ??= new UserForRegisterDTO()).CreatedBy = ConstantClass.SystemUser;
                     _userForRegister.CreatedDate = System.DateTime.Now;
                     // Add default role
                     _userForRegister.UserRoles = new List<UserRoleDTO>();
@@ -154,7 +160,6 @@
             }
         }
 
-    #endregion
-
+    #endregion Methods
     
 }

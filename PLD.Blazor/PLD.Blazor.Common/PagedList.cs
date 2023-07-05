@@ -33,6 +33,11 @@ namespace PLD.Blazor.Common
             var items = await source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
             return new PagedList<T>(items, totalCount);
         }
+        public static async Task<PagedList<T>> CreateAsync(IQueryable<T> source)
+        {
+            var items = await source.ToListAsync();
+            return new PagedList<T>(items);
+        }
 
         public static PagedList<T> Create(IQueryable<T> source, int pageNumber, int pageSize)
         {
@@ -47,11 +52,7 @@ namespace PLD.Blazor.Common
             return new PagedList<T>(items);
         }
 
-        public static async Task<PagedList<T>> CreateAsync(IQueryable<T> source)
-        {   
-            var items = await source.ToListAsync();
-            return new PagedList<T>(items);
-        }
+        
 
         public static IEnumerable<T> OrderBy<T>(IEnumerable<T> input, string sortString)
         {

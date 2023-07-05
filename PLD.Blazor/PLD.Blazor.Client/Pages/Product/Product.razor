@@ -1,7 +1,10 @@
 ﻿@page "/product"
+
 @using Telerik.DataSource.Extensions;
 @using Microsoft.AspNetCore.Authorization;
+
 @attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+
 @inject IProductService productService
 @inject IJSRuntime jsRuntime
 
@@ -116,20 +119,24 @@ else
         private bool _deleteOperation = false;
         private string? _errorMessage = null; 
 
-    #endregion
+    #endregion Fields
 
     #region Constants
     
         private const string Height = "400px";
 
-    #endregion
+    #endregion Constants
     
-    #region Methods
+    #region Events
 
-    protected override async Task OnInitializedAsync()
-    {
-        await GetGridData();
-    }
+        protected override async Task OnInitializedAsync()
+        {
+            await GetGridData();
+        }
+
+    #endregion Events
+
+    #region Methods    
 
     private async Task GetGridData()
     {
@@ -161,7 +168,7 @@ else
         }
     }
 
-    #endregion    
+    #endregion Methods
 }
 
 <style>

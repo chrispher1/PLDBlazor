@@ -1,4 +1,5 @@
 ﻿@page "/caseType"
+
 @using Microsoft.AspNetCore.Authorization;
 
 @attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
@@ -82,20 +83,24 @@ else
         private bool _deleteOperation = false;
         private string? _errorMessage = null;
 
-    #endregion
+    #endregion Fields
 
     #region Constants
 
         private const string Height = "400px";
 
-    #endregion
+    #endregion Constants
 
-    #region Methods
+    #region Events
 
+    #endregion Events
+    
         protected override async Task OnInitializedAsync()
         {
             await GetGridData();
         }
+
+    #region Methods        
 
         private async Task GetGridData()
         {
@@ -125,9 +130,7 @@ else
                 _errorMessage = ex.Message.ToString();
             }
         }
-
-    #endregion
-    
+    #endregion Methods
 }
 
 <style>

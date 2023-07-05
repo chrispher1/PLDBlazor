@@ -1,7 +1,10 @@
 ﻿@page "/role"
+
 @using Telerik.DataSource.Extensions;
 @using Microsoft.AspNetCore.Authorization;
+
 @attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+
 @inject IRoleService roleService
 @inject IJSRuntime jsRuntime
 
@@ -75,6 +78,7 @@ else
 }
 
 @code {
+
     #region Fields
 
         private IEnumerable<RoleDTO>? _roleList;
@@ -83,20 +87,24 @@ else
         private bool _deleteOperaton = false;
         private string? _errorMessage = null;
 
-    #endregion
+    #endregion Fields
     
     #region Constants
 
         private const string _height = "400px";
 
-    #endregion
-    
-    #region Methods
+    #endregion Constants
+
+    #region Events
 
         protected override async Task OnInitializedAsync()
         {
             await GetGridData();
         }
+
+    #endregion Events
+    
+    #region Methods        
 
         private async Task GetGridData()
         {
@@ -128,7 +136,7 @@ else
             }
         }
 
-    #endregion    
+    #endregion Methods
 }
 
 <style>

@@ -7,41 +7,50 @@ namespace PLD.Blazor.Client.Shared
 {
     public class CustomFormValidator : ComponentBase
     {
-        private ValidationMessageStore validationMessageStore;
+        private ValidationMessageStore? validationMessageStore;
 
         [CascadingParameter]
-        private EditContext CurrentEditContext { get; set; }
+        private EditContext? CurrentEditContext { get; set; }
 
-        protected override void OnInitialized()
-        {
-            if (CurrentEditContext == null)
+        #region Events
+
+            protected override void OnInitialized()
             {
-                throw new InvalidOperationException(
-                    $"{nameof(CustomFormValidator)} requires a cascading parameter of type {nameof(EditContext)}.");
+                if (CurrentEditContext == null)
+                {
+                    throw new InvalidOperationException(
+                        $"{nameof(CustomFormValidator)} requires a cascading parameter of type {nameof(EditContext)}.");
+                }
+
+                validationMessageStore = new ValidationMessageStore(CurrentEditContext);
+
+                CurrentEditContext.OnValidationRequested += (s, e) =>
+                    validationMessageStore.Clear();
+                CurrentEditContext.OnFieldChanged += (s, e) =>
+                    validationMessageStore.Clear(e.FieldIdentifier);
             }
 
-            validationMessageStore = new ValidationMessageStore(CurrentEditContext);
+        #endregion Events
 
-            CurrentEditContext.OnValidationRequested += (s, e) =>
-                validationMessageStore.Clear();
-            CurrentEditContext.OnFieldChanged += (s, e) =>
-                validationMessageStore.Clear(e.FieldIdentifier);
-        }
+        #region Methods
 
-        public void DisplayFormErrors(Dictionary<string, List<string>> errors)
-        {
-            foreach (var err in errors)
+            public void DisplayFormErrors(Dictionary<string, List<string>> errors)
             {
-                validationMessageStore.Add(CurrentEditContext.Field(err.Key), err.Value);
+                foreach (var err in errors)
+                {
+                    validationMessageStore?.Add(CurrentEditContext.Field(err.Key), err.Value);
+                }
+
+                CurrentEditContext?.NotifyValidationStateChanged();
             }
 
-            CurrentEditContext.NotifyValidationStateChanged();
-        }
+            public void ClearFormErrors()
+            {
+                validationMessageStore?.Clear();
+                CurrentEditContext?.NotifyValidationStateChanged();
+            }
 
-        public void ClearFormErrors()
-        {
-            validationMessageStore.Clear();
-            CurrentEditContext.NotifyValidationStateChanged();
-        }
+        #endregion Methods
+
     }
 }

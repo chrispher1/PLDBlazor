@@ -1,9 +1,11 @@
 ﻿@page "/role/roleUpdate/{Id:int}"
 @page "/role/roleInsert"
+
 @using Microsoft.AspNetCore.Authorization
+@using PLD.Blazor.Common
+
 @attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
 
-@using PLD.Blazor.Common
 @inject IRoleService roleService
 
 @if (@Id == 0)
@@ -63,7 +65,7 @@ else
         [Parameter]
         public int Id { get; set; }
 
-    #endregion
+    #endregion Parameters
 
     #region Fields
     
@@ -71,22 +73,26 @@ else
         private bool _saveOperation = false;
         private CustomFormValidator? _customFormValidator;
 
-    #endregion
-    
-    #region Methods
+    #endregion Fields
 
-    protected override async Task OnInitializedAsync()
-    {
-        if (@Id == 0)
+    #region Events
+
+        protected override async Task OnInitializedAsync()
         {
-            _role = new RoleDTO();
+            if (@Id == 0)
+            {
+                _role = new RoleDTO();
+            }
+            else
+            {
+                // Populate role if already exists
+                _role = await roleService.GetById(Id);
+            }
         }
-        else
-        {
-            // Populate role if already exists
-            _role = await roleService.GetById(Id);
-        }
-    }
+
+    #endregion Events
+    
+    #region Methods    
 
     private async Task UpsertRole()
     {
@@ -147,6 +153,6 @@ else
         }
     }
 
-    #endregion
+    #endregion Methods
 
 }

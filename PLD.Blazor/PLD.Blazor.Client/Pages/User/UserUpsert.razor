@@ -1,8 +1,10 @@
 ﻿@page "/user/userUpdate/{Id:int}"
 @page "/user/userInsert"
+
 @using PLD.Blazor.Common;
 @using Microsoft.AspNetCore.Authorization;
 @using System;
+
 @attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
 
 @inject IUserService userService
@@ -162,7 +164,7 @@ else
     [Parameter]
     public int Id { get; set; }
 
-    #endregion
+    #endregion Parameters
 
     #region Fields
 
@@ -174,29 +176,32 @@ else
         private ICollection<int> _selectedRoleList { get; set; } = new List<int>();
         private bool _processingIndicator = false;
 
-    #endregion
+    #endregion Fields
 
+    #region Events
+
+        protected override async Task OnInitializedAsync()
+            {
+                //await PopulateForm();
+
+                if (@Id == 0)
+                {
+                    _user = new UserDTO();
+                }
+                else
+                {
+                    // Populate carrier if already exists
+                    _user = await userService.GetById(Id);
+                }
+
+                _userRoleList = _user?.UserRoles ?? new List<UserRoleDTO>();
+                PopulateSelectedRoleList();
+                _roleList = await roleService.GetAll();
+            }
+
+    #endregion Events
 
     #region Methods
-    
-        protected override async Task OnInitializedAsync()
-        {
-            //await PopulateForm();
-
-            if (@Id == 0)
-            {
-                _user = new UserDTO();
-            }
-            else
-            {
-                // Populate carrier if already exists
-                _user = await userService.GetById(Id);
-            }
-
-            _userRoleList = _user?.UserRoles ?? new List<UserRoleDTO>();
-            PopulateSelectedRoleList();
-            _roleList = await roleService.GetAll();
-        }
 
         private void PopulateSelectedRoleList()
         {
@@ -283,9 +288,9 @@ else
                     else
                     {
                         // Update the record
-                        (_user = _user ?? new UserDTO()).ModifiedBy = ConstantClass.SystemUser;
+                        (_user ??= new UserDTO()).ModifiedBy = ConstantClass.SystemUser;
                         _user.ModifiedDate = System.DateTime.Now;
-                    foreach (UserRoleDTO objUserRole in (_user.UserRoles = _user.UserRoles ?? new List<UserRoleDTO>()).ToList())
+                    foreach (UserRoleDTO objUserRole in (_user.UserRoles ??= new List<UserRoleDTO>()).ToList())
                         {
                             // Delete the role of the user that is not checked
                             if (!_selectedRoleList.Where(role => role == objUserRole.RoleId).Any())
@@ -325,7 +330,7 @@ else
             }
         }
 
-    #endregion
+    #endregion Mehods
 }
 
 <style>

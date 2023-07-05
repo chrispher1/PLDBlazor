@@ -86,8 +86,8 @@ namespace PLD.Blazor.WebApi.Controllers
 
                     commissionExpression = ExpressionExtension<CommissionFinal>.AndAlso(commissionExpression, commOverridePaymentExpression);
                 }
-
-                var pagedList = await _unitOfWork.CommissionFinal.GetAll(filter: commissionExpression, includeProperties: "Carrier,Product,Activity,PremiumMode", gridParams: gridParams, sortParams: sortParams);
+                
+                var pagedList = await _unitOfWork.CommissionFinal.GetAll(filter: commissionExpression, includeProperties: ConstantClass.CommissionFinalExtendedProperties, gridParams: gridParams, sortParams: sortParams);
                 var list = _mapper.Map<IEnumerable<CommissionFinalDTO>>(pagedList);
 
                 Response.AddPagination(pagedList.TotalCount);
@@ -106,7 +106,7 @@ namespace PLD.Blazor.WebApi.Controllers
         {
             try
             {
-                var record = _mapper.Map<CommissionFinalDTO>(await _unitOfWork.CommissionFinal.Get(obj => obj.Id == id, includeProperties: "Carrier,Product,Activity,PremiumMode"));
+                var record = _mapper.Map<CommissionFinalDTO>(await _unitOfWork.CommissionFinal.Get(obj => obj.Id == id, includeProperties: ConstantClass.CommissionFinalExtendedProperties));
 
                 if (record == null)
                 {

@@ -1,13 +1,14 @@
 ﻿@page "/timeActivityMapping/timeActivityMappingInsert"
 @page "/timeActivityMapping/timeActivityMappingUpdate/{Id:int}"
+
 @using Microsoft.AspNetCore.Authorization;
-@attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
 @using PLD.Blazor.Common;
+
+@attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
 
 @inject ICarrierService carrierService
 @inject IActivityService activityService
 @inject ITimeActivityMappingService timeActivityMappingService
-
 
 @if (@Id == 0)
 {
@@ -114,7 +115,7 @@ else
         [Parameter]
         public int Id { get; set; }
 
-    #endregion
+    #endregion Parameters
     
     #region Fields
     
@@ -124,25 +125,29 @@ else
         private bool _saveOperation = false;
         private CustomFormValidator? _customFormValidator;
 
-    #endregion
+    #endregion Fields
 
-    #region Methods
+    #region Events
 
-    protected override async Task OnInitializedAsync()
-    {
-        await PopulateForm();
-
-        if (@Id == 0)
+        protected override async Task OnInitializedAsync()
         {
-            _timeActivityMapping = new TimeActivityMappingDTO();
-        }
-        else
-        {
-            _timeActivityMapping = await timeActivityMappingService.GetById(@Id);
+            await PopulateForm();
+
+            if (@Id == 0)
+            {
+                _timeActivityMapping = new TimeActivityMappingDTO();
+            }
+            else
+            {
+                _timeActivityMapping = await timeActivityMappingService.GetById(@Id);
+            }
+
+            await base.OnInitializedAsync();
         }
 
-        await base.OnInitializedAsync();
-    }
+    #endregion Events
+
+    #region Methods    
 
     private async Task PopulateForm()
     {
@@ -189,7 +194,7 @@ else
             else
             {
                 var record = await timeActivityMappingService.GetByCarrierIdCarrierTimeCarrierActivityPolicyYearStartPolicyYearEndAndNotById(
-                    (_timeActivityMapping = _timeActivityMapping ?? new TimeActivityMappingDTO()).CarrierId,
+                    (_timeActivityMapping ??= new TimeActivityMappingDTO()).CarrierId,
                     _timeActivityMapping.CarrierActivity == null ? String.Empty:_timeActivityMapping.CarrierActivity,
                     _timeActivityMapping.PolicyYearStart,
                     _timeActivityMapping.PolicyYearEnd,
@@ -222,7 +227,6 @@ else
         }
     }
 
-    #endregion
-
+    #endregion Methods
     
 }

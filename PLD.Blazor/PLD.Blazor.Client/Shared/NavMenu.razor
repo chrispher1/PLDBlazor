@@ -119,23 +119,26 @@
 </nav>
 
 @code {
-    private bool collapseNavMenu = true;
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-    //private string CommissionRoles = $"{ConstantClass.Role_Commission_User}, {ConstantClass.Role_Commission_User_Read}";
-    //private string CaseRoles = $"{ConstantClass.Role_Case_User}, {ConstantClass.Role_Case_User_Read}";
-    //private string PaymentRoles = $" {ConstantClass.Role_Payment_User}";
-    //private string ReportsRoles = $"{ConstantClass.Role_Reports_User}";
 
-    private string CaseRolePolicy = ConstantClass.CaseRolePolicy;
-    private string CommissionRolePolicy = ConstantClass.CommissionRolePolicy;
-    private string PaymentRolePolicy = ConstantClass.PaymentRolePolicy;
-    private string ReportRolePolicy = ConstantClass.ReportRolePolicy;
-    private string MaintenanceRolePolicy = ConstantClass.MaintenanceRolePolicy;
+    #region Fields
 
+        private bool collapseNavMenu = true;
+        private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+        private string CaseRolePolicy = ConstantClass.CaseRolePolicy;
+        private string CommissionRolePolicy = ConstantClass.CommissionRolePolicy;
+        private string PaymentRolePolicy = ConstantClass.PaymentRolePolicy;
+        private string ReportRolePolicy = ConstantClass.ReportRolePolicy;
+        private string MaintenanceRolePolicy = ConstantClass.MaintenanceRolePolicy;
 
+    #endregion Fields
 
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
+    #region Methods
+
+        private void ToggleNavMenu()
+        {
+            collapseNavMenu = !collapseNavMenu;
+        }
+
+    #endregion Methods
+    
 }

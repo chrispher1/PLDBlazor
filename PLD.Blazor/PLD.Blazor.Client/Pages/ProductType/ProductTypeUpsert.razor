@@ -1,8 +1,11 @@
 ﻿@page "/productType/productTypeUpdate/{Id:int}"
 @page "/productType/productTypeInsert"
+
 @using PLD.Blazor.Common;
 @using Microsoft.AspNetCore.Authorization;
+
 @attribute [Authorize(Policy = ConstantClass.MaintenanceRolePolicy)]
+
 @inject IProductTypeService productTypeService
 
 
@@ -67,7 +70,7 @@ else
         [Parameter]
         public int Id { get; set; }
 
-    #endregion
+    #endregion Parameters
 
     #region Fields
 
@@ -75,10 +78,12 @@ else
         private bool SaveOperation = false;
         private CustomFormValidator? _customFormValidator;
 
-    #endregion
-    
-    #region Methods
+    #endregion Fields
 
+    #region Events
+
+    #endregion Events
+    
         protected override async Task OnInitializedAsync()
         {
             if (@Id == 0)
@@ -91,6 +96,8 @@ else
                 _productType = await productTypeService.GetById(Id);
             }
         }
+
+    #region Methods        
 
         private async Task UpsertProductType()
         {
@@ -150,8 +157,5 @@ else
             }
         }
 
-    #endregion
-    
-    
-
+    #endregion Methods
 }
