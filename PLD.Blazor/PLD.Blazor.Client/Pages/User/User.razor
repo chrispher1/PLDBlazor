@@ -45,7 +45,7 @@
             <GridColumn Field="UserName" Title="User Name" Width="150px" />
             <GridColumn Field="BirthDate" Title="Birthday" Width="150px">
                 <Template>
-                    @((context as UserDTO)?.BirthDate.ToString("MM/dd/yyyy"))
+                    @((context as UserDTO)?.BirthDate?.ToString("MM/dd/yyyy"))
                 </Template>
                 </GridColumn>
             <GridColumn Field="LastLoginDate" Title="Last Login Date" Width="150px" DefaultFilterOperator="FilterOperator.IsGreaterThanOrEqualTo" />

@@ -23,6 +23,7 @@ namespace PLD.Blazor.DataAccess
         public DbSet<Case> Case { get; set; }
         public DbSet<CaseStatus> CaseStatus { get; set; }
         public DbSet<CaseType> CaseType { get; set; }
+        public DbSet<Payment> Payment { get; set; }
        protected override void OnModelCreating (ModelBuilder modelBuilder)
         {
             // Product
@@ -101,6 +102,11 @@ namespace PLD.Blazor.DataAccess
                 HasForeignKey(pldCase => pldCase.TypeId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired(false);
+
+            //Payment
+            modelBuilder.Entity<Payment>().HasOne(p => p.Carrier).WithMany(carrier => carrier.Payments).
+                HasForeignKey(payment => payment.CarrierId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

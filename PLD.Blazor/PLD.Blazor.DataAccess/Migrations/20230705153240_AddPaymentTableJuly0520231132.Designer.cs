@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PLD.Blazor.DataAccess;
 
@@ -11,9 +12,10 @@ using PLD.Blazor.DataAccess;
 namespace PLD.Blazor.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230705153240_AddPaymentTableJuly0520231132")]
+    partial class AddPaymentTableJuly0520231132
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -506,8 +508,7 @@ namespace PLD.Blazor.DataAccess.Migrations
                         .HasColumnName("Carr_Id");
 
                     b.Property<string>("CheckWireNumber")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("Chk_Wire_Num");
 
                     b.Property<string>("CreatedBy")
@@ -542,8 +543,6 @@ namespace PLD.Blazor.DataAccess.Migrations
                         .HasColumnName("Pay_Dt");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CarrierId");
 
                     b.ToTable("DMT_PAY");
                 });
@@ -1055,17 +1054,6 @@ namespace PLD.Blazor.DataAccess.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Payment", b =>
-                {
-                    b.HasOne("PLD.Blazor.DataAccess.Model.Carrier", "Carrier")
-                        .WithMany("Payments")
-                        .HasForeignKey("CarrierId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Carrier");
-                });
-
             modelBuilder.Entity("PLD.Blazor.DataAccess.Model.Product", b =>
                 {
                     b.HasOne("PLD.Blazor.DataAccess.Model.Carrier", "Carrier")
@@ -1139,8 +1127,6 @@ namespace PLD.Blazor.DataAccess.Migrations
                     b.Navigation("CommissionErrors");
 
                     b.Navigation("CommissionFinals");
-
-                    b.Navigation("Payments");
 
                     b.Navigation("Products");
 

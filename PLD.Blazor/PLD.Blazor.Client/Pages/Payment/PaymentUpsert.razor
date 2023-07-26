@@ -1,0 +1,174 @@
+﻿@page "/payment/paymentInsert"
+@page "/payment/paymentUpdate/{id:int}"
+
+@using Blazored.LocalStorage;
+@using Microsoft.AspNetCore.Authorization;
+
+@attribute [Authorize(Policy = ConstantClass.PaymentRolePolicy)]
+
+@inject ILocalStorageService localStorage;
+@inject IPaymentService paymentService;
+@inject ICarrierService carrierService;
+
+@if (_payment?.Id == 0)
+{
+    <h3>New Payment</h3>
+}
+else
+{
+    <h3>Update Payment</h3>
+}
+
+@if (_saveOperation == true)
+{
+    <span>Payment successfully saved</span>
+    <br />
+}
+
+<div class="container border mt-2 p-4">
+    @if (_editContext != null)
+    {
+        <EditForm OnValidSubmit="@UpsertPayment" EditContext="@_editContext">
+            <DataAnnotationsValidator />
+            <CustomFormValidator @ref="_customFormValidator" />
+            <div class="row mb-3">
+                <div class="col">
+                    <ValidationSummary />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(_payment.Carrier.Name)" class="col-2 col-form-label text-end">Carrier</label>
+                <div class="col-3">
+                    <InputSelect class="form-select"
+                             @bind-Value="_payment.CarrierId">
+                        <option value="0" disabled="disabled" selected>--Select Carrier--</option>
+                        @foreach (var carrier in _carrierList)
+                        {
+                            <option value="@carrier.Id">@carrier.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+                <label for="@nameof(_payment.PaymentDate)" class="col-4 col-form-label text-end">Payment Date</label>
+                <div class="col-3">
+                    <InputDate @bind-Value="_payment.PaymentDate" class="form-control" />
+                </div>
+            </div>                            
+            <div class="row mb-3">
+                <label for="@nameof(_payment.CheckWireNumber)" class="col-2 col-form-label text-end">Check Wire Number</label>
+                <div class="col-3">
+                    <InputText @bind-Value="_payment.CheckWireNumber" class="form-control" />
+                </div>
+                <label for="@nameof(_payment.DepositDate)" class="col-4 col-form-label text-end">Deposit Date</label>
+                <div class="col-3">
+                    <InputDate @bind-Value="_payment.DepositDate" class="form-control" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="@nameof(_payment.EFTOverrideAmount)" class="col-2 col-form-label text-end">EFT Override Amount</label>
+                <div class="col-3">
+                    <InputNumber @bind-Value="_payment.EFTOverrideAmount" class="form-control" step="any" />
+                </div>
+                <label for="" class="col-4 col-form-label text-end"></label>
+                <div class="col-3">
+                </div>
+            </div>            
+            <div class="row mb-3">
+                <div class="offset-5 col-7">
+                    <AuthorizeView Policy="@ConstantClass.PaymentRolePolicy" Context="authorizedContext">
+                        <Authorized>
+                            <button class="btn btn-primary">Save</button>
+                        </Authorized>
+                        <NotAuthorized>
+                            <button class="btn btn-primary" disabled>Save</button>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                    <NavLink class="btn btn-secondary" href="payment">Back</NavLink>
+                </div>
+            </div>
+        </EditForm>
+    }
+</div>
+
+@code {
+
+
+    #region Parameters
+
+    [Parameter]
+    public int Id { get; set; }
+
+    #endregion Parameters
+
+
+    #region Fields
+
+    private PaymentDTO? _payment;
+    private IEnumerable<CarrierDTO> _carrierList = new List<CarrierDTO>();
+    private bool _saveOperation = false;
+    private CustomFormValidator? _customFormValidator;
+    private EditContext? _editContext;
+
+    #endregion Fields
+
+    #region Events
+
+    protected override async Task OnInitializedAsync()
+    {
+        await PopulateForm();
+
+        if (@Id == 0)
+        {
+            _payment = new PaymentDTO();
+        }
+        else
+        {
+            _payment = await paymentService.GetById(@Id);            
+        }
+        _editContext = new(_payment ??= new PaymentDTO());
+    }
+
+    #endregion Events
+
+
+    #region Methods
+
+    private async Task PopulateForm()
+    {
+        _carrierList = await carrierService.GetAll();
+    }
+
+    private async Task UpsertPayment()
+    {
+        _customFormValidator?.ClearFormErrors();
+        var errors = new Dictionary<string, List<string>>();
+        try
+        {
+            _saveOperation = false;
+            if (_payment?.Id == 0)
+            {
+                _payment.CreatedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
+                _payment.CreatedDate = System.DateTime.Now;
+                _payment = await paymentService.Create(_payment);
+                _saveOperation = true;
+            }
+            else
+            {
+                // Update the record
+                (_payment ??= new PaymentDTO()).ModifiedBy = (await localStorage.GetItemAsync<UserDTO>(ConstantClass.Local_User) as UserDTO).UserName;
+                _payment.ModifiedDate = System.DateTime.Now;
+                await paymentService.Update(_payment);
+                _saveOperation = true;
+            }
+            _editContext = new(_payment ??= new PaymentDTO());
+        }
+        catch (Exception ex)
+        {
+            errors.Add(nameof(_payment.Carrier),
+                    new() { ex.Message });
+            _customFormValidator?.DisplayFormErrors(errors);
+            _saveOperation = false;
+        }
+    }
+
+    #endregion Methods
+}

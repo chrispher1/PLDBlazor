@@ -33,7 +33,7 @@ builder.Services.AddScoped<IStateCodeService,StateCodeService>();
 builder.Services.AddScoped<ICaseService, CaseService>();
 builder.Services.AddScoped<ICaseStatusService, CaseStatusService>();
 builder.Services.AddScoped<ICaseTypeService, CaseTypeService>();
-
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 // register the Telerik services
 builder.Services.AddTelerikBlazor();
@@ -76,6 +76,9 @@ builder.Services.AddAuthorizationCore(options =>
     options.AddPolicy(ConstantClass.CaseUpsertRolePolicy, policy =>
         policy.RequireRole(defaultRoles.Role_Case_User_Create, defaultRoles.Role_Case_User_Edit
         , defaultRoles.Role_Admin)
+        );
+    options.AddPolicy(ConstantClass.PaymentRolePolicy, policy =>
+        policy.RequireRole(defaultRoles.Role_Payment_User, defaultRoles.Role_Admin)
         );
 });
 

@@ -91,6 +91,13 @@
         public const string CaseClientFirstName = "ClientFirstName";
         public const string CaseClientLastName = "ClientLastName";
 
+        //List of SortFields for payment grid        
+        public const string PaymentCarrierName = "Carrier.Name";
+        public const string PaymentPaymentDate = "PaymentDate";
+        public const string PaymentCheckWireNumber = "CheckWireNumber";
+        public const string PaymentDepositDate = "DepositDate";
+        public const string PaymentEFTOverrideAmount = "EFTOverrideAmount";
+
         // List of extended properties
         public const string CommissionExtendedProperties = "Carrier,Product,Activity,PremiumMode";
         public const string CommissionErrorExtendedProperties = "Carrier,Product,Activity,PremiumMode";
@@ -100,7 +107,8 @@
         public const string RoleExtendedProperties = "UserRoles";
         public const string TimeActivityMappingExtendedProperties = "Carrier,Activity";
         public const string UserExtendedProperties = "UserRoles";
+        public const string PaymentExtendedProperties = "Carrier";
 
-
+        
     }
 }

@@ -30,6 +30,7 @@ namespace PLD.Blazor.Business.Repositories
         public ICaseRepository<Case> Case { get; }
         public ICaseStatusRepository<CaseStatus> CaseStatus { get; }
         public ICaseTypeRepository<CaseType> CaseType { get; }
+        public IPaymentRepository<Payment> Payment { get; }
 
         #endregion
 
@@ -59,6 +60,7 @@ namespace PLD.Blazor.Business.Repositories
             Case = new CaseRepository(applicationDBContext);
             CaseStatus = new CaseStatusRepository(applicationDBContext);
             CaseType = new CaseTypeRepository(applicationDBContext);
+            Payment = new PaymentRepository(applicationDBContext);
         }
         public async Task Save()
         {

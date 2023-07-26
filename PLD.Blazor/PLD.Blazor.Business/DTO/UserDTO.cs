@@ -41,7 +41,7 @@ namespace PLD.Blazor.Business.DTO
         public string LastName { get; set; }
 
         [Required]
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
 
         public DateTime CreatedDate { get; set; }
 
