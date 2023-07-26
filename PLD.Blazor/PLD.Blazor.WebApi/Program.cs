@@ -126,6 +126,9 @@ builder.Services.AddAuthorization(options =>
         policy.RequireRole(defaultRoles.Role_Commission_User_Create, defaultRoles.Role_Commission_User_Edit
         , defaultRoles.Role_Admin)
         );
+    options.AddPolicy(ConstantClass.PaymentRolePolicy, policy =>
+        policy.RequireRole(defaultRoles.Role_Payment_User, defaultRoles.Role_Admin)
+        );
 });
 
 var app = builder.Build();

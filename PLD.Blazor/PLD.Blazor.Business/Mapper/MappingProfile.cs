@@ -31,6 +31,7 @@ namespace PLD.Blazor.Business.Mapper
             CreateMap<Case, CaseDTO>().ReverseMap();
             CreateMap<CaseStatus, CaseStatusDTO>().ReverseMap();
             CreateMap<CaseType, CaseTypeDTO>().ReverseMap();
+            CreateMap<Payment, PaymentDTO>().ReverseMap();
         }
     }
 }

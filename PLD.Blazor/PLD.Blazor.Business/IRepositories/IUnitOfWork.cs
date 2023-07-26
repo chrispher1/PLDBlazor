@@ -27,6 +27,7 @@ namespace PLD.Blazor.Business.IRepositories
         ICaseRepository<Case> Case { get; }
         ICaseStatusRepository<CaseStatus> CaseStatus { get; }
         ICaseTypeRepository<CaseType> CaseType { get; } 
+        IPaymentRepository<Payment> Payment { get; }
         Task Save();
     }
 }

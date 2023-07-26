@@ -1,90 +1,100 @@
 ﻿@page "/login"
+@page "/"
 
 @using PLD.Blazor.Common
 
 @inject IUserService userService
 @inject NavigationManager navigationManager
 
-<div class="container border mt-2 p-4">
+<AuthorizeView>
+    <Authorized>
+        <br />
+        <br />
+        <br />
+        <center><b><h1>Hello @context.User?.Identity?.Name. Have a nice day.</h1></b></center>
+    </Authorized>
+    <NotAuthorized>
+        <div class="container border mt-2 p-4">
+            @if (_userForLogin != null)
+            {
+                <EditForm Model="@_userForLogin" OnValidSubmit="UserLogin" Context="EditFormContext">
+                    <DataAnnotationsValidator />
+                    <CustomFormValidator @ref="_customFormValidator" />
+                    <div class="row mb-3 mt-3">
+                        <div class="offset-5 col-auto">
+                            <ValidationMessage For="() => _userForLogin.UserName"></ValidationMessage>
+                            <ValidationMessage For="() => _userForLogin.Password"></ValidationMessage>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="@nameof(_userForLogin.UserName)" class="offset-3 col-2 col-form-label text-end">User Name</label>
+                        <div class="col-auto">
+                            <InputText type="text" @bind-Value="_userForLogin.UserName" class="form-control" />
+                        </div>
+                    </div>
 
-    @if (_userForLogin != null)
-    {
-        <EditForm Model="@_userForLogin" OnValidSubmit="UserLogin">      
-            <DataAnnotationsValidator />
-            <CustomFormValidator @ref="_customFormValidator" />
-            <div class="row mb-3 mt-3">
-                <div  class="offset-5 col-auto">
-                <ValidationMessage For="() => _userForLogin.UserName"></ValidationMessage>
-                <ValidationMessage For="() => _userForLogin.Password"></ValidationMessage>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label for="@nameof(_userForLogin.UserName)" class="offset-3 col-2 col-form-label text-end">User Name</label>
-                <div class="col-auto">    
-                   <InputText type="text" @bind-Value="_userForLogin.UserName" class="form-control" />
-                </div>
-            </div>
-            
-            <div class="row mb-3">
-                <label for="@nameof(_userForLogin.Password)" class="offset-3 col-2 col-fom-label text-end">Password</label>
-                <div class="col-auto">
-                   <InputText type="password" @bind-Value="_userForLogin.Password" class="form-control" />                       
-                </div>
-            </div>          
+                    <div class="row mb-3">
+                        <label for="@nameof(_userForLogin.Password)" class="offset-3 col-2 col-fom-label text-end">Password</label>
+                        <div class="col-auto">
+                            <InputText type="password" @bind-Value="_userForLogin.Password" class="form-control" />
+                        </div>
+                    </div>
 
-                        <div class="row mb-3">
-                <div class="offset-5 col-7">
-                    <button class="btn btn-primary">Login</button>
-                    <NavLink class="btn btn-secondary" href="">Cancel</NavLink>
-                </div>
-            </div>
-        </EditForm>
-    }
-</div>
+                    <div class="row mb-3">
+                        <div class="offset-5 col-7">
+                            <button class="btn btn-primary">Login</button>
+                            <NavLink class="btn btn-secondary" href="">Cancel</NavLink>
+                        </div>
+                    </div>
+                </EditForm>
+            }
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
 
     #region Parameters
 
-        [Parameter]
-        public int Id { get; set; }
+    [Parameter]
+    public int Id { get; set; }
 
     #endregion Parameters
 
     #region Fields
-        
-        private UserForLoginDTO? _userForLogin;
-        private CustomFormValidator? _customFormValidator;
+
+    private UserForLoginDTO? _userForLogin;
+    private CustomFormValidator? _customFormValidator;
 
     #endregion Fields
 
     #region Events
 
-        protected override void OnInitialized()
-        {
-            _userForLogin = new UserForLoginDTO();
-        }
+    protected override void OnInitialized()
+    {
+        _userForLogin = new UserForLoginDTO();
+    }
     #endregion Events
-    
+
     #region Methods
 
-        private async Task UserLogin()
+    private async Task UserLogin()
+    {
+        _customFormValidator?.ClearFormErrors();
+        var errors = new Dictionary<string, List<string>>();
+        try
         {
-            _customFormValidator?.ClearFormErrors();
-            var errors = new Dictionary<string, List<string>>();
-            try
-            {
-                await userService.Login(_userForLogin == null ? new UserForLoginDTO() : _userForLogin);
-                navigationManager.NavigateTo("loginSuccess");
-            }
-            catch (Exception ex)
-            {
-                errors.Add(nameof(_userForLogin.UserName),
-                        new() { ex.Message });
-                _customFormValidator?.DisplayFormErrors(errors);
-            }
+            await userService.Login(_userForLogin == null ? new UserForLoginDTO() : _userForLogin);
+            navigationManager.NavigateTo("");
         }
+        catch (Exception ex)
+        {
+            errors.Add(nameof(_userForLogin.UserName),
+                    new() { ex.Message });
+            _customFormValidator?.DisplayFormErrors(errors);
+        }
+    }
 
     #endregion Methods
-    
+
 }
